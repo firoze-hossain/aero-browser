@@ -119,197 +119,125 @@ impl Url {
 pub struct InternalPages;
 
 impl InternalPages {
-    /// Generates the Brave-inspired flagship New Tab Dashboard page.
-    pub fn new_tab(stats: &ShieldStats) -> String {
-        format!(
-            "<!DOCTYPE html>
+    /// Generates a clean, minimalist, modern New Tab page (Google Chrome / Brave style).
+    pub fn new_tab(_stats: &ShieldStats) -> String {
+        "<!DOCTYPE html>
 <html>
 <head>
 <title>New Tab</title>
 <style>
-body {{
-    background-color: #080c14;
-    color: #f1f5f9;
+body {
+    background-color: #0f172a;
+    color: #f8fafc;
     font-family: sans-serif;
     margin: 0;
-    padding: 32px 20px;
+    padding: 0;
     text-align: center;
-}}
-.dashboard {{
-    max-width: 860px;
+}
+.newtab-box {
+    max-width: 640px;
     margin: 0 auto;
-}}
-.brand-badge {{
+    padding-top: 130px;
+}
+.logo {
+    font-size: 42px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 28px;
+    display: block;
+}
+.logo-accent {
+    color: #38bdf8;
+}
+.search-bar {
     background-color: #1e293b;
     border: 1px solid #334155;
-    border-radius: 14px;
-    padding: 4px 14px;
-    font-size: 11px;
-    color: #38bdf8;
-    margin: 0 auto 10px auto;
-    width: 240px;
-    text-align: center;
-}}
-.logo-title {{
-    font-size: 30px;
-    font-weight: bold;
-    color: #ff5500;
-    margin-bottom: 6px;
-}}
-.subtitle {{
-    font-size: 13px;
+    border-radius: 26px;
+    padding: 14px 24px;
+    width: 580px;
+    margin: 0 auto 36px auto;
     color: #94a3b8;
-    margin-bottom: 22px;
-}}
-.stats-bar {{
-    background-color: #131b2e;
-    border: 1px solid #24324f;
-    border-radius: 12px;
-    padding: 16px 14px;
-    margin-bottom: 22px;
+    font-size: 15px;
     display: block;
-    text-align: center;
-}}
-.stat-item {{
+    text-align: left;
+}
+.search-icon {
     display: inline-block;
-    width: 240px;
-    margin: 4px 8px;
-    text-align: center;
-}}
-.stat-val {{
-    font-size: 24px;
+    color: #64748b;
+    margin-right: 12px;
     font-weight: bold;
-    color: #38bdf8;
-    margin-bottom: 6px;
-    display: block;
-}}
-.stat-lbl {{
-    font-size: 11px;
+}
+.search-prompt {
+    display: inline-block;
     color: #94a3b8;
-    text-transform: uppercase;
-    display: block;
-}}
-.search-container {{
-    background-color: #131b2e;
-    border: 1.5px solid #3b82f6;
+}
+.shortcuts-row {
+    margin-top: 10px;
+    text-align: center;
+}
+.shortcut-card {
+    display: inline-block;
+    width: 86px;
+    margin: 0 8px;
+    text-align: center;
+}
+.shortcut-btn {
+    background-color: #1e293b;
+    border: 1px solid #334155;
     border-radius: 24px;
-    padding: 12px 24px;
-    width: 600px;
-    margin: 0 auto 10px auto;
-    color: #cbd5e1;
-    font-size: 14px;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 8px auto;
+    padding-top: 14px;
     text-align: center;
-}}
-.search-hint {{
-    font-size: 11px;
-    color: #64748b;
-    margin-bottom: 22px;
-}}
-.quick-dial {{
-    margin-top: 6px;
-}}
-.tile {{
-    background-color: #162035;
-    border: 1px solid #293856;
-    border-radius: 8px;
-    padding: 10px 12px;
-    display: inline-block;
-    width: 175px;
-    margin: 6px 8px;
-    text-align: center;
-}}
-.tile-title {{
-    font-size: 13px;
+    font-size: 15px;
     font-weight: bold;
-    color: #f8fafc;
-    margin-bottom: 2px;
+}
+.shortcut-text {
+    font-size: 12px;
+    color: #cbd5e1;
     display: block;
-}}
-.tile-desc {{
-    font-size: 10px;
-    color: #94a3b8;
-    display: block;
-}}
-.footer-bar {{
-    margin-top: 24px;
-    padding: 8px 16px;
-    background-color: #0d1527;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    font-size: 11px;
-    color: #64748b;
-}}
+}
 </style>
 </head>
 <body>
-<div class=\"dashboard\">
-    <div class=\"brand-badge\">AERO BROWSER v1.0 • PURE RUST</div>
-    <div class=\"logo-title\">AERO BROWSER</div>
-    <div class=\"subtitle\">Fast, Private & Memory-Safe Web Navigator for NovaOS & Linux</div>
+<div class=\"newtab-box\">
+    <div class=\"logo\">AERO<span class=\"logo-accent\">.</span></div>
 
-    <div class=\"stats-bar\">
-        <div class=\"stat-item\">
-            <div class=\"stat-val\">{}</div>
-            <div class=\"stat-lbl\">Trackers & Ads Blocked</div>
-        </div>
-        <div class=\"stat-item\">
-            <div class=\"stat-val\">{}</div>
-            <div class=\"stat-lbl\">Bandwidth Saved</div>
-        </div>
-        <div class=\"stat-item\">
-            <div class=\"stat-val\">{}</div>
-            <div class=\"stat-lbl\">Est. Time Saved</div>
-        </div>
+    <div class=\"search-bar\">
+        <span class=\"search-icon\">[Q]</span>
+        <span class=\"search-prompt\">Search Google or enter address</span>
     </div>
 
-    <div class=\"search-container\">[Q] Search Google, DuckDuckGo or enter web address...</div>
-    <div class=\"search-hint\">Press Enter to Search • Built-in Brave Privacy Shields Active</div>
-
-    <div class=\"quick-dial\">
-        <div class=\"tile\">
-            <div class=\"tile-title\" style=\"color: #ef4444;\">[>] YouTube</div>
-            <div class=\"tile-desc\">Watch & Stream Videos</div>
+    <div class=\"shortcuts-row\">
+        <div class=\"shortcut-card\">
+            <div class=\"shortcut-btn\" style=\"color: #ef4444; border-color: #ef4444;\">[>]</div>
+            <span class=\"shortcut-text\">YouTube</span>
         </div>
-        <div class=\"tile\">
-            <div class=\"tile-title\" style=\"color: #a855f7;\">[*] GitHub</div>
-            <div class=\"tile-desc\">Code & Repositories</div>
+        <div class=\"shortcut-card\">
+            <div class=\"shortcut-btn\" style=\"color: #f8fafc; border-color: #64748b;\">[*]</div>
+            <span class=\"shortcut-text\">GitHub</span>
         </div>
-        <div class=\"tile\">
-            <div class=\"tile-title\" style=\"color: #38bdf8;\">[W] Wikipedia</div>
-            <div class=\"tile-desc\">Free Encyclopedia</div>
+        <div class=\"shortcut-card\">
+            <div class=\"shortcut-btn\" style=\"color: #3b82f6; border-color: #3b82f6;\">[G]</div>
+            <span class=\"shortcut-text\">Google</span>
         </div>
-        <div class=\"tile\">
-            <div class=\"tile-title\" style=\"color: #eab308;\">[D] DuckDuckGo</div>
-            <div class=\"tile-desc\">Private Web Search</div>
+        <div class=\"shortcut-card\">
+            <div class=\"shortcut-btn\" style=\"color: #38bdf8; border-color: #38bdf8;\">[W]</div>
+            <span class=\"shortcut-text\">Wikipedia</span>
         </div>
-        <div class=\"tile\">
-            <div class=\"tile-title\" style=\"color: #f97316;\">[Y] Hacker News</div>
-            <div class=\"tile-desc\">Top Tech & Startups</div>
+        <div class=\"shortcut-card\">
+            <div class=\"shortcut-btn\" style=\"color: #f59e0b; border-color: #f59e0b;\">[D]</div>
+            <span class=\"shortcut-text\">DuckDuckGo</span>
         </div>
-        <div class=\"tile\">
-            <div class=\"tile-title\" style=\"color: #06b6d4;\">[#] NovaOS Hub</div>
-            <div class=\"tile-desc\">Kernel Docs & Packages</div>
+        <div class=\"shortcut-card\">
+            <div class=\"shortcut-btn\" style=\"color: #ff4500; border-color: #ff4500;\">[R]</div>
+            <span class=\"shortcut-text\">Reddit</span>
         </div>
-        <div class=\"tile\">
-            <div class=\"tile-title\" style=\"color: #f59e0b;\">[O] Rust Lang</div>
-            <div class=\"tile-desc\">Systems Programming</div>
-        </div>
-        <div class=\"tile\">
-            <div class=\"tile-title\" style=\"color: #10b981;\">[S] Aero Shields</div>
-            <div class=\"tile-desc\">Telemetry & Controls</div>
-        </div>
-    </div>
-
-    <div class=\"footer-bar\">
-        Brave Shields: Active • HTTPS Upgrade: Enabled • Zero Chromium • Zero WebKit
     </div>
 </div>
 </body>
-</html>",
-            stats.trackers_blocked,
-            stats.bandwidth_saved_string(),
-            stats.time_saved_string()
-        )
+</html>".to_owned()
     }
 
     /// Generates YouTube web portal interface.

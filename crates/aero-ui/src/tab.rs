@@ -124,8 +124,9 @@ impl Tab {
         }
 
         let resp = minreq::get(&target)
-            .with_timeout(5)
-            .with_header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) Aero/1.0.0 (Pure-Rust Engine; Brave Shields)")
+            .with_timeout(8)
+            .with_max_redirects(5)
+            .with_header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             .send()
             .ok()?;
 
@@ -138,6 +139,224 @@ impl Tab {
         } else {
             None
         }
+    }
+
+    #[cfg(feature = "std")]
+    fn fetch_live_youtube(query: Option<&str>) -> Option<(String, String)> {
+        let endpoint = if let Some(q) = query {
+            let encoded = q.replace(' ', "+");
+            format!("https://www.youtube.com/results?search_query={}", encoded)
+        } else {
+            "https://www.youtube.com/results?search_query=trending".to_owned()
+        };
+
+        let resp = minreq::get(&endpoint)
+            .with_timeout(8)
+            .with_max_redirects(5)
+            .with_header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            .send()
+            .ok()?;
+
+        if resp.status_code >= 200 && resp.status_code < 400 {
+            let body = resp.as_str().ok()?;
+            let videos = Self::parse_youtube_videos_from_html(body);
+            let display_q = query.unwrap_or("Trending");
+            let html = Self::build_youtube_feed_html(display_q, &videos);
+            let title = if let Some(q) = query {
+                format!("{} - YouTube", q)
+            } else {
+                "YouTube".to_owned()
+            };
+            Some((title, html))
+        } else {
+            None
+        }
+    }
+
+    #[cfg(feature = "std")]
+    fn parse_youtube_videos_from_html(html: &str) -> Vec<(String, String, String, String)> {
+        let mut results = Vec::new();
+        let mut cursor = 0;
+        while let Some(vr_idx) = html[cursor..].find("\"videoRenderer\":{") {
+            let abs_idx = cursor + vr_idx;
+            cursor = abs_idx + 17;
+
+            let end_idx = (cursor + 3500).min(html.len());
+            let chunk = &html[cursor..end_idx];
+
+            let title = if let Some(t_idx) = chunk.find("\"title\":{\"runs\":[{\"text\":\"") {
+                let t_start = t_idx + 26;
+                if let Some(t_end) = chunk[t_start..].find("\"}") {
+                    chunk[t_start..t_start + t_end].to_owned()
+                } else {
+                    continue;
+                }
+            } else {
+                continue;
+            };
+
+            let channel = if let Some(c_idx) = chunk.find("\"shortBylineText\":{\"runs\":[{\"text\":\"") {
+                let c_start = c_idx + 37;
+                if let Some(c_end) = chunk[c_start..].find("\"") {
+                    chunk[c_start..c_start + c_end].to_owned()
+                } else {
+                    "Creator".to_owned()
+                }
+            } else {
+                "Creator".to_owned()
+            };
+
+            let views = if let Some(v_idx) = chunk.find("\"viewCountText\":{\"simpleText\":\"") {
+                let v_start = v_idx + 31;
+                if let Some(v_end) = chunk[v_start..].find("\"") {
+                    chunk[v_start..v_start + v_end].to_owned()
+                } else {
+                    "Popular".to_owned()
+                }
+            } else {
+                "Popular".to_owned()
+            };
+
+            let duration = if let Some(d_idx) = chunk.find("\"lengthText\":{\"simpleText\":\"") {
+                let d_start = d_idx + 28;
+                if let Some(d_end) = chunk[d_start..].find("\"") {
+                    chunk[d_start..d_start + d_end].to_owned()
+                } else {
+                    "Video".to_owned()
+                }
+            } else {
+                "Video".to_owned()
+            };
+
+            results.push((title, channel, views, duration));
+            if results.len() >= 9 {
+                break;
+            }
+        }
+        results
+    }
+
+    #[cfg(feature = "std")]
+    fn build_youtube_feed_html(query: &str, videos: &[(String, String, String, String)]) -> String {
+        let mut cards = String::new();
+        for (title, channel, views, dur) in videos {
+            cards.push_str(&format!(
+                "<div class=\"video-card\">
+                    <div class=\"thumb-box\">
+                        <div class=\"dur-pill\">{}</div>
+                        <div style=\"color: #ff0000; font-size: 15px; font-weight: bold; padding-top: 40px; text-align: center;\">[>] Watch</div>
+                    </div>
+                    <div class=\"vid-title\">{}</div>
+                    <div class=\"vid-channel\">{}</div>
+                    <div class=\"vid-meta\">{}</div>
+                </div>",
+                dur, title, channel, views
+            ));
+        }
+
+        if cards.is_empty() {
+            cards.push_str("<div style=\"padding: 40px; color: #888; text-align: center;\">No videos found. Try a different search query.</div>");
+        }
+
+        format!(
+            "<!DOCTYPE html>
+<html>
+<head>
+<title>{} - YouTube</title>
+<style>
+body {{
+    background-color: #0f0f0f;
+    color: #f1f1f1;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}}
+.yt-header {{
+    background-color: #0f0f0f;
+    border-bottom: 1px solid #272727;
+    padding: 12px 24px;
+    display: block;
+}}
+.yt-logo {{
+    display: inline-block;
+    color: #ff0000;
+    font-size: 22px;
+    font-weight: bold;
+    width: 140px;
+}}
+.yt-search-bar {{
+    display: inline-block;
+    background-color: #121212;
+    border: 1px solid #303030;
+    border-radius: 20px;
+    padding: 8px 18px;
+    width: 500px;
+    color: #f1f1f1;
+    font-size: 14px;
+    margin: 0 16px;
+}}
+.yt-feed {{
+    padding: 20px 24px;
+    max-width: 1280px;
+    margin: 0 auto;
+}}
+.video-card {{
+    display: inline-block;
+    width: 360px;
+    margin: 12px 14px;
+    background-color: #1a1a1a;
+    border: 1px solid #272727;
+    border-radius: 10px;
+    padding: 12px;
+}}
+.thumb-box {{
+    background-color: #212121;
+    border-radius: 8px;
+    height: 140px;
+    margin-bottom: 10px;
+    padding: 8px;
+}}
+.dur-pill {{
+    background-color: #000000;
+    color: #ffffff;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    float: right;
+}}
+.vid-title {{
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 6px;
+    display: block;
+}}
+.vid-channel {{
+    font-size: 12px;
+    color: #aaaaaa;
+    margin-bottom: 4px;
+    display: block;
+}}
+.vid-meta {{
+    font-size: 11px;
+    color: #717171;
+    display: block;
+}}
+</style>
+</head>
+<body>
+<div class=\"yt-header\">
+    <div class=\"yt-logo\">[>] YouTube</div>
+    <div class=\"yt-search-bar\">Search: {}</div>
+</div>
+
+<div class=\"yt-feed\">
+    {}
+</div>
+</body>
+</html>",
+            query, query, cards
+        )
     }
 
     #[cfg(feature = "std")]
@@ -164,76 +383,22 @@ impl Tab {
         } else if trimmed == "about:version" {
             ("About Aero".to_owned(), InternalPages::version_page())
         } else if trimmed.contains("youtube.com") || trimmed.contains("youtube") {
+            #[cfg(feature = "std")]
+            {
+                let query = if trimmed.contains("search_query=") {
+                    trimmed.split("search_query=").nth(1)
+                } else if trimmed.contains("?q=") {
+                    trimmed.split("?q=").nth(1)
+                } else {
+                    None
+                };
+                if let Some((yt_title, yt_html)) = Self::fetch_live_youtube(query) {
+                    return (yt_title, yt_html);
+                }
+            }
             ("YouTube".to_owned(), InternalPages::youtube_portal())
-        } else if trimmed.contains("github.com") || trimmed.contains("github") {
-            ("firoze-hossain / novaos · GitHub".to_owned(), InternalPages::github_portal())
-        } else if trimmed.contains("wikipedia.org") || trimmed.contains("wikipedia") {
-            ("Operating system - Wikipedia".to_owned(), InternalPages::wikipedia_portal())
-        } else if trimmed.contains("duckduckgo.com") || trimmed.contains("duckduckgo") {
-            ("DuckDuckGo — Privacy, simplified.".to_owned(), InternalPages::duckduckgo_portal("NovaOS and Aero Browser"))
-        } else if trimmed.contains("news.ycombinator.com") || trimmed.contains("hackernews") {
-            ("Hacker News".to_owned(), InternalPages::hackernews_portal())
-        } else if trimmed.starts_with("https://search.") || trimmed.contains("search?q=") {
-            let q = trimmed.split("search?q=").nth(1)
-                .or_else(|| trimmed.split("?q=").nth(1))
-                .unwrap_or("Web Search");
-            ("Search Results - Aero".to_owned(), InternalPages::duckduckgo_portal(q))
-        } else if trimmed.contains("novaos.org") || trimmed.contains("nova") {
-            (
-                "NovaOS - The Modern Rust Operating System".to_owned(),
-                "<!DOCTYPE html>
-<html>
-<head>
-<title>NovaOS Official Portal</title>
-<style>
-body { background-color: #0b0f19; color: #f1f5f9; padding: 24px; font-family: sans-serif; }
-.hero { max-width: 800px; margin: 0 auto; }
-h1 { color: #38bdf8; font-size: 32px; }
-.card { background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 18px; margin: 16px 0; }
-.btn { background-color: #ff5500; color: #fff; padding: 8px 16px; border-radius: 6px; text-decoration: none; display: inline-block; }
-</style>
-</head>
-<body>
-<div class=\"hero\">
-    <h1>NovaOS Enterprise Edition</h1>
-    <p>A next-generation hybrid kernel written in pure, memory-safe Rust with preemptive SMP and rich graphical userland.</p>
-    <div class=\"card\">
-        <h3>Default Web Browser: Aero</h3>
-        <p>Aero is powered by an independent, zero-dependency layout engine with built-in Brave privacy shields.</p>
-        <button class=\"btn\">Explore Documentation</button>
-    </div>
-</div>
-</body>
-</html>".to_owned()
-            )
-        } else if trimmed.contains("rust-lang.org") || trimmed.contains("rust") {
-            (
-                "Rust Programming Language".to_owned(),
-                "<!DOCTYPE html>
-<html>
-<head>
-<title>Rust Programming Language</title>
-<style>
-body { background-color: #0f172a; color: #f1f5f9; padding: 24px; font-family: sans-serif; }
-.container { max-width: 780px; margin: 0 auto; }
-h1 { color: #f97316; }
-.box { background-color: #1e293b; border-radius: 8px; padding: 16px; margin: 12px 0; }
-</style>
-</head>
-<body>
-<div class=\"container\">
-    <h1>Rust: Empowering Everyone to Build Reliable Software</h1>
-    <p>Performance, reliability, productivity. Pick all three.</p>
-    <div class=\"box\">
-        <h3>Zero-Cost Abstractions</h3>
-        <p>Aero Browser layout and painting engines are written entirely in 100% safe Rust without Chromium or WebKit.</p>
-    </div>
-</div>
-</body>
-</html>".to_owned()
-            )
         } else {
-            // Attempt live network fetch via HTTP/HTTPS if running with std
+            // Live network fetch via HTTP/HTTPS for all domains (GitHub, Wikipedia, Google, etc.)
             #[cfg(feature = "std")]
             {
                 if let Some((live_title, live_html)) = Self::fetch_live_web(trimmed) {
@@ -241,7 +406,7 @@ h1 { color: #f97316; }
                 }
             }
 
-            // Fallback for offline, unreachable hosts or bare-metal environment
+            // Fallback for offline or unreachable hosts
             let title = if let Some(url) = Url::parse(trimmed) {
                 format!("{} - Aero Browser", url.host)
             } else {

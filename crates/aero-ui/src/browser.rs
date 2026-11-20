@@ -246,45 +246,37 @@ impl AeroBrowser {
                 self.omnibox_focused = false;
                 let active_url = self.active_tab().url.clone();
                 if active_url == "about:newtab" || active_url.is_empty() {
-                    let dash_x = (width as i32 - 860).max(0) / 2;
-                    let search_x = dash_x + (860 - 600) / 2;
+                    let box_x = (width as i32 - 640).max(0) / 2;
+                    let search_x = box_x + (640 - 580) / 2;
 
                     // Click on Search Box -> focus & clear Omnibox
-                    if x >= search_x && x < search_x + 600 && y >= 170 && y <= 220 {
+                    if x >= search_x && x < search_x + 580 && y >= 210 && y <= 270 {
                         self.omnibox_focused = true;
                         self.omnibox_text.clear();
                         return true;
                     }
 
-                    // Click on Quick Dial Tiles
-                    if y >= 250 && y <= 315 {
-                        // Row 1
-                        if x >= dash_x + 10 && x < dash_x + 200 {
-                            self.navigate("https://youtube.com");
+                    // Click on Shortcuts Row
+                    if y >= 275 && y <= 370 {
+                        let step = 102; // 86px width + 16px margin
+                        let row_start = box_x + (640 - (6 * step)) / 2;
+                        if x >= row_start && x < row_start + step {
+                            self.navigate("https://www.youtube.com");
                             return true;
-                        } else if x >= dash_x + 205 && x < dash_x + 400 {
+                        } else if x >= row_start + step && x < row_start + 2 * step {
                             self.navigate("https://github.com");
                             return true;
-                        } else if x >= dash_x + 405 && x < dash_x + 600 {
-                            self.navigate("https://wikipedia.org");
+                        } else if x >= row_start + 2 * step && x < row_start + 3 * step {
+                            self.navigate("https://www.google.com");
                             return true;
-                        } else if x >= dash_x + 605 && x < dash_x + 800 {
+                        } else if x >= row_start + 3 * step && x < row_start + 4 * step {
+                            self.navigate("https://www.wikipedia.org");
+                            return true;
+                        } else if x >= row_start + 4 * step && x < row_start + 5 * step {
                             self.navigate("https://duckduckgo.com");
                             return true;
-                        }
-                    } else if y >= 320 && y <= 390 {
-                        // Row 2
-                        if x >= dash_x + 10 && x < dash_x + 200 {
-                            self.navigate("https://news.ycombinator.com");
-                            return true;
-                        } else if x >= dash_x + 205 && x < dash_x + 400 {
-                            self.navigate("https://novaos.org");
-                            return true;
-                        } else if x >= dash_x + 405 && x < dash_x + 600 {
-                            self.navigate("https://rust-lang.org");
-                            return true;
-                        } else if x >= dash_x + 605 && x < dash_x + 800 {
-                            self.navigate("about:shields");
+                        } else if x >= row_start + 5 * step && x < row_start + 6 * step {
+                            self.navigate("https://www.reddit.com");
                             return true;
                         }
                     }
