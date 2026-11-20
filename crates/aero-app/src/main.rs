@@ -273,81 +273,97 @@ fn run_x11_gui(browser: &mut AeroBrowser, initial_width: usize, initial_height: 
             needs_redraw = false;
         }
 
-        let event = conn.wait_for_event()?;
-        match event {
-            Event::ConfigureNotify(ev) => {
-                let new_w = ev.width as usize;
-                let new_h = ev.height as usize;
-                if (new_w != width || new_h != height) && new_w >= 320 && new_h >= 240 {
-                    width = new_w;
-                    height = new_h;
-                    surface = vec![0u32; width * height];
-                    needs_redraw = true;
+        let event = if browser.is_animating() {
+            match conn.poll_for_event()? {
+                Some(ev) => Some(ev),
+                None => {
+                    std::thread::sleep(std::time::Duration::from_millis(100));
+                    if browser.tick_animation() {
+                        needs_redraw = true;
+                    }
+                    None
                 }
             }
-            Event::Expose(_) => {
-                needs_redraw = true;
-            }
-            Event::ButtonPress(ev) => {
-                match ev.detail {
-                    1 => {
-                        // Left click
-                        let changed = browser.handle_click(ev.event_x as i32, ev.event_y as i32, width, height);
-                        if changed {
-                            needs_redraw = true;
-                        }
-                    }
-                    4 => {
-                        // Mouse Wheel Up
-                        if browser.handle_scroll(-40.0) {
-                            needs_redraw = true;
-                        }
-                    }
-                    5 => {
-                        // Mouse Wheel Down
-                        if browser.handle_scroll(40.0) {
-                            needs_redraw = true;
-                        }
-                    }
-                    _ => {}
-                }
-            }
-            Event::KeyPress(ev) => {
-                // Map common keycodes
-                let (key_code, ch) = match ev.detail {
-                    // Typical X11 keycodes on standard PC-105:
-                    36 | 104 => (10u8, '\n'),   // Enter / Return / KP_Enter
-                    22 => (8u8, '\x08'),        // Backspace
-                    9 => (27u8, '\x1b'),        // Escape
-                    111 => (38u8, 'k'),         // Up Arrow
-                    116 => (40u8, 'j'),         // Down Arrow
-                    112 => (33u8, ' '),         // Prior / PageUp
-                    117 => (34u8, ' '),         // Next / PageDown
-                    65 => (b' ' as u8, ' '),    // Space
-                    code => {
-                        // Map standard alphanumeric scan codes
-                        let ch = keycode_to_ascii(code, ev.state);
-                        (ch as u8, ch)
-                    }
-                };
+        } else {
+            Some(conn.wait_for_event()?)
+        };
 
-                if ch != '\0' || key_code != 0 {
-                    if browser.handle_key(key_code, ch) {
+        if let Some(event) = event {
+            match event {
+                Event::ConfigureNotify(ev) => {
+                    let new_w = ev.width as usize;
+                    let new_h = ev.height as usize;
+                    if (new_w != width || new_h != height) && new_w >= 320 && new_h >= 240 {
+                        width = new_w;
+                        height = new_h;
+                        surface = vec![0u32; width * height];
                         needs_redraw = true;
                     }
                 }
-            }
-            Event::ClientMessage(ev) => {
-                let data = ev.data.as_data32();
-                if data[0] == wm_delete_window {
-                    println!("[Aero] Window close requested by user.");
+                Event::Expose(_) => {
+                    needs_redraw = true;
+                }
+                Event::ButtonPress(ev) => {
+                    match ev.detail {
+                        1 => {
+                            // Left click
+                            let changed = browser.handle_click(ev.event_x as i32, ev.event_y as i32, width, height);
+                            if changed {
+                                needs_redraw = true;
+                            }
+                        }
+                        4 => {
+                            // Mouse Wheel Up
+                            if browser.handle_scroll(-40.0) {
+                                needs_redraw = true;
+                            }
+                        }
+                        5 => {
+                            // Mouse Wheel Down
+                            if browser.handle_scroll(40.0) {
+                                needs_redraw = true;
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+                Event::KeyPress(ev) => {
+                    // Map common keycodes
+                    let (key_code, ch) = match ev.detail {
+                        // Typical X11 keycodes on standard PC-105:
+                        36 | 104 => (10u8, '\n'),   // Enter / Return / KP_Enter
+                        22 => (8u8, '\x08'),        // Backspace
+                        9 => (27u8, '\x1b'),        // Escape
+                        111 => (38u8, 'k'),         // Up Arrow
+                        116 => (40u8, 'j'),         // Down Arrow
+                        112 => (33u8, ' '),         // Prior / PageUp
+                        117 => (34u8, ' '),         // Next / PageDown
+                        65 => (b' ' as u8, ' '),    // Space
+                        code => {
+                            // Map standard alphanumeric scan codes
+                            let ch = keycode_to_ascii(code, ev.state);
+                            (ch as u8, ch)
+                        }
+                    };
+
+                    if ch != '\0' || key_code != 0 {
+                        if browser.handle_key(key_code, ch) {
+                            needs_redraw = true;
+                        }
+                    }
+                }
+                Event::ClientMessage(ev) => {
+                    let data = ev.data.as_data32();
+                    if data[0] == wm_delete_window {
+                        println!("[Aero] Window close requested by user.");
+                        break;
+                    }
+                }
+                Event::DestroyNotify(_) => {
                     break;
                 }
+                _ => {}
             }
-            Event::DestroyNotify(_) => {
-                break;
-            }
-            _ => {}
         }
     }
 

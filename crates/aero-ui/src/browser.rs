@@ -41,6 +41,15 @@ pub struct AeroBrowser {
     pub omnibox_text: String,
     pub omnibox_focused: bool,
     pub cached_dom: Option<Node>,
+    // In-page interactive YouTube search and streaming playback state
+    pub page_input_focused: bool,
+    pub page_search_query: String,
+    pub search_cursor_visible: bool,
+    pub video_playing: bool,
+    pub playback_sec: u32,
+    pub playback_frame: usize,
+    pub is_subscribed: bool,
+    pub likes: u32,
 }
 
 impl AeroBrowser {
@@ -61,7 +70,86 @@ impl AeroBrowser {
             omnibox_text,
             omnibox_focused: false,
             cached_dom: None,
+            page_input_focused: false,
+            page_search_query: String::new(),
+            search_cursor_visible: true,
+            video_playing: true,
+            playback_sec: 134,
+            playback_frame: 0,
+            is_subscribed: false,
+            likes: 4300,
         }
+    }
+
+    /// Re-renders the active tab's HTML using dynamic in-page state (typing query, focus, live playback).
+    pub fn refresh_current_page(&mut self) {
+        let active_url = self.tab_mgr.active_tab().url.clone();
+        if active_url.contains("youtube.com") || active_url.contains("youtube") {
+            #[cfg(feature = "std")]
+            {
+                let (title, html) = Tab::build_youtube_page_html(
+                    &active_url,
+                    &self.page_search_query,
+                    self.page_input_focused,
+                    self.search_cursor_visible,
+                    self.video_playing,
+                    self.is_subscribed,
+                    self.likes,
+                    self.playback_sec,
+                    self.playback_frame,
+                );
+                let tab = self.tab_mgr.active_tab_mut();
+                tab.title = title;
+                tab.html_source = html;
+                self.cached_dom = None;
+            }
+        }
+    }
+
+    /// Returns true if the page has active live animations (video playing or blinking text cursor).
+    pub fn is_animating(&self) -> bool {
+        let active_url = self.active_tab().url.as_str();
+        let is_yt = active_url.contains("youtube.com") || active_url.contains("youtube");
+        if is_yt {
+            let is_watch = active_url.contains("watch?v=") || active_url.contains("/watch");
+            (is_watch && self.video_playing) || self.page_input_focused
+        } else {
+            false
+        }
+    }
+
+    /// Advances the live playback timer, audio spectrum waveform, and blinking text cursor.
+    pub fn tick_animation(&mut self) -> bool {
+        let active_url = self.active_tab().url.clone();
+        let is_yt = active_url.contains("youtube.com") || active_url.contains("youtube");
+        if !is_yt {
+            return false;
+        }
+
+        self.playback_frame = self.playback_frame.wrapping_add(1);
+        let mut changed = false;
+
+        let is_watch = active_url.contains("watch?v=") || active_url.contains("/watch");
+        if is_watch && self.video_playing {
+            // Advance seconds: every 10 frames (~1 sec when ticking at 100ms)
+            if self.playback_frame % 10 == 0 {
+                self.playback_sec = self.playback_sec.saturating_add(1);
+            }
+            changed = true;
+        }
+
+        if self.page_input_focused {
+            let new_cursor = (self.playback_frame % 6) < 3;
+            if new_cursor != self.search_cursor_visible {
+                self.search_cursor_visible = new_cursor;
+                changed = true;
+            }
+        }
+
+        if changed {
+            self.refresh_current_page();
+        }
+        changed
     }
 
     /// Returns a reference to the active tab.
@@ -89,6 +177,12 @@ impl AeroBrowser {
         self.tab_mgr.navigate_active(&target_url, &self.shields.stats);
         self.omnibox_text = self.tab_mgr.active_tab().url.clone();
         self.cached_dom = None;
+        if target_url.contains("watch?v=") || target_url.contains("/watch") {
+            self.video_playing = true;
+            self.playback_sec = 134; // Start at realistic 02:14
+            self.playback_frame = 0;
+        }
+        self.refresh_current_page();
     }
 
     /// Navigates back in history for the active tab.
@@ -221,6 +315,8 @@ impl AeroBrowser {
             }
             ChromeClickTarget::OmniboxFocus => {
                 self.omnibox_focused = true;
+                self.page_input_focused = false;
+                self.refresh_current_page();
                 true
             }
             ChromeClickTarget::ToggleShields => {
@@ -282,7 +378,7 @@ impl AeroBrowser {
                     }
                 }
 
-                // YouTube Interactive Navigation & Click Handling (Images 1-5)
+                // YouTube Interactive Navigation & Click Handling
                 if active_url.contains("youtube.com") || active_url.contains("youtube") {
                     let vy = y - TOTAL_CHROME_HEIGHT;
                     let vx = x;
@@ -290,20 +386,31 @@ impl AeroBrowser {
                     // 1. YouTube Top Bar (vy: 0..52)
                     if vy >= 0 && vy <= 52 {
                         if vx >= 10 && vx <= 220 {
-                            // Logo or hamburger -> Home Feed (Image 5)
+                            // Logo or hamburger -> Home Feed
+                            self.page_input_focused = false;
                             self.navigate("https://www.youtube.com?feed=true");
                             return true;
-                        } else if vx >= 230 && vx <= 640 {
-                            // Search box -> open suggestions / focus search
-                            if !active_url.contains("search_query") && !active_url.contains("watch") && !active_url.contains("feed") {
-                                self.navigate("https://www.youtube.com?sugg=true");
-                            } else {
-                                self.omnibox_focused = true;
-                                self.omnibox_text = "naki in bangla".to_owned();
-                            }
+                        } else if vx >= 220 && vx <= 640 {
+                            // In-page search textbox clicked!
+                            self.omnibox_focused = false;
+                            self.page_input_focused = true;
+                            self.search_cursor_visible = true;
+                            self.refresh_current_page();
                             return true;
-                        } else if vx > 640 && vx <= 740 {
-                            // Search button [Q] or mic [🎙] -> run search (Image 3)
+                        } else if vx > 640 && vx <= 700 {
+                            // Search button [🔍] clicked!
+                            self.page_input_focused = false;
+                            let q = if self.page_search_query.trim().is_empty() {
+                                "naki in bangla"
+                            } else {
+                                self.page_search_query.trim()
+                            };
+                            let url = format!("https://www.youtube.com/results?search_query={}", q.replace(' ', "+"));
+                            self.navigate(&url);
+                            return true;
+                        } else if vx > 700 && vx <= 760 {
+                            // Mic button [🎙] clicked!
+                            self.page_input_focused = false;
                             self.navigate("https://www.youtube.com/results?search_query=naki+in+bangla");
                             return true;
                         } else if vx >= 800 {
@@ -314,8 +421,9 @@ impl AeroBrowser {
 
                     // 2. Left Sidebar (vx: 0..200, vy: 53..600)
                     if vx >= 0 && vx <= 200 && vy >= 53 {
+                        self.page_input_focused = false;
                         if vy >= 53 && vy <= 95 {
-                            // Home -> Feed (Image 5)
+                            // Home -> Feed
                             self.navigate("https://www.youtube.com?feed=true");
                             return true;
                         } else if vy > 95 && vy <= 135 {
@@ -327,7 +435,7 @@ impl AeroBrowser {
                             self.navigate("https://www.youtube.com/results?search_query=subscriptions");
                             return true;
                         } else if vy > 175 && vy <= 265 {
-                            // You / History -> Clean Start Page (Image 1)
+                            // You / History -> Clean Start Page
                             self.navigate("https://www.youtube.com?clean=true");
                             return true;
                         } else if vy > 330 && vy <= 370 {
@@ -350,31 +458,28 @@ impl AeroBrowser {
                     }
 
                     // 3. Main Content Views (vx > 200)
-                    // 3A. Watch Page: watch?v=... (Image 4)
-                    if active_url.contains("watch?v=") {
-                        if vx >= 20 && vx <= 700 {
+                    // 3A. Watch Page: watch?v=...
+                    if active_url.contains("watch?v=") || active_url.contains("/watch") {
+                        if vx >= 200 && vx <= 720 {
                             // Cinema player screen / controls (vy: 55..450)
                             if vy >= 55 && vy <= 450 {
-                                let next_url = if active_url.contains("playing=false") {
-                                    active_url.replace("playing=false", "playing=true")
-                                } else if active_url.contains("playing=true") {
-                                    active_url.replace("playing=true", "playing=false")
-                                } else {
-                                    format!("{}&playing=false", active_url)
-                                };
-                                self.navigate(&next_url);
+                                self.video_playing = !self.video_playing;
+                                self.refresh_current_page();
                                 return true;
-                            } else if vy >= 490 && vy <= 560 && vx >= 260 && vx <= 420 {
-                                // Subscribe pill toggle
-                                let next_url = if active_url.contains("sub=true") {
-                                    active_url.replace("sub=true", "sub=false")
-                                } else {
-                                    format!("{}&sub=true", active_url)
-                                };
-                                self.navigate(&next_url);
-                                return true;
+                            } else if vy >= 450 && vy <= 540 {
+                                if vx >= 280 && vx <= 430 {
+                                    // Subscribe pill toggle
+                                    self.is_subscribed = !self.is_subscribed;
+                                    self.refresh_current_page();
+                                    return true;
+                                } else if vx >= 430 && vx <= 530 {
+                                    // Like button
+                                    self.likes = self.likes.saturating_add(1);
+                                    self.refresh_current_page();
+                                    return true;
+                                }
                             }
-                        } else if vx >= 710 {
+                        } else if vx >= 720 {
                             // Up Next related column
                             if vy >= 80 && vy <= 170 {
                                 self.navigate("https://www.youtube.com/watch?v=rel_hajj");
@@ -396,14 +501,13 @@ impl AeroBrowser {
                         return false;
                     }
 
-                    // 3B. Search Results Page: search_query=... (Image 3)
+                    // 3B. Search Results Page: search_query=... or ?q=...
                     if active_url.contains("search_query=") || active_url.contains("?q=") {
                         if vx >= 200 {
                             if vy >= 55 && vy <= 200 {
                                 self.navigate("https://www.youtube.com/watch?v=bY1cozLiK14");
                                 return true;
                             } else if vy > 200 && vy <= 350 {
-                                // Card 2 -> Muslim Youth Advice watch page (Image 4)
                                 self.navigate("https://www.youtube.com/watch?v=4NlKj7Saogc");
                                 return true;
                             } else if vy > 350 && vy <= 500 {
@@ -420,7 +524,7 @@ impl AeroBrowser {
                         return false;
                     }
 
-                    // 3C. Home Feed: feed=true (Image 5)
+                    // 3C. Home Feed: feed=true
                     if active_url.contains("feed=true") || active_url.ends_with("/feed") {
                         if vx >= 200 {
                             // Filter chips (vy: 55..100)
@@ -472,7 +576,6 @@ impl AeroBrowser {
                                     self.navigate("https://www.youtube.com/watch?v=yt_mashrafe");
                                     return true;
                                 } else if vx > 740 && vx <= 1010 {
-                                    // Card 6 -> Watch Page (Image 4)
                                     self.navigate("https://www.youtube.com/watch?v=4NlKj7Saogc");
                                     return true;
                                 }
@@ -485,18 +588,23 @@ impl AeroBrowser {
                     if vx >= 200 {
                         // Dropdown suggestion box (Image 2)
                         if vy >= 55 && vy <= 180 && vx >= 240 && vx <= 760 {
+                            self.page_input_focused = false;
                             self.navigate("https://www.youtube.com/results?search_query=naki+in+bangla");
                             return true;
                         }
 
-                        // Welcome card (Image 1)
+                        // Welcome card / center search pill (Image 1)
                         if vy >= 140 && vy <= 240 && vx >= 260 && vx <= 780 {
-                            self.navigate("https://www.youtube.com?sugg=true");
+                            self.omnibox_focused = false;
+                            self.page_input_focused = true;
+                            self.search_cursor_visible = true;
+                            self.refresh_current_page();
                             return true;
                         }
 
                         // Quick Pills
                         if vy >= 240 && vy <= 350 {
+                            self.page_input_focused = false;
                             if vx >= 230 && vx <= 410 {
                                 self.navigate("https://www.youtube.com/results?search_query=naki+in+bangla");
                                 return true;
@@ -512,6 +620,13 @@ impl AeroBrowser {
                             }
                         }
                     }
+
+                    // Clicked elsewhere on the page -> unfocus in-page input
+                    if self.page_input_focused {
+                        self.page_input_focused = false;
+                        self.refresh_current_page();
+                        return true;
+                    }
                 }
                 false
             }
@@ -520,7 +635,43 @@ impl AeroBrowser {
 
     /// Handles keyboard input.
     pub fn handle_key(&mut self, key_code: u8, ch: char) -> bool {
-        if self.omnibox_focused {
+        if self.page_input_focused {
+            match key_code {
+                13 | 10 => {
+                    // Enter pressed: commit in-page YouTube search
+                    self.page_input_focused = false;
+                    let q = if self.page_search_query.trim().is_empty() {
+                        "naki in bangla"
+                    } else {
+                        self.page_search_query.trim()
+                    };
+                    let url = format!("https://www.youtube.com/results?search_query={}", q.replace(' ', "+"));
+                    self.navigate(&url);
+                    true
+                }
+                8 | 127 => {
+                    // Backspace: delete character from search query
+                    self.page_search_query.pop();
+                    self.refresh_current_page();
+                    true
+                }
+                27 => {
+                    // Escape: cancel in-page search focus
+                    self.page_input_focused = false;
+                    self.refresh_current_page();
+                    true
+                }
+                _ => {
+                    if !ch.is_control() && ch != '\0' {
+                        self.page_search_query.push(ch);
+                        self.refresh_current_page();
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
+        } else if self.omnibox_focused {
             match key_code {
                 13 | 10 => {
                     // Enter pressed: commit navigation

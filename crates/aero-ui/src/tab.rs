@@ -155,7 +155,7 @@ impl Tab {
     }
 
     #[cfg(feature = "std")]
-    fn get_default_home_feed() -> Vec<YouTubeVideo> {
+    pub fn get_default_home_feed() -> Vec<YouTubeVideo> {
         vec![
             YouTubeVideo {
                 video_id: "yt_noman2".to_owned(),
@@ -221,114 +221,307 @@ impl Tab {
     }
 
     #[cfg(feature = "std")]
-    fn get_default_search_results(query: &str) -> Vec<YouTubeVideo> {
-        vec![
-            YouTubeVideo {
+    pub fn get_default_search_results(query: &str) -> Vec<YouTubeVideo> {
+        let q_lower = query.to_lowercase();
+        if q_lower.contains("vlad") || q_lower.contains("kids") {
+            vec![
+                Self::get_video_by_id("bY1cozLiK14"),
+                Self::get_video_by_id("4NlKj7Saogc"),
+                Self::get_video_by_id("pagi23"),
+            ]
+        } else if q_lower.contains("rust") || q_lower.contains("novaos") || q_lower.contains("program") {
+            vec![
+                Self::get_video_by_id("XsNGS_bxzwg"),
+                Self::get_video_by_id("4NlKj7Saogc"),
+                Self::get_video_by_id("yt_noman2"),
+            ]
+        } else {
+            vec![
+                Self::get_video_by_id("bY1cozLiK14"),
+                Self::get_video_by_id("4NlKj7Saogc"),
+                Self::get_video_by_id("pagi23"),
+                Self::get_video_by_id("LWzPB04DhCg"),
+                Self::get_video_by_id("XsNGS_bxzwg"),
+            ]
+        }
+    }
+
+    #[cfg(feature = "std")]
+    pub fn get_video_by_id(vid: &str) -> YouTubeVideo {
+        match vid {
+            "bY1cozLiK14" => YouTubeVideo {
                 video_id: "bY1cozLiK14".to_owned(),
                 title: "Vlad and Niki new mother explore ice cream truck (ভ্লাদ এবং নিকি)".to_owned(),
                 channel: "Niki TV".to_owned(),
                 views: "11M views".to_owned(),
                 duration: "4:47".to_owned(),
                 published: "5y ago".to_owned(),
-                description: "Vlad and Niki explore new ice cream truck adventure for kids.".to_owned(),
+                description: "Vlad and Niki explore new ice cream truck adventure for kids with giant gelato cones!".to_owned(),
                 verified: true,
             },
-            YouTubeVideo {
+            "4NlKj7Saogc" => YouTubeVideo {
                 video_id: "4NlKj7Saogc".to_owned(),
                 title: "Muslim Torunder Uddesshe Kichu Kotha || Nouman Ali Khan (NAKInBangla)".to_owned(),
                 channel: "NAKInBangla".to_owned(),
                 views: "155K views".to_owned(),
-                duration: "56:28".to_owned(),
+                duration: "56:31".to_owned(),
                 published: "1y ago".to_owned(),
-                description: "Support us in patreon: https://patreon.com/spektrummedia Advice for Muslim Youth by Nouman Ali Khan.".to_owned(),
+                description: "Advice and spiritual guidance for Muslim youth facing modern challenges by Dr. Nouman Ali Khan.".to_owned(),
                 verified: true,
             },
-            YouTubeVideo {
+            "pagi23" => YouTubeVideo {
                 video_id: "pagi23".to_owned(),
                 title: "Pagol Naki Song (Original) | পাগল নাকি | WAQAS (Official Lyric Video)".to_owned(),
                 channel: "WAQAS".to_owned(),
                 views: "348K views".to_owned(),
                 duration: "2:38".to_owned(),
                 published: "2w ago".to_owned(),
-                description: "Pagol Naki song | Official Lyric Video by WAQAS.".to_owned(),
+                description: "Pagol Naki official acoustic studio session | Bengali Diaries Volume 1 by WAQAS.".to_owned(),
                 verified: true,
             },
-            YouTubeVideo {
+            "LWzPB04DhCg" => YouTubeVideo {
                 video_id: "LWzPB04DhCg".to_owned(),
                 title: "Vul Naki Prem | ভুল নাকি প্রেম | Arosh Khan | Bangla Natok 2026".to_owned(),
                 channel: "G Series Bangla Natok".to_owned(),
                 views: "3.9M views".to_owned(),
                 duration: "44:59".to_owned(),
                 published: "6mo ago".to_owned(),
-                description: "Presenting Special Romantic Drama 'Vul Naki Prem' starring Arosh Khan.".to_owned(),
+                description: "Special Eid romantic drama 'Vul Naki Prem' starring Arosh Khan and Tania Bristy.".to_owned(),
                 verified: true,
             },
-            YouTubeVideo {
+            "XsNGS_bxzwg" => YouTubeVideo {
                 video_id: "XsNGS_bxzwg".to_owned(),
-                title: "Chakri Bachabo Naki Girlfriend (Full Natok) | চাকরি বাঁচাবো নাকি গার্লফ্রেন্ড".to_owned(),
-                channel: "Eagle Premier Station".to_owned(),
-                views: "1.1M views".to_owned(),
-                duration: "49:05".to_owned(),
-                published: "1y ago".to_owned(),
-                description: "Eagle Team Presents New Comedy Drama 'Chakri Bachabo Naki Girlfriend Bachabo'.".to_owned(),
+                title: "Building NovaOS 2.0: Writing an Operating System in Rust".to_owned(),
+                channel: "NovaOS Engineering".to_owned(),
+                views: "542K views".to_owned(),
+                duration: "42:15".to_owned(),
+                published: "3d ago".to_owned(),
+                description: "Architecture deep dive into monolithic kernel engineering in 100% pure safe Rust.".to_owned(),
                 verified: true,
             },
-        ]
-    }
-
-    #[cfg(feature = "std")]
-    fn get_related_videos_for(video_id: &str) -> Vec<YouTubeVideo> {
-        vec![
-            YouTubeVideo {
+            "yt_noman2" => YouTubeVideo {
+                video_id: "yt_noman2".to_owned(),
+                title: "Apni Allahar Hoye Jan (Turn to Allah) || Shaykh Nouman Ali Khan".to_owned(),
+                channel: "Shaykh Nouman Ali Khan Bangla".to_owned(),
+                views: "40K views".to_owned(),
+                duration: "21:15".to_owned(),
+                published: "3d ago".to_owned(),
+                description: "Spiritual lecture on seeking closeness to Allah and finding inner tranquility in life.".to_owned(),
+                verified: true,
+            },
+            "yt_parliament" => YouTubeVideo {
+                video_id: "yt_parliament".to_owned(),
+                title: "Mugdho Puro Sangsad (Historic Parliament Speech) | ATN News".to_owned(),
+                channel: "ATN News".to_owned(),
+                views: "1.2M views".to_owned(),
+                duration: "22:34".to_owned(),
+                published: "2d ago".to_owned(),
+                description: "Historic parliament address sparking major national headlines and public discussion.".to_owned(),
+                verified: true,
+            },
+            "yt_humble" | "rel_humble" => YouTubeVideo {
+                video_id: "yt_humble".to_owned(),
+                title: "True Men of Knowledge are Extremely Humble || Dr. Noman Ali Khan".to_owned(),
+                channel: "Motivation".to_owned(),
+                views: "6.5K views".to_owned(),
+                duration: "17:06".to_owned(),
+                published: "2d ago".to_owned(),
+                description: "In-depth lecture exploring humility, wisdom, and character development in true scholars.".to_owned(),
+                verified: true,
+            },
+            "yt_barsha" => YouTubeVideo {
+                video_id: "yt_barsha".to_owned(),
+                title: "Barita Aji Chere Dite Hobe (Eviction Report) | Ananta Jalil | ATN News".to_owned(),
+                channel: "ATN News".to_owned(),
+                views: "106K views".to_owned(),
+                duration: "1:14".to_owned(),
+                published: "23h ago".to_owned(),
+                description: "Latest entertainment news investigation from national broadcast newsroom.".to_owned(),
+                verified: true,
+            },
+            "yt_mashrafe" => YouTubeVideo {
+                video_id: "yt_mashrafe".to_owned(),
+                title: "Dirghodin Por Dekha Millo Mashrafe (Mashrafe Exclusive) | Khabar Protidin".to_owned(),
+                channel: "Khabar Protidin".to_owned(),
+                views: "2.7M views".to_owned(),
+                duration: "28:15".to_owned(),
+                published: "2d ago".to_owned(),
+                description: "Exclusive interview with former cricket captain Mashrafe Bin Mortaza on sports & life.".to_owned(),
+                verified: true,
+            },
+            "rel_hajj" => YouTubeVideo {
                 video_id: "rel_hajj".to_owned(),
                 title: "Hojjer Pothe Nobiji Part 4 || Nouman Ali Khan".to_owned(),
                 channel: "NAKInBangla".to_owned(),
                 views: "19K views".to_owned(),
                 duration: "45:53".to_owned(),
                 published: "1y ago".to_owned(),
-                description: "The historical and spiritual journey of Hajj.".to_owned(),
+                description: "The historical and spiritual journey of Hajj and following the footsteps of the Prophet.".to_owned(),
                 verified: true,
             },
-            YouTubeVideo {
+            "rel_sirah" => YouTubeVideo {
                 video_id: "rel_sirah".to_owned(),
                 title: "Sobar Jibonei Sukher Obhinoy Keno Eto Nikhut? - Nouman Ali Khan".to_owned(),
                 channel: "SiRah".to_owned(),
                 views: "1.3K views".to_owned(),
                 duration: "38:57".to_owned(),
                 published: "1d ago".to_owned(),
-                description: "Reflections on mental peace and inner contentment in modern life.".to_owned(),
+                description: "Deep reflections on societal expectations, mental peace, and authentic contentment.".to_owned(),
                 verified: true,
             },
-            YouTubeVideo {
+            "rel_marriage" => YouTubeVideo {
                 video_id: "rel_marriage".to_owned(),
                 title: "Biyer Purbe Kichu Proyojonio Poramorsho • Nouman Ali Khan".to_owned(),
                 channel: "Bangla Waz".to_owned(),
                 views: "304K views".to_owned(),
                 duration: "30:32".to_owned(),
                 published: "11mo ago".to_owned(),
-                description: "Crucial guidance and advice on marriage preparation.".to_owned(),
+                description: "Crucial guidance and advice on marriage preparation, mutual respect, and family building.".to_owned(),
                 verified: true,
             },
-            YouTubeVideo {
+            "rel_destroy" => YouTubeVideo {
                 video_id: "rel_destroy".to_owned(),
                 title: "Amra Nijekey Dhongsho Kore Felchi? | Noman Ali Khan Bangla".to_owned(),
                 channel: "Islam Daily".to_owned(),
                 views: "2.3K views".to_owned(),
                 duration: "24:10".to_owned(),
                 published: "1y ago".to_owned(),
-                description: "Are we destroying our own potential? Deep soul searching lecture.".to_owned(),
+                description: "Are we destroying our own potential? Soul searching lecture by Nouman Ali Khan.".to_owned(),
                 verified: true,
             },
-            YouTubeVideo {
-                video_id: "rel_humble".to_owned(),
-                title: "True Men of Knowledge are Extremely Humble || Dr. Noman Ali Khan".to_owned(),
-                channel: "Motivation".to_owned(),
-                views: "6.5K views".to_owned(),
-                duration: "17:06".to_owned(),
-                published: "2d ago".to_owned(),
-                description: "The noble character and modesty of true scholars.".to_owned(),
+            _ => YouTubeVideo {
+                video_id: vid.to_owned(),
+                title: format!("Special Feature: {}", vid),
+                channel: "Aero Media Official".to_owned(),
+                views: "100K views".to_owned(),
+                duration: "15:00".to_owned(),
+                published: "Recently".to_owned(),
+                description: "Aero Browser media broadcast.".to_owned(),
                 verified: true,
             },
+        }
+    }
+
+    #[cfg(feature = "std")]
+    pub fn get_video_thumbnail_details(v: &YouTubeVideo) -> (
+        &'static str, // bg_color
+        &'static str, // border_color
+        &'static str, // badge_bg
+        &'static str, // badge_color
+        &'static str, // tag
+        &'static str, // headline
+        &'static str, // subtext
+        &'static str, // avatar_bg
+        &'static str, // avatar_text
+    ) {
+        if v.title.contains("Vlad") || v.channel.contains("Niki") {
+            (
+                "#0284c7",
+                "#38bdf8",
+                "#0f172a",
+                "#38bdf8",
+                "🍦 KIDS FUN ADVENTURE",
+                "🌟 ICE CREAM TRUCK QUEST!",
+                "Vlad &amp; Niki • 4K Gelato Fun",
+                "#0284c7",
+                "VLAD",
+            )
+        } else if v.title.contains("Pagol Naki") || v.channel.contains("WAQAS") {
+            (
+                "#581c87",
+                "#a855f7",
+                "#0f172a",
+                "#c084fc",
+                "🎸 OFFICIAL MUSIC VIDEO",
+                "🎵 PAGOL NAKI • STUDIO MASTER",
+                "WAQAS Bengali Diaries Vol 1",
+                "#a855f7",
+                "WAQAS",
+            )
+        } else if v.title.contains("Vul Naki Prem") || v.channel.contains("G Series") {
+            (
+                "#7f1d1d",
+                "#ef4444",
+                "#0f172a",
+                "#f87171",
+                "🎬 BANGLA NATOK 2026",
+                "🎭 VUL NAKI PREM • ROMANCE",
+                "Arosh Khan &amp; Tania Bristy",
+                "#b91c1c",
+                "G",
+            )
+        } else if v.title.contains("NovaOS") || v.channel.contains("NovaOS") {
+            (
+                "#0f172a",
+                "#3b82f6",
+                "#1e3a8a",
+                "#60a5fa",
+                "⚡ RUST KERNEL DEV",
+                "🦀 BUILDING NOVAOS 2.0",
+                "Monolithic OS in Pure Rust",
+                "#ff5500",
+                "NOVA",
+            )
+        } else if v.title.contains("Parliament") || (v.channel.contains("ATN") && v.title.contains("Mugdho")) {
+            (
+                "#881337",
+                "#f43f5e",
+                "#0f172a",
+                "#fda4af",
+                "📺 NATIONAL PARLIAMENT",
+                "📡 MUGDHO PURO SANGSAD",
+                "ATN News Prime Time Report",
+                "#dc2626",
+                "ATN",
+            )
+        } else if v.title.contains("Mashrafe") {
+            (
+                "#14532d",
+                "#22c55e",
+                "#052e16",
+                "#86efac",
+                "🏏 CRICKET EXCLUSIVE",
+                "🏆 MASHRAFE INTERVIEW",
+                "Khabar Protidin Sports Special",
+                "#16a34a",
+                "KP",
+            )
+        } else if v.title.contains("Barita") {
+            (
+                "#713f12",
+                "#eab308",
+                "#1c1917",
+                "#fde047",
+                "📰 SPECIAL INVESTIGATION",
+                "🏠 BARITA AJI CHERE DITE HOBE",
+                "Entertainment News Investigation",
+                "#dc2626",
+                "ATN",
+            )
+        } else {
+            // Default / Islamic / Nouman Ali Khan
+            (
+                "#064e3b",
+                "#059669",
+                "#0f172a",
+                "#34d399",
+                "🕌 BAYYINAH ISLAMIC WISDOM",
+                "📖 SPIRITUAL LECTURE • 1080p",
+                "Dr. Nouman Ali Khan Official",
+                "#cc0000",
+                "NAK",
+            )
+        }
+    }
+
+    #[cfg(feature = "std")]
+    pub fn get_related_videos_for(video_id: &str) -> Vec<YouTubeVideo> {
+        vec![
+            Self::get_video_by_id("rel_hajj"),
+            Self::get_video_by_id("rel_sirah"),
+            Self::get_video_by_id("rel_marriage"),
+            Self::get_video_by_id("rel_destroy"),
+            Self::get_video_by_id("rel_humble"),
         ]
     }
 
@@ -359,13 +552,13 @@ impl Tab {
             if videos.is_empty() {
                 videos = Self::get_default_search_results(q);
             }
-            let html = Self::build_youtube_search_results_html(q, &videos);
+            let html = Self::build_youtube_search_results_html(q, &videos, q, false, false);
             Some((format!("{} - YouTube", q), html))
         } else {
             if videos.is_empty() {
                 videos = Self::get_default_home_feed();
             }
-            let html = Self::build_youtube_feed_html("All", &videos);
+            let html = Self::build_youtube_feed_html("All", &videos, "", false, false);
             Some(("YouTube".to_owned(), html))
         }
     }
@@ -475,15 +668,209 @@ impl Tab {
         results
     }
 
+    #[cfg(feature = "std")]
+    pub fn parse_duration_to_sec(dur: &str) -> u32 {
+        let parts: Vec<&str> = dur.split(':').collect();
+        if parts.len() == 2 {
+            let m: u32 = parts[0].trim().parse().unwrap_or(5);
+            let s: u32 = parts[1].trim().parse().unwrap_or(0);
+            m * 60 + s
+        } else if parts.len() == 3 {
+            let h: u32 = parts[0].trim().parse().unwrap_or(1);
+            let m: u32 = parts[1].trim().parse().unwrap_or(0);
+            let s: u32 = parts[2].trim().parse().unwrap_or(0);
+            h * 3600 + m * 60 + s
+        } else {
+            300
+        }
+    }
+
+    #[cfg(feature = "std")]
+    pub fn get_player_stage_details(v: &YouTubeVideo) -> (
+        &'static str, // hud_badge
+        &'static str, // slide_tag
+        String,       // slide_main
+        [&'static str; 3], // bullets
+        String,       // speaker_title
+        String,       // speaker_sub
+        String,       // cc_subtitle
+        &'static str, // avatar_bg
+        &'static str, // avatar_text
+    ) {
+        if v.title.contains("Vlad") || v.channel.contains("Niki") {
+            (
+                "● LIVE 4K UHD 60FPS • Niki TV Official Stream",
+                "🍦 KIDS ADVENTURE &amp; ENTERTAINMENT",
+                "Vlad &amp; Niki: Ice Cream Truck Expedition".to_owned(),
+                [
+                    "• Exploring the magical mega ice cream truck",
+                    "• Flavors quest: Strawberry, Gelato &amp; Bubblegum",
+                    "• Outdoor backyard fun with brother Niki &amp; mom",
+                ],
+                "[ 🌟 VLAD &amp; NIKI ]".to_owned(),
+                "Kids Creators • 110M+ Global Subscribers".to_owned(),
+                "&quot;Look at this giant gelato cone! We found all five rainbow flavors!&quot;".to_owned(),
+                "#0284c7",
+                "VLAD",
+            )
+        } else if v.title.contains("Pagol Naki") || v.channel.contains("WAQAS") {
+            (
+                "● LIVE 1080p HI-FI • Studio Acoustic Session",
+                "🎸 OFFICIAL ACOUSTIC MASTER",
+                "Pagol Naki (Original) • WAQAS Acoustic Live".to_owned(),
+                [
+                    "• Bengali Diaries Vol 1: Studio Sound Engineering",
+                    "• Unplugged guitar &amp; intimate acoustic vocals",
+                    "• Written, composed and performed by WAQAS",
+                ],
+                "[ 🎵 WAQAS ]".to_owned(),
+                "Singer-Songwriter • Studio Sessions".to_owned(),
+                "&quot;Tumi ki pagol naki... amar moner kotha shune jao ekbar...&quot;".to_owned(),
+                "#a855f7",
+                "WAQAS",
+            )
+        } else if v.title.contains("Vul Naki Prem") || v.channel.contains("G Series") {
+            (
+                "● LIVE 1080p60 FHD • G Series Official Broadcast",
+                "🎬 BANGLA NATOK 2026 • SPECIAL DRAMA",
+                "Vul Naki Prem • Arosh Khan &amp; Tania Bristy".to_owned(),
+                [
+                    "• Directed by G Series Special Drama Productions",
+                    "• Romantic comedy drama set across old Dhaka",
+                    "• Original soundtrack by Autumnal Moon",
+                ],
+                "[ 🎭 AROSH KHAN ]".to_owned(),
+                "Lead Actor • G Series Bangla Drama".to_owned(),
+                "&quot;Ei shohore shobai bhalobasha khuje, kintu shotti prem ki emni pawa jaay?&quot;".to_owned(),
+                "#ef4444",
+                "G",
+            )
+        } else if v.title.contains("NovaOS") || v.channel.contains("NovaOS") {
+            (
+                "● LIVE 1080p60 HD • Pure Rust Systems Architecture",
+                "⚡ RUST KERNEL DEVELOPMENT",
+                "Building NovaOS 2.0: Writing an OS in Pure Rust".to_owned(),
+                [
+                    "• Monolithic zero-dependency x86_64 architecture",
+                    "• nova_uring async I/O rings &amp; memory safety",
+                    "• Pure Rust Aero Browser rendering engine",
+                ],
+                "[ 🦀 NOVAOS ARCHITECT ]".to_owned(),
+                "Lead Systems Engineer • NovaOS Systems Lab".to_owned(),
+                "&quot;In NovaOS 2.0, every single line of kernel, window manager and browser is pure Rust.&quot;".to_owned(),
+                "#ff5500",
+                "NOVA",
+            )
+        } else if v.title.contains("Parliament") || (v.channel.contains("ATN") && v.title.contains("Mugdho")) {
+            (
+                "● LIVE 1080p60 HD • ATN News National Broadcast",
+                "📺 NATIONAL PARLIAMENT REPORT",
+                "Mugdho Puro Sangsad: Special Parliamentary Session".to_owned(),
+                [
+                    "• Historic national assembly debate &amp; reform bills",
+                    "• Prime time political analysis &amp; floor speeches",
+                    "• Broadcast live from Jatiya Sangsad Bhaban",
+                ],
+                "[ 📡 ATN NEWS PRIME ]".to_owned(),
+                "Senior Parliamentary Correspondent • ATN".to_owned(),
+                "&quot;Jatiya Sangsade shokol duler shodoshyoder uposthitite guruttopurno bil pass holo.&quot;".to_owned(),
+                "#dc2626",
+                "ATN",
+            )
+        } else if v.title.contains("Mashrafe") {
+            (
+                "● LIVE 1080p60 HD • Sports Exclusive Interview",
+                "🏏 BANGLADESH CRICKET SPECIAL",
+                "Dirghodin Por Dekha Mileche • Mashrafe Mortaza".to_owned(),
+                [
+                    "• In-depth interview on Bangladesh cricket journey",
+                    "• Career reflections, leadership &amp; youth inspiration",
+                    "• Khabar Protidin Special Sports Presentation",
+                ],
+                "[ 🏆 MASHRAFE MORTAZA ]".to_owned(),
+                "Former Captain • Bangladesh National Cricket Team".to_owned(),
+                "&quot;Desher hoye math-e namar je onubhuti, tar shathe kono kichur tulona hoy na.&quot;".to_owned(),
+                "#16a34a",
+                "KP",
+            )
+        } else if v.title.contains("Barita") {
+            (
+                "● LIVE 1080p60 HD • Investigative Report • ATN News",
+                "📰 SPECIAL INVESTIGATION",
+                "Barita Aji Chere Dite Hobe • Exclusive Report".to_owned(),
+                [
+                    "• Special investigative journalism on urban housing",
+                    "• Ground realities &amp; public safety inspection",
+                    "• Comprehensive reporting by ATN News Team",
+                ],
+                "[ 🎙 INVESTIGATIVE DESK ]".to_owned(),
+                "Special Investigation Unit • ATN News".to_owned(),
+                "&quot;Ghotona sthol theke amader bishes protibedok janacchen bishes tothyo.&quot;".to_owned(),
+                "#dc2626",
+                "ATN",
+            )
+        } else if v.title.contains("Biyer Purbe") || v.video_id == "rel_marriage" {
+            (
+                "● LIVE 1080p60 HD • Bayyinah Islamic Wisdom • NAK HD",
+                "📖 ISLAMIC COUNSELING &amp; WISDOM",
+                "Biyer Purbe Kichu Proyojonio Poramosho • Nouman Ali Khan".to_owned(),
+                [
+                    "• Foundations of a blissful and resilient marriage",
+                    "• Emotional maturity, realistic expectations &amp; empathy",
+                    "• Quranic guidance for youth embarking on matrimony",
+                ],
+                "[ 🎙 DR. NOUMAN ALI KHAN ]".to_owned(),
+                "Speaker &amp; Founder • Bayyinah Institute".to_owned(),
+                "&quot;Marriage requires immense patience, emotional maturity, and mutual respect every single day.&quot;".to_owned(),
+                "#059669",
+                "NAK",
+            )
+        } else {
+            (
+                "● LIVE 1080p60 HD • Spektrum Media Official Stream • NAK HD",
+                "📖 BAYYINAH LECTURE SERIES",
+                v.title.clone(),
+                [
+                    "• Building spiritual resilience in modern times",
+                    "• Overcoming toxic digital distractions",
+                    "• Achieving balance: Faith, Education &amp; Moral Character",
+                ],
+                "[ 🎙 DR. NOUMAN ALI KHAN ]".to_owned(),
+                "Speaker &amp; Founder • Bayyinah Institute".to_owned(),
+                "&quot;Our purpose in life is building character, spiritual resilience and moral clarity.&quot;".to_owned(),
+                "#cc0000",
+                "NAK",
+            )
+        }
+    }
+
     /// Builds the clean initial landing page matching Image 1 & 2 in White Mode (Light Theme).
     #[cfg(feature = "std")]
-    pub fn build_youtube_clean_home_html(query_input: &str, suggestions_open: bool) -> String {
-        let display_input = if query_input.is_empty() {
-            if suggestions_open { "naki in bangl" } else { "Search" }
+    pub fn build_youtube_clean_home_html(
+        query_input: &str,
+        suggestions_open: bool,
+        is_focused: bool,
+        cursor_visible: bool,
+    ) -> String {
+        let (search_border, display_input) = if is_focused {
+            let cursor = if cursor_visible { "|" } else { " " };
+            let text = if query_input.is_empty() {
+                format!("<span style=\"color:#065fd4; font-weight:bold;\">{}</span><span style=\"color:#888888;\">Search</span>", cursor)
+            } else {
+                format!("{}<span style=\"color:#065fd4; font-weight:bold;\">{}</span>", query_input, cursor)
+            };
+            ("1.5px solid #065fd4", text)
         } else {
-            query_input
+            let text = if query_input.is_empty() {
+                "<span style=\"color:#888888;\">Search</span>".to_owned()
+            } else {
+                query_input.to_owned()
+            };
+            ("1px solid #cccccc", text)
         };
-        let sugg_display = if suggestions_open { "block" } else { "none" };
+
+        let sugg_display = if suggestions_open || is_focused { "block" } else { "none" };
+        let base_q = if query_input.is_empty() { "naki in bangla" } else { query_input };
 
         format!(
             "<!DOCTYPE html>
@@ -534,7 +921,6 @@ body {{
 }}
 .search-pill {{
     background-color: #ffffff;
-    border: 1px solid #cccccc;
     border-right: none;
     border-radius: 20px 0 0 20px;
     padding: 8px 16px;
@@ -585,26 +971,29 @@ body {{
     vertical-align: middle;
 }}
 .sugg-dropdown {{
-    display: {};
+    position: absolute;
+    top: 50px;
+    left: 218px;
+    width: 440px;
     background-color: #ffffff;
-    border: 1px solid #cccccc;
+    border: 1px solid #e5e5e5;
     border-radius: 12px;
-    padding: 8px 14px;
-    width: 400px;
-    margin-left: 180px;
-    margin-top: 4px;
-    margin-bottom: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    display: {};
+    padding: 8px 0;
+    z-index: 100;
 }}
 .sugg-item {{
-    padding: 6px 6px;
+    padding: 8px 18px;
     font-size: 13px;
     color: #0f0f0f;
-    border-bottom: 1px solid #f2f2f2;
+    cursor: pointer;
 }}
 .sugg-footer {{
-    padding: 6px 6px;
-    font-size: 10px;
-    color: #888888;
+    border-top: 1px solid #f2f2f2;
+    padding: 6px 18px;
+    font-size: 11px;
+    color: #909090;
     text-align: right;
 }}
 .layout-row {{
@@ -624,6 +1013,7 @@ body {{
     color: #0f0f0f;
     border-radius: 10px;
     margin: 2px 10px;
+    cursor: pointer;
 }}
 .side-active {{
     background-color: #f2f2f2;
@@ -678,6 +1068,7 @@ body {{
     border-radius: 16px;
     font-size: 12px;
     margin: 6px;
+    cursor: pointer;
 }}
 .pill-active {{
     background-color: #0f0f0f;
@@ -691,7 +1082,7 @@ body {{
     <div class=\"hamburger\">≡</div>
     <div class=\"logo\"><span style=\"color:#ff0000;\">▶</span> YouTube <span class=\"logo-badge\">BD</span></div>
     <div class=\"search-container\">
-        <div class=\"search-pill\">{}</div>
+        <div class=\"search-pill\" style=\"border:{}; border-right:none;\">{}</div>
         <div class=\"search-btn\">🔍</div>
         <div class=\"mic-btn\">🎙</div>
     </div>
@@ -699,10 +1090,10 @@ body {{
 </div>
 
 <div class=\"sugg-dropdown\">
-    <div class=\"sugg-item\">🔍 <b>naki in bangla</b></div>
-    <div class=\"sugg-item\">🔍 naki in bangla natok</div>
-    <div class=\"sugg-item\">🔍 naki in bangla song</div>
-    <div class=\"sugg-item\">🔍 naki in bangla waz</div>
+    <div class=\"sugg-item\">🔍 <b>{}</b></div>
+    <div class=\"sugg-item\">🔍 {} natok</div>
+    <div class=\"sugg-item\">🔍 {} song official</div>
+    <div class=\"sugg-item\">🔍 {} waz 2026</div>
     <div class=\"sugg-footer\">Report search predictions</div>
 </div>
 
@@ -730,7 +1121,7 @@ body {{
         </div>
 
         <div class=\"quick-pills\">
-            <div class=\"pill pill-active\">🔍 naki in bangla</div>
+            <div class=\"pill pill-active\">🔍 {}</div>
             <div class=\"pill\">Explore Trending Feed</div>
             <div class=\"pill\">Popular Music</div>
             <div class=\"pill\">Gaming Live</div>
@@ -740,30 +1131,58 @@ body {{
 </div>
 </body>
 </html>",
-            sugg_display, display_input
+            sugg_display, search_border, display_input, base_q, base_q, base_q, base_q, base_q
         )
     }
 
     /// Builds the authentic search results page matching Image 3 in White Mode.
     #[cfg(feature = "std")]
-    pub fn build_youtube_search_results_html(query: &str, videos: &[YouTubeVideo]) -> String {
+    pub fn build_youtube_search_results_html(
+        query: &str,
+        videos: &[YouTubeVideo],
+        query_input: &str,
+        is_focused: bool,
+        cursor_visible: bool,
+    ) -> String {
+        let (search_border, display_input) = if is_focused {
+            let cursor = if cursor_visible { "|" } else { " " };
+            let text = if query_input.is_empty() {
+                format!("<span style=\"color:#065fd4; font-weight:bold;\">{}</span><span style=\"color:#888888;\">Search</span>", cursor)
+            } else {
+                format!("{}<span style=\"color:#065fd4; font-weight:bold;\">{}</span>", query_input, cursor)
+            };
+            ("1.5px solid #065fd4", text)
+        } else {
+            let text = if query_input.is_empty() {
+                query.to_owned()
+            } else {
+                query_input.to_owned()
+            };
+            ("1px solid #cccccc", text)
+        };
+
         let mut cards = String::new();
         for v in videos {
+            let (bg_color, border_color, badge_bg, badge_color, tag, headline, subtext, avatar_bg, avatar_text) =
+                Self::get_video_thumbnail_details(v);
+
             cards.push_str(&format!(
                 "<div class=\"result-card\">
-                    <div class=\"thumb-widescreen\">
-                        <div class=\"thumb-banner\">1080p HD VIDEO</div>
-                        <div class=\"thumb-scene\">▶ Play Video</div>
+                    <div class=\"thumb-widescreen\" style=\"background-color:{}; border:1px solid {};\">
+                        <div class=\"thumb-tag\" style=\"background-color:{}; color:{};\">{}</div>
+                        <div class=\"thumb-headline\">{}</div>
+                        <div class=\"thumb-subtext\">{}</div>
                         <div class=\"dur-badge\">{}</div>
                     </div>
                     <div class=\"result-info\">
                         <div class=\"res-title\">{}</div>
                         <div class=\"res-meta\">{} • {}</div>
-                        <div class=\"res-channel\"><span class=\"ch-avatar\">NAK</span> {} <span class=\"verified\">✔</span></div>
+                        <div class=\"res-channel\"><span class=\"ch-avatar\" style=\"background-color:{}; color:#ffffff;\">{}</span> {} <span class=\"verified\">✔</span></div>
                         <div class=\"res-desc\">{}</div>
                     </div>
                 </div>",
-                v.duration, v.title, v.views, v.published, v.channel, v.description
+                bg_color, border_color, badge_bg, badge_color, tag, headline, subtext, v.duration,
+                v.title, v.views, v.published, avatar_bg, avatar_text, v.channel, v.description
             ));
         }
 
@@ -790,26 +1209,27 @@ body {{
 .logo {{ display: inline-block; font-size: 18px; font-weight: bold; color: #0f0f0f; width: 130px; cursor: pointer; vertical-align: middle; }}
 .logo-badge {{ font-size: 10px; color: #606060; margin-left: 2px; }}
 .search-container {{ display: inline-block; width: 540px; margin-left: 20px; vertical-align: middle; }}
-.search-pill {{ background-color: #ffffff; border: 1px solid #cccccc; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
+.search-pill {{ background-color: #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
 .search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 56px; padding: 8px 0; text-align: center; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; cursor: pointer; }}
 .mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 36px; height: 36px; display: inline-block; margin-left: 10px; text-align: center; color: #0f0f0f; font-size: 14px; vertical-align: middle; cursor: pointer; }}
 .signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 7px 16px; font-size: 13px; font-weight: bold; margin-top: 2px; vertical-align: middle; }}
 .layout-row {{ display: block; }}
 .sidebar {{ display: inline-block; width: 170px; background-color: #ffffff; border-right: 1px solid #e5e5e5; padding-top: 12px; vertical-align: top; }}
-.side-item {{ padding: 10px 18px; font-size: 13px; color: #0f0f0f; border-radius: 10px; margin: 2px 10px; }}
+.side-item {{ padding: 10px 18px; font-size: 13px; color: #0f0f0f; border-radius: 10px; margin: 2px 10px; cursor: pointer; }}
 .side-active {{ background-color: #f2f2f2; font-weight: bold; }}
 .side-divider {{ border-top: 1px solid #e5e5e5; margin: 10px 14px; }}
 .content-area {{ display: inline-block; width: 790px; vertical-align: top; padding: 14px 18px; }}
 .result-card {{ display: block; margin-bottom: 22px; cursor: pointer; }}
-.thumb-widescreen {{ display: inline-block; width: 280px; height: 140px; background-color: #1e293b; border-radius: 10px; vertical-align: top; position: relative; border: 1px solid #334155; }}
-.thumb-banner {{ background-color: #0f172a; color: #38bdf8; font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 8px 8px 0 0; }}
-.thumb-scene {{ color: #ffffff; font-size: 16px; font-weight: bold; padding-top: 30px; text-align: center; }}
-.dur-badge {{ background-color: #000000; color: #ffffff; border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: bold; float: right; margin: 6px; }}
+.thumb-widescreen {{ display: inline-block; width: 280px; height: 135px; border-radius: 10px; vertical-align: top; position: relative; padding: 6px; box-sizing: border-box; }}
+.thumb-tag {{ font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 6px; display: inline-block; }}
+.thumb-headline {{ color: #ffffff; font-size: 13px; font-weight: bold; padding-top: 16px; text-align: center; line-height: 1.3; }}
+.thumb-subtext {{ color: #e2e8f0; font-size: 10px; text-align: center; margin-top: 6px; }}
+.dur-badge {{ background-color: rgba(0, 0, 0, 0.85); color: #ffffff; border-radius: 4px; padding: 2px 5px; font-size: 10px; font-weight: bold; float: right; margin: 4px; }}
 .result-info {{ display: inline-block; width: 470px; padding-left: 16px; vertical-align: top; }}
 .res-title {{ font-size: 15px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 6px; }}
 .res-meta {{ font-size: 12px; color: #606060; margin-bottom: 6px; }}
 .res-channel {{ font-size: 12px; color: #606060; margin-bottom: 8px; }}
-.ch-avatar {{ background-color: #e5e5e5; border-radius: 50%; padding: 2px 5px; margin-right: 4px; font-weight: bold; font-size: 10px; }}
+.ch-avatar {{ border-radius: 50%; padding: 2px 6px; margin-right: 4px; font-weight: bold; font-size: 10px; }}
 .verified {{ color: #606060; font-size: 11px; }}
 .res-desc {{ font-size: 11px; color: #606060; line-height: 1.4; }}
 </style>
@@ -819,7 +1239,7 @@ body {{
     <div class=\"hamburger\">≡</div>
     <div class=\"logo\"><span style=\"color:#ff0000;\">▶</span> YouTube <span class=\"logo-badge\">BD</span></div>
     <div class=\"search-container\">
-        <div class=\"search-pill\">{}</div>
+        <div class=\"search-pill\" style=\"border:{}; border-right:none;\">{}</div>
         <div class=\"search-btn\">🔍</div>
         <div class=\"mic-btn\">🎙</div>
     </div>
@@ -846,7 +1266,7 @@ body {{
 </div>
 </body>
 </html>",
-            query, query, cards
+            query, search_border, display_input, cards
         )
     }
 
@@ -858,24 +1278,72 @@ body {{
         is_playing: bool,
         is_subscribed: bool,
         likes: u32,
+        elapsed_sec: u32,
+        anim_frame: usize,
+        query_input: &str,
+        is_focused: bool,
+        cursor_visible: bool,
     ) -> String {
-        let play_badge = if is_playing {
-            "<span style=\"color:#22c55e; font-weight:bold;\">● LIVE STREAM ACTIVE</span>"
+        let (hud_badge, slide_tag, slide_main, bullets, speaker_title, speaker_sub, cc_subtitle, avatar_bg, avatar_text) =
+            Self::get_player_stage_details(video);
+
+        let total_sec = Self::parse_duration_to_sec(&video.duration);
+        let cur_sec = elapsed_sec.min(total_sec);
+        let time_str = format!("{:02}:{:02}", cur_sec / 60, cur_sec % 60);
+        let pct = ((cur_sec as f32 / total_sec as f32) * 100.0).clamp(2.0, 98.0);
+        let timeline_width = format!("{:.1}%", pct);
+
+        let spectrum_frames = [
+            "SPECTRUM: ▂▃▅▆▇█▇▆▅▃▂ 100%",
+            "SPECTRUM: ▃▅▆▇█▇▆▅▃▂▃ 100%",
+            "SPECTRUM: ▅▆▇█▇▆▅▃▂▃▅ 100%",
+            "SPECTRUM: ▆▇█▇▆▅▃▂▃▅▆ 100%",
+            "SPECTRUM: █▇▆▅▃▂▃▅▆▇█ 100%",
+            "SPECTRUM: ▇▆▅▃▂▃▅▆▇█▇ 100%",
+        ];
+        let spectrum_str = if is_playing {
+            spectrum_frames[anim_frame % spectrum_frames.len()]
         } else {
-            "<span style=\"color:#f59e0b; font-weight:bold;\">⏸ PAUSED</span>"
+            "SPECTRUM: ▂▂▂▂▂▂▂▂▂▂▂ PAUSED"
+        };
+
+        let play_badge = if is_playing {
+            let dot = if (anim_frame % 2) == 0 { "●" } else { "○" };
+            format!("<span style=\"color:#22c55e; font-weight:bold;\">{} LIVE STREAM ACTIVE</span>", dot)
+        } else {
+            "<span style=\"color:#f59e0b; font-weight:bold;\">⏸ PAUSED</span>".to_owned()
         };
         let play_btn = if is_playing { "⏸ Pause" } else { "▶ Play" };
         let sub_btn = if is_subscribed { "Subscribed ✓" } else { "Subscribe" };
         let sub_bg = if is_subscribed { "#f2f2f2" } else { "#cc0000" };
         let sub_text_color = if is_subscribed { "#0f0f0f" } else { "#ffffff" };
 
+        let (search_border, display_input) = if is_focused {
+            let cursor = if cursor_visible { "|" } else { " " };
+            let text = if query_input.is_empty() {
+                format!("<span style=\"color:#065fd4; font-weight:bold;\">{}</span><span style=\"color:#888888;\">Search</span>", cursor)
+            } else {
+                format!("{}<span style=\"color:#065fd4; font-weight:bold;\">{}</span>", query_input, cursor)
+            };
+            ("1.5px solid #065fd4", text)
+        } else {
+            let text = if query_input.is_empty() {
+                "Search".to_owned()
+            } else {
+                query_input.to_owned()
+            };
+            ("1px solid #cccccc", text)
+        };
+
         let mut rel_cards = String::new();
         for r in related {
+            let (rbg, rborder, _, _, rtag, _, _, _, _) = Self::get_video_thumbnail_details(r);
             rel_cards.push_str(&format!(
                 "<div class=\"rel-item\">
-                    <div class=\"rel-thumb\">
+                    <div class=\"rel-thumb\" style=\"background-color:{}; border:1px solid {};\">
                         <div class=\"dur-badge\">{}</div>
-                        <div style=\"color:#ffffff; font-size:12px; font-weight:bold; padding-top:20px; text-align:center;\">▶ HD</div>
+                        <div style=\"color:#ffffff; font-size:9px; font-weight:bold; padding:4px 6px;\">{}</div>
+                        <div style=\"color:#e2e8f0; font-size:11px; font-weight:bold; text-align:center; padding-top:6px;\">▶ HD</div>
                     </div>
                     <div class=\"rel-info\">
                         <div class=\"rel-title\">{}</div>
@@ -883,7 +1351,7 @@ body {{
                         <div class=\"rel-meta\">{} • {}</div>
                     </div>
                 </div>",
-                r.duration, r.title, r.channel, r.views, r.published
+                rbg, rborder, r.duration, rtag, r.title, r.channel, r.views, r.published
             ));
         }
 
@@ -910,7 +1378,7 @@ body {{
 .logo {{ display: inline-block; font-size: 18px; font-weight: bold; color: #0f0f0f; width: 130px; cursor: pointer; vertical-align: middle; }}
 .logo-badge {{ font-size: 10px; color: #606060; margin-left: 2px; }}
 .search-container {{ display: inline-block; width: 540px; margin-left: 20px; vertical-align: middle; }}
-.search-pill {{ background-color: #ffffff; border: 1px solid #cccccc; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
+.search-pill {{ background-color: #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
 .search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 56px; padding: 8px 0; text-align: center; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; cursor: pointer; }}
 .mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 36px; height: 36px; display: inline-block; margin-left: 10px; text-align: center; color: #0f0f0f; font-size: 14px; vertical-align: middle; cursor: pointer; }}
 .signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 7px 16px; font-size: 13px; font-weight: bold; margin-top: 2px; vertical-align: middle; }}
@@ -1013,7 +1481,6 @@ body {{
 .timeline-fill {{
     background-color: #ff0000;
     height: 5px;
-    width: 35%;
     display: inline-block;
 }}
 .timeline-dot {{
@@ -1036,8 +1503,6 @@ body {{
 .vid-heading {{ font-size: 17px; font-weight: bold; color: #0f0f0f; margin-top: 14px; line-height: 1.3; }}
 .channel-row {{ margin-top: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e5e5; display: block; }}
 .ch-avatar-big {{
-    background-color: #cc0000;
-    color: #ffffff;
     border-radius: 50%;
     width: 36px;
     height: 36px;
@@ -1074,6 +1539,7 @@ body {{
     font-size: 11px;
     color: #0f0f0f;
     margin-left: 4px;
+    cursor: pointer;
 }}
 .desc-box {{
     background-color: #f2f2f2;
@@ -1092,8 +1558,8 @@ body {{
 }}
 .rel-header {{ font-size: 14px; font-weight: bold; color: #0f0f0f; margin-bottom: 12px; }}
 .rel-item {{ display: block; margin-bottom: 14px; cursor: pointer; }}
-.rel-thumb {{ display: inline-block; width: 120px; height: 68px; background-color: #1e293b; border-radius: 8px; vertical-align: top; position: relative; border: 1px solid #cbd5e1; }}
-.dur-badge {{ background-color: #000000; color: #ffffff; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: bold; float: right; margin: 4px; }}
+.rel-thumb {{ display: inline-block; width: 120px; height: 68px; border-radius: 8px; vertical-align: top; position: relative; }}
+.dur-badge {{ background-color: rgba(0, 0, 0, 0.85); color: #ffffff; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: bold; float: right; margin: 4px; }}
 .rel-info {{ display: inline-block; width: 185px; padding-left: 10px; vertical-align: top; }}
 .rel-title {{ font-size: 12px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 4px; }}
 .rel-channel {{ font-size: 11px; color: #606060; margin-bottom: 2px; }}
@@ -1105,7 +1571,7 @@ body {{
     <div class=\"hamburger\">≡</div>
     <div class=\"logo\"><span style=\"color:#ff0000;\">▶</span> YouTube <span class=\"logo-badge\">BD</span></div>
     <div class=\"search-container\">
-        <div class=\"search-pill\">naki in bangla</div>
+        <div class=\"search-pill\" style=\"border:{}; border-right:none;\">{}</div>
         <div class=\"search-btn\">🔍</div>
         <div class=\"mic-btn\">🎙</div>
     </div>
@@ -1116,30 +1582,30 @@ body {{
     <div class=\"player-column\">
         <div class=\"cinema-player\">
             <div class=\"player-hud-top\">
-                <span style=\"color:#22c55e; font-weight:bold;\">● LIVE 1080p60 HD</span> • Spektrum Media Official Stream • <span style=\"color:#38bdf8;\">NAK HD</span>
+                <span style=\"color:#22c55e; font-weight:bold;\">{}</span> • Aero Cinema Stream Engine
             </div>
             <div class=\"player-stage\">
                 <div class=\"stage-slide\">
-                    <div class=\"slide-tag\">📖 BAYYINAH LECTURE SERIES</div>
-                    <div class=\"slide-main\">Advice for Muslim Youth: Purpose &amp; Identity</div>
+                    <div class=\"slide-tag\">{}</div>
+                    <div class=\"slide-main\">{}</div>
                     <div class=\"slide-bullets\">
-                        • Building spiritual resilience in modern times<br>
-                        • Overcoming toxic digital distractions<br>
-                        • Achieving balance: Faith, Education &amp; Goals
+                        {}<br>
+                        {}<br>
+                        {}
                     </div>
                 </div>
                 <div class=\"stage-speaker\">
-                    <div class=\"speaker-title\">[ 🎙 DR. NOUMAN ALI KHAN ]</div>
-                    <div class=\"speaker-sub\">Speaker &amp; Founder • Bayyinah</div>
-                    <div class=\"audio-spectrum\">SPECTRUM: ▂▃▅▆▇█▇▆▅▃▂ 100%</div>
+                    <div class=\"speaker-title\">{}</div>
+                    <div class=\"speaker-sub\">{}</div>
+                    <div class=\"audio-spectrum\">{}</div>
                     <div class=\"stage-state\">{}</div>
                 </div>
                 <div class=\"stage-cc\">
-                    <span class=\"cc-pill\">[ CC: &quot;Our purpose in life is building character, spiritual resilience and moral clarity&quot; - Nouman Ali Khan ]</span>
+                    <span class=\"cc-pill\">[ CC: {} ]</span>
                 </div>
             </div>
             <div class=\"timeline-bar\">
-                <div class=\"timeline-fill\"></div>
+                <div class=\"timeline-fill\" style=\"width:{};\"></div>
                 <div class=\"timeline-dot\">●</div>
             </div>
             <div class=\"player-controls\">
@@ -1147,7 +1613,7 @@ body {{
                 <div class=\"ctrl-item\">⏮</div>
                 <div class=\"ctrl-item\">⏭</div>
                 <div class=\"ctrl-item\">🔊 100%</div>
-                <div class=\"ctrl-item\">02:14 / {}</div>
+                <div class=\"ctrl-item\">{} / {}</div>
                 <div class=\"shield-badge\">🛡️ Brave Shields: 0 Video Ads</div>
                 <div class=\"ctrl-item float-r\">⛶ Fullscreen</div>
                 <div class=\"ctrl-item float-r\">⚙ 1080p HD</div>
@@ -1158,23 +1624,22 @@ body {{
         <div class=\"vid-heading\">{}</div>
 
         <div class=\"channel-row\">
-            <div class=\"ch-avatar-big\">NAK</div>
+            <div class=\"ch-avatar-big\" style=\"background-color:{}; color:#ffffff;\">{}</div>
             <div class=\"ch-details\">
                 <div class=\"ch-name\">{} ✔</div>
-                <div class=\"ch-subs\">778K subscribers</div>
+                <div class=\"ch-subs\">779K subscribers</div>
             </div>
             <div class=\"sub-pill\">{}</div>
-
             <div class=\"action-pills\">
-                <div class=\"action-pill\">👍 {} | 👎</div>
+                <div class=\"action-pill\">👍 {}</div>
                 <div class=\"action-pill\">↗ Share</div>
-                <div class=\"action-pill\">⬇ Download</div>
-                <div class=\"action-pill\">•••</div>
+                <div class=\"action-pill\">📥 Download</div>
+                <div class=\"action-pill\">• • •</div>
             </div>
         </div>
 
         <div class=\"desc-box\">
-            <b>{} • {}</b><br>
+            <b>{} views • {}</b><br>
             {}
         </div>
     </div>
@@ -1189,10 +1654,26 @@ body {{
             video.title,
             sub_bg,
             sub_text_color,
+            search_border,
+            display_input,
+            hud_badge,
+            slide_tag,
+            slide_main,
+            bullets[0],
+            bullets[1],
+            bullets[2],
+            speaker_title,
+            speaker_sub,
+            spectrum_str,
             play_badge,
+            cc_subtitle,
+            timeline_width,
             play_btn,
+            time_str,
             video.duration,
             video.title,
+            avatar_bg,
+            avatar_text,
             video.channel,
             sub_btn,
             likes,
@@ -1205,25 +1686,51 @@ body {{
 
     /// Builds the rich Home Feed matching Image 5 in White Mode.
     #[cfg(feature = "std")]
-    pub fn build_youtube_feed_html(category: &str, videos: &[YouTubeVideo]) -> String {
+    pub fn build_youtube_feed_html(
+        category: &str,
+        videos: &[YouTubeVideo],
+        query_input: &str,
+        is_focused: bool,
+        cursor_visible: bool,
+    ) -> String {
+        let (search_border, display_input) = if is_focused {
+            let cursor = if cursor_visible { "|" } else { " " };
+            let text = if query_input.is_empty() {
+                format!("<span style=\"color:#065fd4; font-weight:bold;\">{}</span><span style=\"color:#888888;\">Search</span>", cursor)
+            } else {
+                format!("{}<span style=\"color:#065fd4; font-weight:bold;\">{}</span>", query_input, cursor)
+            };
+            ("1.5px solid #065fd4", text)
+        } else {
+            let text = if query_input.is_empty() {
+                "Search".to_owned()
+            } else {
+                query_input.to_owned()
+            };
+            ("1px solid #cccccc", text)
+        };
+
         let mut cards = String::new();
         for v in videos {
-            let title_display = if v.title.chars().count() > 24 {
-                let s: String = v.title.chars().take(22).collect();
+            let title_display = if v.title.chars().count() > 28 {
+                let s: String = v.title.chars().take(26).collect();
                 format!("{}...", s)
             } else {
                 v.title.clone()
             };
-            let initial = v.channel.chars().next().unwrap_or('Y');
+            let (bg_color, border_color, badge_bg, badge_color, tag, headline, subtext, avatar_bg, avatar_text) =
+                Self::get_video_thumbnail_details(v);
+
             cards.push_str(&format!(
                 "<div class=\"grid-card\">
-                    <div class=\"card-thumb\">
-                        <div class=\"thumb-tag\">VID STREAM</div>
-                        <div class=\"thumb-center\">▶ Play Video</div>
+                    <div class=\"card-thumb\" style=\"background-color:{}; border:1px solid {};\">
+                        <div class=\"thumb-tag\" style=\"background-color:{}; color:{};\">{}</div>
+                        <div class=\"thumb-headline\">{}</div>
+                        <div class=\"thumb-subtext\">{}</div>
                         <div class=\"dur-badge\">{}</div>
                     </div>
                     <div class=\"card-body\">
-                        <div class=\"card-avatar\">{}</div>
+                        <div class=\"card-avatar\" style=\"background-color:{}; color:#ffffff;\">{}</div>
                         <div class=\"card-text\">
                             <div class=\"card-title\">{}</div>
                             <div class=\"card-channel\">{} ✔</div>
@@ -1231,7 +1738,8 @@ body {{
                         </div>
                     </div>
                 </div>",
-                v.duration, initial, title_display, v.channel, v.views, v.published
+                bg_color, border_color, badge_bg, badge_color, tag, headline, subtext, v.duration,
+                avatar_bg, avatar_text, title_display, v.channel, v.views, v.published
             ));
         }
 
@@ -1258,13 +1766,13 @@ body {{
 .logo {{ display: inline-block; font-size: 18px; font-weight: bold; color: #0f0f0f; width: 130px; cursor: pointer; vertical-align: middle; }}
 .logo-badge {{ font-size: 10px; color: #606060; margin-left: 2px; }}
 .search-container {{ display: inline-block; width: 540px; margin-left: 20px; vertical-align: middle; }}
-.search-pill {{ background-color: #ffffff; border: 1px solid #cccccc; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
+.search-pill {{ background-color: #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
 .search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 56px; padding: 8px 0; text-align: center; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; cursor: pointer; }}
 .mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 36px; height: 36px; display: inline-block; margin-left: 10px; text-align: center; color: #0f0f0f; font-size: 14px; vertical-align: middle; cursor: pointer; }}
 .signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 7px 16px; font-size: 13px; font-weight: bold; margin-top: 2px; vertical-align: middle; }}
 .layout-row {{ display: block; }}
 .sidebar {{ display: inline-block; width: 170px; background-color: #ffffff; border-right: 1px solid #e5e5e5; padding-top: 12px; vertical-align: top; }}
-.side-item {{ padding: 10px 18px; font-size: 13px; color: #0f0f0f; border-radius: 10px; margin: 2px 10px; }}
+.side-item {{ padding: 10px 18px; font-size: 13px; color: #0f0f0f; border-radius: 10px; margin: 2px 10px; cursor: pointer; }}
 .side-active {{ background-color: #f2f2f2; font-weight: bold; }}
 .side-divider {{ border-top: 1px solid #e5e5e5; margin: 10px 14px; }}
 .content-area {{ display: inline-block; width: 790px; vertical-align: top; padding: 14px 18px; }}
@@ -1279,6 +1787,7 @@ body {{
     font-size: 12px;
     margin-right: 6px;
     margin-bottom: 6px;
+    cursor: pointer;
 }}
 .chip-active {{ background-color: #0f0f0f; color: #ffffff; font-weight: bold; }}
 .grid-card {{
@@ -1289,30 +1798,30 @@ body {{
     cursor: pointer;
 }}
 .card-thumb {{
-    background-color: #1e293b;
     border-radius: 10px;
-    height: 140px;
+    height: 135px;
     position: relative;
-    border: 1px solid #334155;
+    padding: 6px;
+    box-sizing: border-box;
+    display: block;
 }}
-.thumb-tag {{ background-color: #0f172a; color: #38bdf8; font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 8px 8px 0 0; }}
-.thumb-center {{ color: #ffffff; font-size: 16px; font-weight: bold; padding-top: 25px; text-align: center; }}
-.dur-badge {{ background-color: #000000; color: #ffffff; border-radius: 4px; padding: 2px 5px; font-size: 10px; font-weight: bold; float: right; margin: 6px; }}
+.thumb-tag {{ font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 6px; display: inline-block; }}
+.thumb-headline {{ color: #ffffff; font-size: 13px; font-weight: bold; padding-top: 16px; text-align: center; line-height: 1.3; }}
+.thumb-subtext {{ color: #e2e8f0; font-size: 10px; text-align: center; margin-top: 6px; }}
+.dur-badge {{ background-color: rgba(0, 0, 0, 0.85); color: #ffffff; border-radius: 4px; padding: 2px 5px; font-size: 10px; font-weight: bold; float: right; margin: 4px; }}
 .card-body {{ margin-top: 10px; display: block; }}
 .card-avatar {{
-    background-color: #e5e5e5;
     border-radius: 50%;
     width: 32px;
     height: 32px;
     display: inline-block;
     text-align: center;
     line-height: 32px;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: bold;
     vertical-align: top;
-    color: #0f0f0f;
 }}
-.card-text {{ display: inline-block; width: 205px; padding-left: 8px; vertical-align: top; }}
+.card-text {{ display: inline-block; width: 200px; padding-left: 8px; vertical-align: top; }}
 .card-title {{ font-size: 13px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 4px; }}
 .card-channel {{ font-size: 11px; color: #606060; margin-bottom: 2px; }}
 .card-meta {{ font-size: 10px; color: #606060; }}
@@ -1323,7 +1832,7 @@ body {{
     <div class=\"hamburger\">≡</div>
     <div class=\"logo\"><span style=\"color:#ff0000;\">▶</span> YouTube <span class=\"logo-badge\">BD</span></div>
     <div class=\"search-container\">
-        <div class=\"search-pill\">Search</div>
+        <div class=\"search-pill\" style=\"border:{}; border-right:none;\">{}</div>
         <div class=\"search-btn\">🔍</div>
         <div class=\"mic-btn\">🎙</div>
     </div>
@@ -1342,7 +1851,6 @@ body {{
         <div class=\"side-item\">[🎵 Music]</div>
         <div class=\"side-item\">[🎮 Gaming]</div>
         <div class=\"side-item\">[📰 News]</div>
-        <div class=\"side-item\">[💡 Podcasts]</div>
     </div>
 
     <div class=\"content-area\">
@@ -1364,8 +1872,88 @@ body {{
 </div>
 </body>
 </html>",
-            cards
+            search_border, display_input, cards
         )
+    }
+
+    #[cfg(feature = "std")]
+    pub fn build_youtube_page_html(
+        url_str: &str,
+        query_input: &str,
+        is_focused: bool,
+        cursor_visible: bool,
+        is_playing: bool,
+        is_subscribed: bool,
+        likes: u32,
+        elapsed_sec: u32,
+        anim_frame: usize,
+    ) -> (String, String) {
+        let trimmed = url_str.trim();
+
+        // 1. Watch page: /watch?v=...
+        if trimmed.contains("/watch") || trimmed.contains("watch?v=") {
+            let vid = if let Some(v_part) = trimmed.split("v=").nth(1) {
+                v_part.split('&').next().unwrap_or("4NlKj7Saogc")
+            } else {
+                "4NlKj7Saogc"
+            };
+            let video = Self::get_video_by_id(vid);
+            let related = Self::get_related_videos_for(vid);
+            let html = Self::build_youtube_watch_html(
+                &video,
+                &related,
+                is_playing,
+                is_subscribed,
+                likes,
+                elapsed_sec,
+                anim_frame,
+                query_input,
+                is_focused,
+                cursor_visible,
+            );
+            return (format!("{} - YouTube", video.title), html);
+        }
+
+        // 2. Search results page: search_query=... or ?q=...
+        if trimmed.contains("search_query=") || trimmed.contains("?q=") {
+            let q = if let Some(q_part) = trimmed.split("search_query=").nth(1) {
+                q_part.split('&').next().unwrap_or("naki in bangla")
+            } else if let Some(q_part) = trimmed.split("?q=").nth(1) {
+                q_part.split('&').next().unwrap_or("naki in bangla")
+            } else {
+                "naki in bangla"
+            };
+            let decoded_q = q.replace('+', " ");
+            let videos = Self::get_default_search_results(&decoded_q);
+            let html = Self::build_youtube_search_results_html(
+                &decoded_q,
+                &videos,
+                if query_input.is_empty() { &decoded_q } else { query_input },
+                is_focused,
+                cursor_visible,
+            );
+            return (format!("{} - YouTube", decoded_q), html);
+        }
+
+        // 3. Home Feed with Filter Chips: feed=true
+        if trimmed.contains("feed=true") || trimmed.contains("/feed") {
+            let videos = Self::get_default_home_feed();
+            let html = Self::build_youtube_feed_html("All", &videos, query_input, is_focused, cursor_visible);
+            return ("YouTube".to_owned(), html);
+        }
+
+        // 4. Clean Landing Page (Image 1 & 2): default or clean=true
+        let raw_q = if !query_input.is_empty() {
+            query_input
+        } else if trimmed.contains("q=") {
+            trimmed.split("q=").nth(1).unwrap_or("").split('&').next().unwrap_or("")
+        } else {
+            ""
+        };
+        let q_input = raw_q.replace('+', " ");
+        let sugg_open = trimmed.contains("sugg=true") || is_focused;
+        let html = Self::build_youtube_clean_home_html(&q_input, sugg_open, is_focused, cursor_visible);
+        ("YouTube".to_owned(), html)
     }
 
     #[cfg(feature = "std")]
@@ -1394,84 +1982,12 @@ body {{
         } else if trimmed.contains("youtube.com") || trimmed.contains("youtube") {
             #[cfg(feature = "std")]
             {
-                // 1. Watch page: /watch?v=...
-                if trimmed.contains("/watch") || trimmed.contains("watch?v=") {
-                    let vid = if let Some(v_part) = trimmed.split("v=").nth(1) {
-                        v_part.split('&').next().unwrap_or("4NlKj7Saogc")
-                    } else {
-                        "4NlKj7Saogc"
-                    };
-                    let is_playing = !trimmed.contains("playing=false");
-                    let is_sub = trimmed.contains("sub=true");
-                    let likes = 4300;
-
-                    let (video, related) = if vid == "4NlKj7Saogc" {
-                        (
-                            YouTubeVideo {
-                                video_id: "4NlKj7Saogc".to_owned(),
-                                title: "Muslim Torunder Uddesshe Kichu Kotha || Nouman Ali Khan (NAKInBangla)".to_owned(),
-                                channel: "NAKInBangla".to_owned(),
-                                views: "155K views".to_owned(),
-                                duration: "56:31".to_owned(),
-                                published: "1 year ago".to_owned(),
-                                description: "Support us in patreon: https://patreon.com/spektrummedia Support us in Buzzsprout: https://buzzsprout.com... Advice and life guidance for Muslim youth by Dr. Nouman Ali Khan.".to_owned(),
-                                verified: true,
-                            },
-                            Self::get_related_videos_for("4NlKj7Saogc")
-                        )
-                    } else {
-                        (
-                            YouTubeVideo {
-                                video_id: vid.to_owned(),
-                                title: "Vlad and Niki new mother explore ice cream truck (ভ্লাদ এবং নিকি)".to_owned(),
-                                channel: "Niki TV".to_owned(),
-                                views: "11M views".to_owned(),
-                                duration: "4:47".to_owned(),
-                                published: "5 years ago".to_owned(),
-                                description: "Vlad and Niki explore new ice cream truck adventure for kids.".to_owned(),
-                                verified: true,
-                            },
-                            Self::get_related_videos_for(vid)
-                        )
-                    };
-
-                    let html = Self::build_youtube_watch_html(&video, &related, is_playing, is_sub, likes);
-                    return (format!("{} - YouTube", video.title), html);
-                }
-
-                // 2. Search results page: search_query=...
-                if trimmed.contains("search_query=") || trimmed.contains("?q=") {
-                    let q = if let Some(q_part) = trimmed.split("search_query=").nth(1) {
-                        q_part.split('&').next().unwrap_or("naki in bangla")
-                    } else if let Some(q_part) = trimmed.split("?q=").nth(1) {
-                        q_part.split('&').next().unwrap_or("naki in bangla")
-                    } else {
-                        "naki in bangla"
-                    };
-                    let decoded_q = q.replace('+', " ");
-                    if let Some((yt_title, yt_html)) = Self::fetch_live_youtube(Some(&decoded_q)) {
-                        return (yt_title, yt_html);
-                    }
-                }
-
-                // 3. Home Feed with Filter Chips: feed=true
-                if trimmed.contains("feed=true") || trimmed.contains("/feed") {
-                    let videos = Self::get_default_home_feed();
-                    let html = Self::build_youtube_feed_html("All", &videos);
-                    return ("YouTube".to_owned(), html);
-                }
-
-                // 4. Clean Landing Page (Image 1 & 2): default or clean=true
-                let q_input = if trimmed.contains("q=") {
-                    trimmed.split("q=").nth(1).unwrap_or("").split('&').next().unwrap_or("")
-                } else {
-                    ""
-                };
-                let sugg_open = trimmed.contains("sugg=true") || !q_input.is_empty();
-                let html = Self::build_youtube_clean_home_html(q_input, sugg_open);
-                return ("YouTube".to_owned(), html);
+                return Self::build_youtube_page_html(trimmed, "", false, false, true, false, 4300, 134, 0);
             }
-            ("YouTube".to_owned(), InternalPages::youtube_portal())
+            #[cfg(not(feature = "std"))]
+            {
+                ("YouTube".to_owned(), InternalPages::youtube_portal())
+            }
         } else {
             // Live network fetch via HTTP/HTTPS for all domains (GitHub, Wikipedia, Google, etc.)
             #[cfg(feature = "std")]
