@@ -28,7 +28,10 @@ use crate::chrome::{
     render_more_tools_submenu, ChromeClickTarget, BOOKMARKS_HEIGHT, NAVBAR_HEIGHT,
     TAB_STRIP_HEIGHT, TOTAL_CHROME_HEIGHT,
 };
-use crate::devtools::{render_devtools_panel, DevToolsState, DevToolsTab};
+use crate::devtools::{
+    hit_test_devtools, render_devtools_panel, DevToolsClickTarget, DevToolsState, DevToolsTab,
+    DockSide,
+};
 use crate::shields_panel::render_shields_flyout;
 use crate::tab::{Tab, TabManager};
 
@@ -430,28 +433,69 @@ impl AeroBrowser {
         }
 
         // 2. DevTools click test if open
-        let devtools_h = if self.devtools.is_open { 180 } else { 0 };
+        let devtools_h = if self.devtools.is_open { self.devtools.panel_height } else { 0 };
         let devtools_y = h - devtools_h;
 
         if self.devtools.is_open && y >= devtools_y {
-            if y < devtools_y + 28 {
-                // DevTools header tabs
-                let tabs = [
-                    ("Elements", DevToolsTab::Elements),
-                    ("Console", DevToolsTab::Console),
-                    ("Network", DevToolsTab::Network),
-                    ("Shields", DevToolsTab::Shields),
-                ];
-                let mut tab_x = 12;
-                for (_, tab_enum) in &tabs {
-                    if x >= tab_x && x < tab_x + 65 {
-                        self.devtools.active_tab = *tab_enum;
-                        return true;
+            let target = hit_test_devtools(x, y, 0, devtools_y, width as i32, devtools_h, &self.devtools);
+            match target {
+                DevToolsClickTarget::SelectTab(tab) => {
+                    self.devtools.active_tab = tab;
+                    self.devtools.show_more_options = false;
+                    return true;
+                }
+                DevToolsClickTarget::ToggleInspectElement => {
+                    self.devtools.inspect_element_mode = !self.devtools.inspect_element_mode;
+                    return true;
+                }
+                DevToolsClickTarget::ToggleResponsive => {
+                    self.devtools.responsive_mode = !self.devtools.responsive_mode;
+                    return true;
+                }
+                DevToolsClickTarget::ToggleMoreOptions => {
+                    self.devtools.show_more_options = !self.devtools.show_more_options;
+                    return true;
+                }
+                DevToolsClickTarget::CloseDevTools => {
+                    self.devtools.is_open = false;
+                    self.devtools.show_more_options = false;
+                    return true;
+                }
+                DevToolsClickTarget::SetDockSide(dock) => {
+                    self.devtools.dock_side = dock;
+                    self.devtools.show_more_options = false;
+                    return true;
+                }
+                DevToolsClickTarget::SetNetworkFilter(filter) => {
+                    self.devtools.network_type_filter = filter;
+                    return true;
+                }
+                DevToolsClickTarget::SetMemoryProfileType(idx) => {
+                    self.devtools.memory_profiling_type = idx;
+                    return true;
+                }
+                DevToolsClickTarget::SetAppSelectedItem(item) => {
+                    self.devtools.app_selected_item = item;
+                    return true;
+                }
+                DevToolsClickTarget::ToggleRecord => {
+                    if self.devtools.active_tab == DevToolsTab::Network {
+                        self.devtools.network_recording = !self.devtools.network_recording;
+                    } else if self.devtools.active_tab == DevToolsTab::Performance {
+                        self.devtools.perf_recording = !self.devtools.perf_recording;
                     }
-                    tab_x += 70;
+                    return true;
+                }
+                DevToolsClickTarget::ClearData | DevToolsClickTarget::TakeSnapshot => {
+                    return true;
+                }
+                DevToolsClickTarget::None => {
+                    if self.devtools.show_more_options {
+                        self.devtools.show_more_options = false;
+                    }
+                    return true;
                 }
             }
-            return true;
         }
 
         // 3. Browser Chrome click targets (Tabs, Omnibox, Navigation, Bookmarks)
@@ -1032,7 +1076,7 @@ impl AeroBrowser {
 
         // 2. Compute Viewport dimensions
         let chrome_h = TOTAL_CHROME_HEIGHT as usize;
-        let devtools_h = if self.devtools.is_open { 180 } else { 0 };
+        let devtools_h = if self.devtools.is_open { self.devtools.panel_height as usize } else { 0 };
         let vp_h = height.saturating_sub(chrome_h + devtools_h);
 
         if vp_h > 0 {

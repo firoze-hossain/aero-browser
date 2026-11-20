@@ -72,6 +72,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut open_menu = false;
     let mut open_more_tools = false;
     let mut open_devtools = false;
+    let mut open_devtools_tab: Option<String> = None;
+    let mut open_devtools_options = false;
     let mut open_bookmark_name: Option<String> = None;
 
     let mut i = 1;
@@ -107,6 +109,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             "--open-devtools" => {
                 open_devtools = true;
+            }
+            "--open-devtools-tab" => {
+                if i + 1 < args.len() {
+                    i += 1;
+                    open_devtools_tab = Some(args[i].clone());
+                }
+            }
+            "--open-devtools-options" => {
+                open_devtools_options = true;
             }
             "--open-bookmark" => {
                 if i + 1 < args.len() {
@@ -145,6 +156,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     if open_devtools {
         browser.devtools.is_open = true;
+    }
+    if let Some(ref tab_str) = open_devtools_tab {
+        browser.devtools.is_open = true;
+        match tab_str.to_lowercase().as_str() {
+            "elements" => browser.devtools.active_tab = aero_ui::DevToolsTab::Elements,
+            "console" => browser.devtools.active_tab = aero_ui::DevToolsTab::Console,
+            "sources" => browser.devtools.active_tab = aero_ui::DevToolsTab::Sources,
+            "network" => browser.devtools.active_tab = aero_ui::DevToolsTab::Network,
+            "performance" => browser.devtools.active_tab = aero_ui::DevToolsTab::Performance,
+            "memory" => browser.devtools.active_tab = aero_ui::DevToolsTab::Memory,
+            "application" => browser.devtools.active_tab = aero_ui::DevToolsTab::Application,
+            "shields" => browser.devtools.active_tab = aero_ui::DevToolsTab::Shields,
+            "lighthouse" => browser.devtools.active_tab = aero_ui::DevToolsTab::Lighthouse,
+            _ => {}
+        }
+    }
+    if open_devtools_options {
+        browser.devtools.is_open = true;
+        browser.devtools.show_more_options = true;
     }
     if let Some(ref bm_name) = open_bookmark_name {
         if let Some(idx) = browser.bookmarks.items.iter().position(|b| b.title().contains(bm_name)) {

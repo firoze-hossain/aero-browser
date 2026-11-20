@@ -321,4 +321,74 @@ mod tests {
         assert!(browser.active_tab().html_source.contains("About Aero Browser"));
         assert!(browser.active_tab().html_source.contains("Multi-Paradigm Engine Architecture"));
     }
+
+    #[test]
+    fn test_devtools_panels_and_tab_switching() {
+        let mut browser = AeroBrowser::new();
+        assert!(!browser.devtools.is_open);
+
+        // Open DevTools
+        browser.devtools.is_open = true;
+        assert_eq!(browser.devtools.active_tab, DevToolsTab::Elements);
+
+        let devtools_y = 720 - browser.devtools.panel_height;
+
+        // Click on Console tab (x: ~140, y: devtools_y + 12)
+        // Tabs: Elements (58..136), Console (136..206), Sources (206..276), Network (276..346), Performance (346..438), Memory (438..508), Application (508..600)
+        let clicked = browser.handle_click(160, devtools_y + 12, 1024, 720);
+        assert!(clicked);
+        assert_eq!(browser.devtools.active_tab, DevToolsTab::Console);
+
+        // Click on Network tab
+        let clicked = browser.handle_click(300, devtools_y + 12, 1024, 720);
+        assert!(clicked);
+        assert_eq!(browser.devtools.active_tab, DevToolsTab::Network);
+
+        // Click on Performance tab
+        let clicked = browser.handle_click(380, devtools_y + 12, 1024, 720);
+        assert!(clicked);
+        assert_eq!(browser.devtools.active_tab, DevToolsTab::Performance);
+
+        // Click on Memory tab
+        let clicked = browser.handle_click(470, devtools_y + 12, 1024, 720);
+        assert!(clicked);
+        assert_eq!(browser.devtools.active_tab, DevToolsTab::Memory);
+
+        // Click on Application tab
+        let clicked = browser.handle_click(550, devtools_y + 12, 1024, 720);
+        assert!(clicked);
+        assert_eq!(browser.devtools.active_tab, DevToolsTab::Application);
+
+        // Render full frame with Application tab open
+        let mut surface = vec![0u32; 1024 * 720];
+        browser.render(&mut surface, 1024, 720);
+        let non_zero = surface.iter().filter(|&&p| p != 0).count();
+        assert!(non_zero > 100_000);
+    }
+
+    #[test]
+    fn test_devtools_options_popup_and_docking() {
+        let mut browser = AeroBrowser::new();
+        browser.devtools.is_open = true;
+
+        // Open more options popup
+        let devtools_y = 720 - browser.devtools.panel_height;
+        let right_x = 1024 - 120;
+        let clicked = browser.handle_click(right_x + 18, devtools_y + 12, 1024, 720);
+        assert!(clicked);
+        assert!(browser.devtools.show_more_options);
+
+        // Click dock side: Left (pop_x + 105 + 30)
+        let pop_x = 1024 - 240;
+        let pop_y = devtools_y + 28 + 2;
+        let clicked = browser.handle_click(pop_x + 140, pop_y + 15, 1024, 720);
+        assert!(clicked);
+        assert_eq!(browser.devtools.dock_side, devtools::DockSide::Left);
+        assert!(!browser.devtools.show_more_options);
+
+        // Close DevTools button
+        let clicked_close = browser.handle_click(right_x + 40, devtools_y + 12, 1024, 720);
+        assert!(clicked_close);
+        assert!(!browser.devtools.is_open);
+    }
 }
