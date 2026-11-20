@@ -116,6 +116,44 @@ impl Tab {
         self.reader_mode = !self.reader_mode;
     }
 
+    #[cfg(feature = "std")]
+    fn fetch_live_web(url: &str) -> Option<(String, String)> {
+        let mut target = url.to_owned();
+        if !target.starts_with("http://") && !target.starts_with("https://") {
+            target = format!("https://{}", target);
+        }
+
+        let resp = minreq::get(&target)
+            .with_timeout(5)
+            .with_header("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) Aero/1.0.0 (Pure-Rust Engine; Brave Shields)")
+            .send()
+            .ok()?;
+
+        if resp.status_code >= 200 && resp.status_code < 400 {
+            let body = resp.as_str().ok()?.to_owned();
+            let title = Self::extract_title_from_html(&body).unwrap_or_else(|| {
+                Url::parse(&target).map(|u| u.host).unwrap_or_else(|| "Aero Web".to_owned())
+            });
+            Some((title, body))
+        } else {
+            None
+        }
+    }
+
+    #[cfg(feature = "std")]
+    fn extract_title_from_html(html: &str) -> Option<String> {
+        let lower = html.to_lowercase();
+        let start_tag = "<title>";
+        let end_tag = "</title>";
+        if let Some(start_idx) = lower.find(start_tag) {
+            if let Some(end_idx) = lower[start_idx..].find(end_tag) {
+                let raw_title = &html[start_idx + start_tag.len()..start_idx + end_idx];
+                return Some(raw_title.trim().to_owned());
+            }
+        }
+        None
+    }
+
     fn load_page(url_str: &str, stats: &ShieldStats) -> (String, String) {
         let trimmed = url_str.trim();
 
@@ -125,6 +163,21 @@ impl Tab {
             ("Aero Shields".to_owned(), InternalPages::shields_page(stats))
         } else if trimmed == "about:version" {
             ("About Aero".to_owned(), InternalPages::version_page())
+        } else if trimmed.contains("youtube.com") || trimmed.contains("youtube") {
+            ("YouTube".to_owned(), InternalPages::youtube_portal())
+        } else if trimmed.contains("github.com") || trimmed.contains("github") {
+            ("firoze-hossain / novaos · GitHub".to_owned(), InternalPages::github_portal())
+        } else if trimmed.contains("wikipedia.org") || trimmed.contains("wikipedia") {
+            ("Operating system - Wikipedia".to_owned(), InternalPages::wikipedia_portal())
+        } else if trimmed.contains("duckduckgo.com") || trimmed.contains("duckduckgo") {
+            ("DuckDuckGo — Privacy, simplified.".to_owned(), InternalPages::duckduckgo_portal("NovaOS and Aero Browser"))
+        } else if trimmed.contains("news.ycombinator.com") || trimmed.contains("hackernews") {
+            ("Hacker News".to_owned(), InternalPages::hackernews_portal())
+        } else if trimmed.starts_with("https://search.") || trimmed.contains("search?q=") {
+            let q = trimmed.split("search?q=").nth(1)
+                .or_else(|| trimmed.split("?q=").nth(1))
+                .unwrap_or("Web Search");
+            ("Search Results - Aero".to_owned(), InternalPages::duckduckgo_portal(q))
         } else if trimmed.contains("novaos.org") || trimmed.contains("nova") {
             (
                 "NovaOS - The Modern Rust Operating System".to_owned(),
@@ -180,40 +233,21 @@ h1 { color: #f97316; }
 </html>".to_owned()
             )
         } else {
-            // Default rendered view for arbitrary URLs
+            // Attempt live network fetch via HTTP/HTTPS if running with std
+            #[cfg(feature = "std")]
+            {
+                if let Some((live_title, live_html)) = Self::fetch_live_web(trimmed) {
+                    return (live_title, live_html);
+                }
+            }
+
+            // Fallback for offline, unreachable hosts or bare-metal environment
             let title = if let Some(url) = Url::parse(trimmed) {
                 format!("{} - Aero Browser", url.host)
             } else {
-                "Aero Browser".to_owned()
+                "Unable to Connect - Aero".to_owned()
             };
-
-            let html = format!(
-                "<!DOCTYPE html>
-<html>
-<head>
-<title>{}</title>
-<style>
-body {{ background-color: #0f172a; color: #f1f5f9; padding: 32px; font-family: sans-serif; }}
-.container {{ max-width: 760px; margin: 0 auto; }}
-h1 {{ color: #38bdf8; margin-bottom: 8px; }}
-.card {{ background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 20px; margin-top: 16px; }}
-</style>
-</head>
-<body>
-<div class=\"container\">
-    <h1>{}</h1>
-    <p>Connected securely via Aero Pure-Rust Engine.</p>
-    <div class=\"card\">
-        <h3>Page Content</h3>
-        <p>You are viewing: <b>{}</b></p>
-        <p>Aero Shields are actively protecting your privacy and blocking malicious tracking scripts.</p>
-    </div>
-</div>
-</body>
-</html>",
-                title, title, trimmed
-            );
-            (title, html)
+            (title, InternalPages::error_page(trimmed, "Could not establish a connection to this server. Ensure the web address is correct or verify network connectivity."))
         }
     }
 }

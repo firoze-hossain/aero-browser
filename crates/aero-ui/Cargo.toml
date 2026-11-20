@@ -9,7 +9,8 @@ repository = "https://github.com/firoze-hossain/aero-browser"
 
 [features]
 default = ["std"]
-std = ["aero-engine/std"]
+std = ["aero-engine/std", "dep:minreq"]
 
 [dependencies]
 aero-engine = { path = "../aero-engine", default-features = false }
+minreq = { version = "3.0", features = ["https-rustls"], optional = true }

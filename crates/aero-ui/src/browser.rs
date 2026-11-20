@@ -244,6 +244,51 @@ impl AeroBrowser {
             ChromeClickTarget::None => {
                 // Click was in viewport
                 self.omnibox_focused = false;
+                let active_url = self.active_tab().url.clone();
+                if active_url == "about:newtab" || active_url.is_empty() {
+                    let dash_x = (width as i32 - 860).max(0) / 2;
+                    let search_x = dash_x + (860 - 600) / 2;
+
+                    // Click on Search Box -> focus & clear Omnibox
+                    if x >= search_x && x < search_x + 600 && y >= 170 && y <= 220 {
+                        self.omnibox_focused = true;
+                        self.omnibox_text.clear();
+                        return true;
+                    }
+
+                    // Click on Quick Dial Tiles
+                    if y >= 250 && y <= 315 {
+                        // Row 1
+                        if x >= dash_x + 10 && x < dash_x + 200 {
+                            self.navigate("https://youtube.com");
+                            return true;
+                        } else if x >= dash_x + 205 && x < dash_x + 400 {
+                            self.navigate("https://github.com");
+                            return true;
+                        } else if x >= dash_x + 405 && x < dash_x + 600 {
+                            self.navigate("https://wikipedia.org");
+                            return true;
+                        } else if x >= dash_x + 605 && x < dash_x + 800 {
+                            self.navigate("https://duckduckgo.com");
+                            return true;
+                        }
+                    } else if y >= 320 && y <= 390 {
+                        // Row 2
+                        if x >= dash_x + 10 && x < dash_x + 200 {
+                            self.navigate("https://news.ycombinator.com");
+                            return true;
+                        } else if x >= dash_x + 205 && x < dash_x + 400 {
+                            self.navigate("https://novaos.org");
+                            return true;
+                        } else if x >= dash_x + 405 && x < dash_x + 600 {
+                            self.navigate("https://rust-lang.org");
+                            return true;
+                        } else if x >= dash_x + 605 && x < dash_x + 800 {
+                            self.navigate("about:shields");
+                            return true;
+                        }
+                    }
+                }
                 false
             }
         }
