@@ -181,15 +181,30 @@ impl<'a> LayoutBox<'a> {
                 let (tw, th) = crate::font::measure_text(text.trim(), font_size);
                 self.dimensions.content.width = tw;
                 self.dimensions.content.height = th;
+                let is_center = s.lookup("text-align", "left") == crate::css::Value::Keyword("center".to_owned());
+                if is_center && containing_block.content.width > tw {
+                    let offset_x = (containing_block.content.width - tw) / 2.0;
+                    self.dimensions.content.x = containing_block.content.x + offset_x;
+                }
                 return;
             }
+        }
+
+        let mut explicit_width = 0.0f32;
+        if let Some(s) = style {
+            if let Some(w) = s.value("width") {
+                explicit_width = w.to_px();
+            }
+        }
+        if explicit_width > 0.0 {
+            self.dimensions.content.width = explicit_width;
         }
 
         let has_block_children = self.children.iter().any(|c| matches!(c.box_type, BoxType::BlockNode(_)));
         if has_block_children {
             // Stack block children vertically inside this inline-block container
             let mut cur_y = self.dimensions.content.y;
-            let mut max_w = 0.0f32;
+            let mut max_w = explicit_width;
             for child in &mut self.children {
                 let mut child_cb = self.dimensions;
                 child_cb.content.x = self.dimensions.content.x;
@@ -380,8 +395,10 @@ impl<'a> LayoutBox<'a> {
                     cur_x = self.dimensions.content.x;
                     cur_y += row_h + 8.0;
                     row_h = mb.height;
-                    child.dimensions.content.x = cur_x;
-                    child.dimensions.content.y = cur_y;
+                    let mut child_cb = self.dimensions;
+                    child_cb.content.x = cur_x;
+                    child_cb.content.y = cur_y;
+                    child.layout(child_cb);
                 }
                 cur_x += mb.width + 12.0;
             } else {
