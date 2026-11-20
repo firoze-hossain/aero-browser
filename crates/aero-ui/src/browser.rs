@@ -22,9 +22,10 @@ use aero_engine::net::Url;
 use aero_engine::render_html_to_surface;
 use aero_engine::shields::ShieldEngine;
 
-use crate::bookmarks::BookmarkManager;
+use crate::bookmarks::{BookmarkItem, BookmarkManager};
 use crate::chrome::{
-    hit_test_chrome, render_chrome, ChromeClickTarget, BOOKMARKS_HEIGHT, NAVBAR_HEIGHT,
+    hit_test_chrome, render_bookmark_folder_dropdown, render_chrome, render_main_toggle_menu,
+    render_more_tools_submenu, ChromeClickTarget, BOOKMARKS_HEIGHT, NAVBAR_HEIGHT,
     TAB_STRIP_HEIGHT, TOTAL_CHROME_HEIGHT,
 };
 use crate::devtools::{render_devtools_panel, DevToolsState, DevToolsTab};
@@ -38,6 +39,9 @@ pub struct AeroBrowser {
     pub shields: ShieldEngine,
     pub devtools: DevToolsState,
     pub show_shields_flyout: bool,
+    pub show_main_menu: bool,
+    pub show_more_tools_submenu: bool,
+    pub open_bookmark_folder: Option<usize>,
     pub omnibox_text: String,
     pub omnibox_focused: bool,
     pub cached_dom: Option<Node>,
@@ -67,6 +71,9 @@ impl AeroBrowser {
             shields,
             devtools,
             show_shields_flyout: false,
+            show_main_menu: false,
+            show_more_tools_submenu: false,
+            open_bookmark_folder: None,
             omnibox_text,
             omnibox_focused: false,
             cached_dom: None,
@@ -220,7 +227,182 @@ impl AeroBrowser {
         let w = width as i32;
         let h = height as i32;
 
-        // 1. If Shields Flyout is open, hit-test against it first
+        // 1. More Tools Submenu Click Handling (if open) - Image 5
+        if self.show_more_tools_submenu {
+            let sub_w = 260;
+            let sub_h = 330;
+            let main_menu_w = 350;
+            let menu_x = w - main_menu_w - 12;
+            let sub_x = menu_x - sub_w - 4;
+            let sub_y = TOTAL_CHROME_HEIGHT + 236;
+
+            if x >= sub_x && x < sub_x + sub_w && y >= sub_y && y < sub_y + sub_h {
+                let rel_y = y - sub_y - 8;
+                if rel_y >= 55 && rel_y < 79 {
+                    // Sync
+                    self.navigate("about:settings?category=sync");
+                    self.show_main_menu = false;
+                    self.show_more_tools_submenu = false;
+                    return true;
+                } else if rel_y >= 237 && rel_y < 261 {
+                    // Developer tools (Ctrl+Shift+I)
+                    self.devtools.is_open = !self.devtools.is_open;
+                    self.show_main_menu = false;
+                    self.show_more_tools_submenu = false;
+                    return true;
+                } else if rel_y >= 261 && rel_y < 285 {
+                    // Task manager (Shift+Esc)
+                    self.navigate("about:shields");
+                    self.show_main_menu = false;
+                    self.show_more_tools_submenu = false;
+                    return true;
+                }
+                return true;
+            } else {
+                self.show_more_tools_submenu = false;
+            }
+        }
+
+        // 2. Main Menu Click Handling (if open) - Image 3
+        if self.show_main_menu {
+            let menu_w = 350;
+            let menu_h = 574;
+            let menu_x = w - menu_w - 12;
+            let menu_y = TOTAL_CHROME_HEIGHT - 4;
+
+            if x >= menu_x && x < menu_x + menu_w && y >= menu_y && y < menu_y + menu_h {
+                let rel_y = y - menu_y - 8;
+                if rel_y >= 0 && rel_y < 24 {
+                    // New tab
+                    self.new_tab("about:newtab");
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 24 && rel_y < 72 {
+                    // New window / private
+                    self.new_tab("about:newtab");
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 103 && rel_y < 127 {
+                    // Leo AI
+                    self.navigate("https://search.brave.com/ai");
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 127 && rel_y < 151 {
+                    // Wallet
+                    self.navigate("about:settings?category=web3");
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 189 && rel_y < 213 {
+                    // Passwords
+                    self.navigate("about:settings?category=autofill");
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 213 && rel_y < 237 {
+                    // History
+                    self.navigate("about:history");
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 237 && rel_y < 261 {
+                    // Bookmarks and lists
+                    self.open_bookmark_folder = Some(self.bookmarks.items.len().saturating_sub(1));
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 261 && rel_y < 285 {
+                    // Downloads
+                    self.navigate("about:downloads");
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 285 && rel_y < 309 {
+                    // Extensions
+                    self.navigate("about:settings?category=extensions");
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 309 && rel_y < 333 {
+                    // Delete browsing data
+                    self.navigate("about:settings?category=privacy");
+                    self.show_main_menu = false;
+                    return true;
+                } else if rel_y >= 443 && rel_y < 467 {
+                    // More tools >
+                    self.show_more_tools_submenu = !self.show_more_tools_submenu;
+                    return true;
+                } else if rel_y >= 498 && rel_y < 522 {
+                    // Settings
+                    self.navigate("about:settings");
+                    self.show_main_menu = false;
+                    self.show_more_tools_submenu = false;
+                    return true;
+                } else if rel_y >= 522 && rel_y < 546 {
+                    // Exit
+                    self.show_main_menu = false;
+                    return true;
+                }
+                return true;
+            } else {
+                self.show_main_menu = false;
+                self.show_more_tools_submenu = false;
+            }
+        }
+
+        // 3. Bookmark Folder Dropdown Popover Click Handling (if open) - Image 2
+        if let Some(folder_idx) = self.open_bookmark_folder {
+            if folder_idx < self.bookmarks.items.len() {
+                let mut fx = 12;
+                for (i, bm) in self.bookmarks.items.iter().enumerate() {
+                    if i == folder_idx {
+                        break;
+                    }
+                    fx += (bm.title().len() * 8) as i32 + 28;
+                }
+                if folder_idx == self.bookmarks.items.len() - 1 {
+                    fx = (w - 120).max(10);
+                }
+
+                let dd_w = 320;
+                let dd_x = fx.min(w - dd_w - 8).max(8);
+                let dd_y = TOTAL_CHROME_HEIGHT;
+                let folder_item = &self.bookmarks.items[folder_idx];
+
+                if let Some(children) = folder_item.children() {
+                    let item_h = 30;
+                    let dd_h = (children.len() as i32 * item_h) + 12;
+
+                    if x >= dd_x && x < dd_x + dd_w && y >= dd_y && y < dd_y + dd_h {
+                        let clicked_idx = ((y - dd_y - 6) / item_h) as usize;
+                        if clicked_idx < children.len() {
+                            let child = &children[clicked_idx];
+                            let target_opt = child.url().map(|u| u.to_owned());
+                            let folder_title = if child.is_folder() {
+                                Some(child.title().to_owned())
+                            } else {
+                                None
+                            };
+
+                            self.open_bookmark_folder = None;
+
+                            if let Some(target_url) = target_opt {
+                                self.navigate(&target_url);
+                                return true;
+                            } else if let Some(title) = folder_title {
+                                if title == "novaos" {
+                                    self.navigate("https://github.com/firoze-hossain/novaos");
+                                } else if title == "roze" {
+                                    self.navigate("https://github.com/firoze-hossain/roze");
+                                } else if title == "stratosdb" {
+                                    self.navigate("https://github.com/firoze-hossain/stratosdb");
+                                }
+                                return true;
+                            }
+                        }
+                        return true;
+                    } else {
+                        self.open_bookmark_folder = None;
+                    }
+                }
+            }
+        }
+
+        // 4. If Shields Flyout is open, hit-test against it first
         if self.show_shields_flyout {
             let panel_w = 320;
             let panel_h = 290;
@@ -332,8 +514,31 @@ impl AeroBrowser {
                 self.devtools.is_open = !self.devtools.is_open;
                 true
             }
+            ChromeClickTarget::ToggleMainMenu => {
+                self.show_main_menu = !self.show_main_menu;
+                if !self.show_main_menu {
+                    self.show_more_tools_submenu = false;
+                }
+                self.open_bookmark_folder = None;
+                self.show_shields_flyout = false;
+                true
+            }
+            ChromeClickTarget::BookmarkFolderClick(idx) => {
+                self.open_bookmark_folder = if self.open_bookmark_folder == Some(idx) {
+                    None
+                } else {
+                    Some(idx)
+                };
+                self.show_main_menu = false;
+                self.show_more_tools_submenu = false;
+                self.show_shields_flyout = false;
+                true
+            }
             ChromeClickTarget::BookmarkClick(url) => {
                 self.navigate(&url);
+                self.open_bookmark_folder = None;
+                self.show_main_menu = false;
+                self.show_more_tools_submenu = false;
                 self.omnibox_focused = false;
                 true
             }
@@ -341,6 +546,38 @@ impl AeroBrowser {
                 // Click was in viewport
                 self.omnibox_focused = false;
                 let active_url = self.active_tab().url.clone();
+
+                // Interactive Settings Page Navigation (Image 4)
+                if active_url.starts_with("about:settings") || active_url.starts_with("brave://settings") {
+                    let vy = y - TOTAL_CHROME_HEIGHT;
+                    if x >= 20 && x <= 270 && vy >= 56 && vy <= 56 + (17 * 32) {
+                        let cat_idx = ((vy - 56) / 32) as usize;
+                        let categories = [
+                            "get-started",
+                            "appearance",
+                            "content",
+                            "shields",
+                            "privacy",
+                            "web3",
+                            "leo",
+                            "sync",
+                            "search-engine",
+                            "extensions",
+                            "autofill",
+                            "languages",
+                            "downloads",
+                            "accessibility",
+                            "system",
+                            "reset",
+                            "about",
+                        ];
+                        if cat_idx < categories.len() {
+                            let slug = categories[cat_idx];
+                            self.navigate(&format!("about:settings?category={}", slug));
+                            return true;
+                        }
+                    }
+                }
                 if active_url == "about:newtab" || active_url.is_empty() {
                     let box_x = (width as i32 - 640).max(0) / 2;
                     let search_x = box_x + (640 - 580) / 2;
@@ -715,6 +952,26 @@ impl AeroBrowser {
                 }
             }
         } else {
+            // Escape dismisses any open menu, submenu, dropdown, or shields flyout
+            if key_code == 27 {
+                if self.show_more_tools_submenu {
+                    self.show_more_tools_submenu = false;
+                    return true;
+                }
+                if self.show_main_menu {
+                    self.show_main_menu = false;
+                    return true;
+                }
+                if self.open_bookmark_folder.is_some() {
+                    self.open_bookmark_folder = None;
+                    return true;
+                }
+                if self.show_shields_flyout {
+                    self.show_shields_flyout = false;
+                    return true;
+                }
+            }
+
             // Viewport scrolling hotkeys
             match key_code {
                 38 | b'k' => {
@@ -766,6 +1023,8 @@ impl AeroBrowser {
             &self.tab_mgr,
             &self.bookmarks,
             self.show_shields_flyout,
+            self.show_main_menu,
+            self.open_bookmark_folder,
             self.shields.stats.trackers_blocked,
             &self.omnibox_text,
             self.omnibox_focused,
@@ -827,6 +1086,33 @@ impl AeroBrowser {
             let py = TOTAL_CHROME_HEIGHT + 2;
 
             render_shields_flyout(surface, width, height, px, py, &domain, &self.shields);
+        }
+
+        // 5. Render Bookmark Folder Dropdown Popover if active (Image 2)
+        if let Some(folder_idx) = self.open_bookmark_folder {
+            if folder_idx < self.bookmarks.items.len() {
+                let mut fx = 12;
+                for (i, bm) in self.bookmarks.items.iter().enumerate() {
+                    if i == folder_idx {
+                        break;
+                    }
+                    fx += (bm.title().len() * 8) as i32 + 28;
+                }
+                if folder_idx == self.bookmarks.items.len() - 1 {
+                    fx = (width as i32 - 120).max(10);
+                }
+                render_bookmark_folder_dropdown(surface, width, height, fx, &self.bookmarks.items[folder_idx]);
+            }
+        }
+
+        // 6. Render Main Hamburger Toggle Menu if active (Image 3)
+        if self.show_main_menu {
+            render_main_toggle_menu(surface, width, height, self.show_more_tools_submenu);
+        }
+
+        // 7. Render "More tools >" secondary flyout submenu if active (Image 5)
+        if self.show_more_tools_submenu {
+            render_more_tools_submenu(surface, width, height);
         }
     }
 }

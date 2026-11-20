@@ -1027,6 +1027,342 @@ p {{ color: #94a3b8; font-size: 14px; line-height: 1.5; }}
         )
     }
 
+    /// Generates the authentic Brave/Chrome/Firefox styled browser Settings page.
+    pub fn settings_page(category: &str, stats: &ShieldStats) -> String {
+        let cat = if category.is_empty() { "get-started" } else { category };
+
+        let content_html = match cat {
+            "appearance" => {
+                "<div class=\"content-title\">Appearance</div>
+                <div class=\"settings-card\">
+                    <div class=\"card-head\">Aero Theme & Colors</div>
+                    <div class=\"card-sub\">Select browser theme appearance. Automatically adapts to NovaOS system window theme.</div>
+                    <div class=\"radio-choice\"><span class=\"radio-dot-active\">●</span> Aero Dark Nova (Default)</div>
+                    <div class=\"radio-choice\"><span class=\"radio-dot\">○</span> Light Clean Mode</div>
+                    <div class=\"radio-choice\"><span class=\"radio-dot\">○</span> Match NovaOS System Theme</div>
+                </div>
+                <div class=\"settings-card\">
+                    <div class=\"card-head\">Toolbars & Navigation</div>
+                    <div class=\"menu-item-row\"><span class=\"item-label\">Always show Bookmarks bar</span><span class=\"item-arrow\">[ON]</span></div>
+                    <div class=\"menu-item-row\"><span class=\"item-label\">Show Home button</span><span class=\"item-arrow\">[ON]</span></div>
+                    <div class=\"menu-item-row\"><span class=\"item-label\">Show Leo AI and Wallet shortcuts in Chrome</span><span class=\"item-arrow\">[ON]</span></div>
+                </div>
+                <div class=\"settings-card\">
+                    <div class=\"card-head\">Typography & Zoom</div>
+                    <div class=\"menu-item-row\"><span class=\"item-label\">Font size</span><span class=\"item-arrow\">Medium (14px) ▾</span></div>
+                    <div class=\"menu-item-row\"><span class=\"item-label\">Page zoom default</span><span class=\"item-arrow\">100% ▾</span></div>
+                </div>".to_owned()
+            }
+            "shields" => {
+                format!(
+                    "<div class=\"content-title\">Shields & Privacy Protection</div>
+                    <div class=\"settings-card\">
+                        <div class=\"card-head\">Aero Brave Shields Engine</div>
+                        <div class=\"card-sub\">Blocks trackers, intrusive video ads, and third-party tracking cookies across all web tabs.</div>
+                        <div class=\"menu-item-row\"><span class=\"item-label\">Trackers & ads blocking</span><span class=\"item-arrow\">Aggressive (Shields Up) ▾</span></div>
+                        <div class=\"menu-item-row\"><span class=\"item-label\">Upgrade connections to HTTPS</span><span class=\"item-arrow\">[ON]</span></div>
+                        <div class=\"menu-item-row\"><span class=\"item-label\">Block third-party tracking cookies</span><span class=\"item-arrow\">[ON]</span></div>
+                        <div class=\"menu-item-row\"><span class=\"item-label\">Block fingerprinting scripts</span><span class=\"item-arrow\">Strict ▾</span></div>
+                    </div>
+                    <div class=\"settings-card\">
+                        <div class=\"card-head\">Live Telemetry Statistics</div>
+                        <p style=\"font-size: 13px; color: #94a3b8;\">Trackers Blocked: <b style=\"color: #ff5500;\">{}</b> | HTTPS Upgrades: <b style=\"color: #22c55e;\">{}</b> | Data Saved: <b style=\"color: #38bdf8;\">{}</b></p>
+                    </div>",
+                    stats.trackers_blocked,
+                    stats.https_upgrades,
+                    stats.bandwidth_saved_string(),
+                )
+            }
+            "about" | "about-aero" => {
+                "<div class=\"content-title\">About Aero Browser</div>
+                <div class=\"settings-card\">
+                    <div class=\"card-head\">Aero Browser 1.4.0 (Official Build)</div>
+                    <div class=\"card-sub\">Fast, Private, Pure-Rust Multi-Engine Web Navigator engineered for NovaOS and Linux.</div>
+                    <div class=\"btn-secondary\">Check for updates</div>
+                </div>
+                <div class=\"settings-card\">
+                    <div class=\"card-head\">Multi-Paradigm Engine Architecture</div>
+                    <div class=\"card-sub\">Combines the greatest architectural strengths of the top 3 modern web engines into 100% safe pure Rust:</div>
+                    <p style=\"font-size: 13px; color: #cbd5e1;\"><b>• Blink Engine:</b> Fast recursive DOM parser and dynamic node hierarchy.</p>
+                    <p style=\"font-size: 13px; color: #cbd5e1;\"><b>• WebKit Engine:</b> Elegant CSS style cascade, specificity calculation, and typography.</p>
+                    <p style=\"font-size: 13px; color: #cbd5e1;\"><b>• Gecko Engine:</b> Robust box model flow layout, floating stacking, and border-box containment.</p>
+                    <p style=\"font-size: 13px; color: #cbd5e1;\"><b>• Brave Shields:</b> Built-in native ad and tracker blocking sub-engine.</p>
+                    <p style=\"font-size: 13px; color: #38bdf8;\"><b>• Zero C Dependencies:</b> Zero Chromium, zero WebKit, zero Gecko C++ dependencies.</p>
+                </div>".to_owned()
+            }
+            _ => {
+                // "get-started" (Image 4 exact layout)
+                "<div class=\"content-title\">Get started</div>
+                <div class=\"settings-card\">
+                    <div class=\"card-head\">Sync your settings across devices</div>
+                    <div class=\"card-sub\">Aero Sync allows you to safely and privately sync your bookmarks, passwords, and history between your computers and mobile devices.</div>
+                    <div class=\"btn-primary\">Start using sync</div>
+                </div>
+                <div class=\"settings-card\">
+                    <div class=\"profile-row\">
+                        <div class=\"avatar-badge\">[U]</div>
+                        <div class=\"profile-title\">Profile 1</div>
+                    </div>
+                    <div class=\"menu-item-row\"><span class=\"item-label\">Customise your profile name and icon</span><span class=\"item-arrow\">&gt;</span></div>
+                    <div class=\"menu-item-row\"><span class=\"item-label\">Import bookmarks and settings</span><span class=\"item-arrow\">&gt;</span></div>
+                </div>
+                <div class=\"settings-card\">
+                    <div style=\"float: right; margin-top: 4px;\"><div class=\"btn-secondary\">Make default</div></div>
+                    <div class=\"card-head\">Make Aero default browser</div>
+                    <div class=\"card-sub\">Aero is currently set as your default web browser on NovaOS.</div>
+                </div>
+                <div class=\"settings-card\">
+                    <div class=\"card-head\">On startup</div>
+                    <div class=\"radio-choice\"><span class=\"radio-dot-active\">●</span> Open the New Tab page</div>
+                    <div class=\"radio-choice\"><span class=\"radio-dot\">○</span> Continue where you left off</div>
+                    <div class=\"radio-choice\"><span class=\"radio-dot\">○</span> Open a specific page or set of pages</div>
+                </div>
+                <div class=\"settings-card\">
+                    <div class=\"menu-item-row\"><span class=\"item-label\">New tab page shows</span><span class=\"item-arrow\">Dashboard ▾</span></div>
+                    <div class=\"menu-item-row\"><span class=\"item-label\">Customise dashboard settings and add widgets</span><span class=\"item-arrow\">&gt;</span></div>
+                </div>".to_owned()
+            }
+        };
+
+        let nav_active = |target: &str| {
+            if cat == target || (cat == "get-started" && target == "get-started") {
+                "nav-link nav-link-active"
+            } else {
+                "nav-link"
+            }
+        };
+
+        format!(
+            "<!DOCTYPE html>
+<html>
+<head>
+<title>Settings</title>
+<style>
+body {{
+    background-color: #171923;
+    color: #e2e8f0;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}}
+.settings-header {{
+    background-color: #1a1e29;
+    border-bottom: 1px solid #2d3345;
+    padding: 14px 32px;
+    display: block;
+}}
+.header-title {{
+    display: inline-block;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ffffff;
+    width: 220px;
+    vertical-align: middle;
+}}
+.header-search {{
+    display: inline-block;
+    background-color: #12141c;
+    border: 1px solid #2d3345;
+    border-radius: 20px;
+    padding: 8px 18px;
+    width: 380px;
+    color: #94a3b8;
+    font-size: 13px;
+    vertical-align: middle;
+}}
+.settings-layout {{
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    box-sizing: border-box;
+}}
+.settings-nav {{
+    display: inline-block;
+    width: 21%;
+    vertical-align: top;
+    box-sizing: border-box;
+}}
+.nav-link {{
+    display: block;
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #94a3b8;
+}}
+.nav-link-active {{
+    background-color: #2b3245;
+    color: #38bdf8;
+    font-weight: bold;
+}}
+.settings-content {{
+    display: inline-block;
+    width: 76%;
+    margin-left: 2%;
+    vertical-align: top;
+    box-sizing: border-box;
+}}
+.content-title {{
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 18px;
+    display: block;
+}}
+.settings-card {{
+    background-color: #1e2433;
+    border: 1px solid #2d3345;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    display: block;
+}}
+.card-head {{
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 6px;
+    display: block;
+}}
+.card-sub {{
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 14px;
+    display: block;
+    line-height: 18px;
+}}
+.btn-primary {{
+    display: inline-block;
+    background-color: #ff5500;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 8px 18px;
+    border-radius: 6px;
+}}
+.btn-secondary {{
+    display: inline-block;
+    background-color: #2b3245;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 14px;
+    border-radius: 6px;
+}}
+.profile-row {{
+    margin-bottom: 14px;
+    display: block;
+}}
+.avatar-badge {{
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background-color: #3b82f6;
+    color: #ffffff;
+    text-align: center;
+    padding-top: 6px;
+    font-weight: bold;
+    vertical-align: middle;
+    margin-right: 12px;
+}}
+.profile-title {{
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+    vertical-align: middle;
+}}
+.menu-item-row {{
+    padding: 12px 0;
+    border-top: 1px solid #262c3d;
+    display: block;
+}}
+.item-label {{
+    display: inline-block;
+    width: 88%;
+    font-size: 13px;
+    color: #cbd5e1;
+}}
+.item-arrow {{
+    display: inline-block;
+    width: 8%;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: bold;
+    text-align: right;
+}}
+.radio-choice {{
+    padding: 8px 0;
+    display: block;
+    font-size: 13px;
+    color: #cbd5e1;
+}}
+.radio-dot-active {{
+    color: #38bdf8;
+    font-weight: bold;
+    margin-right: 10px;
+}}
+.radio-dot {{
+    color: #64748b;
+    margin-right: 10px;
+}}
+</style>
+</head>
+<body>
+<div class=\"settings-header\">
+    <div class=\"header-title\">Settings</div>
+    <div class=\"header-search\">[Q] Search settings</div>
+</div>
+
+<div class=\"settings-layout\">
+    <div class=\"settings-nav\">
+        <div class=\"{}\">Get started</div>
+        <div class=\"{}\">Appearance</div>
+        <div class=\"{}\">Content</div>
+        <div class=\"{}\">Shields</div>
+        <div class=\"{}\">Privacy and security</div>
+        <div class=\"{}\">Web3</div>
+        <div class=\"{}\">Leo</div>
+        <div class=\"{}\">Sync</div>
+        <div class=\"{}\">Search engine</div>
+        <div class=\"{}\">Extensions</div>
+        <div class=\"{}\">Autofill and passwords</div>
+        <div class=\"{}\">Languages</div>
+        <div class=\"{}\">Downloads</div>
+        <div class=\"{}\">Accessibility</div>
+        <div class=\"{}\">System</div>
+        <div class=\"{}\">Reset settings</div>
+        <div class=\"{}\">About Aero</div>
+    </div>
+    <div class=\"settings-content\">
+        {}
+    </div>
+</div>
+</body>
+</html>",
+            nav_active("get-started"),
+            nav_active("appearance"),
+            nav_active("content"),
+            nav_active("shields"),
+            nav_active("privacy"),
+            nav_active("web3"),
+            nav_active("leo"),
+            nav_active("sync"),
+            nav_active("search-engine"),
+            nav_active("extensions"),
+            nav_active("autofill"),
+            nav_active("languages"),
+            nav_active("downloads"),
+            nav_active("accessibility"),
+            nav_active("system"),
+            nav_active("reset"),
+            nav_active("about"),
+            content_html
+        )
+    }
+
     /// Generates the Brave-inspired Shields Control Panel page.
     pub fn shields_page(stats: &ShieldStats) -> String {
         format!(

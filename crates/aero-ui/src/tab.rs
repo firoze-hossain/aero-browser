@@ -1974,10 +1974,21 @@ body {{
 
         if trimmed == "about:newtab" || trimmed.is_empty() || trimmed == "about:blank" {
             ("New Tab".to_owned(), InternalPages::new_tab(stats))
+        } else if trimmed.starts_with("about:settings") || trimmed.starts_with("brave://settings") {
+            let cat = if let Some(idx) = trimmed.find("category=") {
+                &trimmed[idx + 9..]
+            } else {
+                "get-started"
+            };
+            ("Settings - Aero".to_owned(), InternalPages::settings_page(cat, stats))
+        } else if trimmed == "about:bookmarks" {
+            ("Bookmarks - Aero".to_owned(), InternalPages::settings_page("appearance", stats))
+        } else if trimmed == "about:downloads" {
+            ("Downloads - Aero".to_owned(), InternalPages::settings_page("downloads", stats))
         } else if trimmed == "about:shields" {
             ("Aero Shields".to_owned(), InternalPages::shields_page(stats))
         } else if trimmed == "about:version" {
-            ("About Aero".to_owned(), InternalPages::version_page())
+            ("About Aero".to_owned(), InternalPages::settings_page("about", stats))
         } else if trimmed.contains("youtube.com") || trimmed.contains("youtube") {
             #[cfg(feature = "std")]
             {

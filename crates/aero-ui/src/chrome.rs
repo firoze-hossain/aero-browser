@@ -5,7 +5,9 @@
 //! - Omnibox address bar with live security & TLS lock indicators
 //! - Brave-style interactive Lion Shield button with blocked counter pill
 //! - Firefox-style distraction-free Reader View trigger
-//! - Quick Bookmarks bar and Chrome Developer Tools inspector toggle
+//! - Quick Bookmarks bar with interactive Folder dropdowns (Brave/Chrome style)
+//! - Main hamburger toggle menu [≡] with full browser options (Image 3)
+//! - Secondary "More tools >" flyout popover with Developer Tools (Image 5)
 
 #![allow(unused)]
 
@@ -13,15 +15,15 @@
 extern crate alloc;
 #[cfg(not(feature = "std"))]
 use alloc::{
-    string::{String, ToString},
-    vec::Vec,
     borrow::ToOwned,
     format,
+    string::{String, ToString},
+    vec::Vec,
 };
 
 use aero_engine::css::Color;
 use aero_engine::font::render_text;
-use crate::bookmarks::BookmarkManager;
+use crate::bookmarks::{BookmarkItem, BookmarkManager};
 use crate::tab::{Tab, TabManager};
 
 pub const TAB_STRIP_HEIGHT: i32 = 34;
@@ -43,6 +45,8 @@ pub enum ChromeClickTarget {
     ToggleShields,
     ToggleReader,
     ToggleDevTools,
+    ToggleMainMenu,
+    BookmarkFolderClick(usize),
     BookmarkClick(String),
     None,
 }
@@ -55,6 +59,8 @@ pub fn render_chrome(
     tab_mgr: &TabManager,
     bookmarks: &BookmarkManager,
     shields_open: bool,
+    main_menu_open: bool,
+    open_bookmark_folder: Option<usize>,
     trackers_blocked: u64,
     omnibox_text: &str,
     omnibox_focused: bool,
@@ -117,7 +123,7 @@ pub fn render_chrome(
 
     // Omnibox URL Bar
     let omni_x = 112;
-    let right_actions_w = 230;
+    let right_actions_w = 270;
     let omni_w = (w - omni_x - right_actions_w).max(220);
     let omni_h = 30;
     let omni_y = nav_y + 5;
@@ -175,18 +181,314 @@ pub fn render_chrome(
     fill_rounded_rect(surface, surface_w, surface_h, action_x, omni_y, 36, omni_h, 6, Color::rgb(20, 27, 45));
     draw_border(surface, surface_w, surface_h, action_x, omni_y, 36, omni_h, 1, 6, Color::rgb(51, 65, 85));
     draw_devtools_icon(surface, surface_w, surface_h, action_x + 10, omni_y + 10, Color::rgb(56, 189, 248));
+    action_x += 44;
 
-    // 3. Bookmarks Bar (y: 74..102)
+    // 4. Hamburger Main Menu Toggle Button `[≡]` (Image 3 trigger)
+    let menu_btn_x = w - 38;
+    let menu_btn_bg = if main_menu_open { Color::rgb(51, 65, 85) } else { Color::rgb(20, 27, 45) };
+    fill_rounded_rect(surface, surface_w, surface_h, menu_btn_x, omni_y, 30, omni_h, 6, menu_btn_bg);
+    draw_border(surface, surface_w, surface_h, menu_btn_x, omni_y, 30, omni_h, 1, 6, Color::rgb(51, 65, 85));
+    draw_hamburger_icon(surface, surface_w, surface_h, menu_btn_x + 8, omni_y + 8, Color::WHITE);
+
+    // 3. Bookmarks Bar (y: 74..102) - Image 1 & 2
     let bm_y = TAB_STRIP_HEIGHT + NAVBAR_HEIGHT;
     fill_rect(surface, surface_w, surface_h, 0, bm_y, w, BOOKMARKS_HEIGHT, Color::rgb(20, 27, 45));
     fill_rect(surface, surface_w, surface_h, 0, bm_y + BOOKMARKS_HEIGHT - 1, w, 1, Color::rgb(30, 41, 59));
 
+    let all_bm_w = 110;
+    let all_bm_x = w - all_bm_w - 8;
+
     let mut bm_x = 12;
-    for bm in &bookmarks.items {
-        draw_star_icon(surface, surface_w, surface_h, bm_x + 5, bm_y + 14, Color::rgb(234, 179, 8));
-        render_text(surface, surface_w, surface_h, bm_x + 16, bm_y + 7, &bm.title, Color::rgb(226, 232, 240), 12.0, false);
-        let item_w = (bm.title.len() * 8) as i32 + 28;
+    for (idx, bm) in bookmarks.items.iter().enumerate() {
+        if idx == bookmarks.items.len() - 1 {
+            // "All Bookmarks" rendered on the far right
+            continue;
+        }
+
+        let is_folder = bm.is_folder();
+        let is_open = open_bookmark_folder == Some(idx);
+        let item_title = bm.title();
+        let item_w = (item_title.len() * 8) as i32 + 28;
+
+        if bm_x + item_w > all_bm_x - 8 {
+            break;
+        }
+
+        if is_open {
+            fill_rounded_rect(surface, surface_w, surface_h, bm_x, bm_y + 3, item_w - 4, BOOKMARKS_HEIGHT - 6, 4, Color::rgb(51, 65, 85));
+        }
+
+        if is_folder {
+            draw_folder_icon(surface, surface_w, surface_h, bm_x + 5, bm_y + 9, Color::rgb(203, 213, 225));
+        } else {
+            draw_star_icon(surface, surface_w, surface_h, bm_x + 5, bm_y + 14, Color::rgb(234, 179, 8));
+        }
+
+        let text_col = if is_open { Color::WHITE } else { Color::rgb(226, 232, 240) };
+        render_text(surface, surface_w, surface_h, bm_x + 20, bm_y + 7, item_title, text_col, 12.0, is_open);
+
         bm_x += item_w;
+    }
+
+    // Render "All Bookmarks" on far right of bookmarks bar
+    let is_all_open = open_bookmark_folder == Some(bookmarks.items.len() - 1);
+    if is_all_open {
+        fill_rounded_rect(surface, surface_w, surface_h, all_bm_x, bm_y + 3, all_bm_w, BOOKMARKS_HEIGHT - 6, 4, Color::rgb(51, 65, 85));
+    }
+    draw_folder_icon(surface, surface_w, surface_h, all_bm_x + 6, bm_y + 9, Color::rgb(203, 213, 225));
+    render_text(surface, surface_w, surface_h, all_bm_x + 24, bm_y + 7, "All Bookmarks", Color::rgb(226, 232, 240), 12.0, is_all_open);
+}
+
+/// Renders a bookmark folder dropdown popover (Image 2: 7th Dream Pr... dropdown).
+pub fn render_bookmark_folder_dropdown(
+    surface: &mut [u32],
+    surface_w: usize,
+    surface_h: usize,
+    folder_x: i32,
+    folder_item: &BookmarkItem,
+) {
+    let w = surface_w as i32;
+    let children = match folder_item.children() {
+        Some(c) => c,
+        None => return,
+    };
+
+    let item_h = 30;
+    let dd_w = 320;
+    let dd_h = (children.len() as i32 * item_h) + 12;
+    let dd_x = folder_x.min(w - dd_w - 8).max(8);
+    let dd_y = TOTAL_CHROME_HEIGHT;
+
+    // Drop shadow
+    fill_rect(surface, surface_w, surface_h, dd_x + 3, dd_y + 3, dd_w, dd_h, Color::rgb(0, 0, 0));
+    // Popover container
+    fill_rounded_rect(surface, surface_w, surface_h, dd_x, dd_y, dd_w, dd_h, 6, Color::rgb(24, 32, 47));
+    draw_border(surface, surface_w, surface_h, dd_x, dd_y, dd_w, dd_h, 1, 6, Color::rgb(51, 65, 85));
+
+    let mut item_y = dd_y + 6;
+    for child in children {
+        let is_folder = child.is_folder();
+        let title = child.title();
+
+        if is_folder {
+            draw_folder_icon(surface, surface_w, surface_h, dd_x + 12, item_y + 9, Color::rgb(203, 213, 225));
+            draw_chevron_right(surface, surface_w, surface_h, dd_x + dd_w - 18, item_y + 11, Color::rgb(148, 163, 184));
+        } else if title.contains("Google Sheets") || title.contains("xlsx") {
+            draw_sheets_icon(surface, surface_w, surface_h, dd_x + 12, item_y + 9);
+        } else if title.contains("drive.google.com") {
+            draw_folder_icon(surface, surface_w, surface_h, dd_x + 12, item_y + 9, Color::rgb(56, 189, 248));
+        } else {
+            draw_star_icon(surface, surface_w, surface_h, dd_x + 18, item_y + 15, Color::rgb(234, 179, 8));
+        }
+
+        let max_chars = ((dd_w - 55) / 8).max(4) as usize;
+        let display_title: String = title.chars().take(max_chars).collect();
+        render_text(surface, surface_w, surface_h, dd_x + 32, item_y + 8, &display_title, Color::rgb(241, 245, 249), 12.0, false);
+
+        item_y += item_h;
+    }
+}
+
+/// Renders the complete Brave Main Toggle Menu (Image 3).
+pub fn render_main_toggle_menu(
+    surface: &mut [u32],
+    surface_w: usize,
+    surface_h: usize,
+    show_more_tools: bool,
+) {
+    let w = surface_w as i32;
+    let menu_w = 350;
+    let menu_h = 574;
+    let menu_x = w - menu_w - 12;
+    let menu_y = TOTAL_CHROME_HEIGHT - 4;
+
+    // Drop shadow
+    fill_rect(surface, surface_w, surface_h, menu_x + 4, menu_y + 4, menu_w, menu_h, Color::rgb(0, 0, 0));
+    // Background & border
+    fill_rounded_rect(surface, surface_w, surface_h, menu_x, menu_y, menu_w, menu_h, 8, Color::rgb(24, 32, 47));
+    draw_border(surface, surface_w, surface_h, menu_x, menu_y, menu_w, menu_h, 1, 8, Color::rgb(51, 65, 85));
+
+    let mut cur_y = menu_y + 8;
+    let item_h = 24;
+
+    // Rows from Image 3:
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "New tab", "Ctrl+T", false, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "New window", "Ctrl+N", false, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "New private window", "Ctrl+Shift+N", false, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "New private window with Tor", "Shift+Alt+N", false, false);
+    cur_y += item_h;
+    draw_menu_divider(surface, surface_w, surface_h, menu_x, cur_y, menu_w);
+    cur_y += 7;
+
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Leo AI", "", false, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Wallet", "", false, false);
+    cur_y += item_h;
+    draw_menu_divider(surface, surface_w, surface_h, menu_x, cur_y, menu_w);
+    cur_y += 7;
+
+    // Sidebar: On | Autohide | Off (with Off selected)
+    render_text(surface, surface_w, surface_h, menu_x + 16, cur_y + 4, "Sidebar", Color::WHITE, 12.0, false);
+    let pill_x = menu_x + menu_w - 128;
+    fill_rounded_rect(surface, surface_w, surface_h, pill_x, cur_y - 1, 114, 20, 4, Color::rgb(15, 23, 42));
+    render_text(surface, surface_w, surface_h, pill_x + 6, cur_y + 3, "On", Color::rgb(148, 163, 184), 10.0, false);
+    render_text(surface, surface_w, surface_h, pill_x + 30, cur_y + 3, "Autohide", Color::rgb(148, 163, 184), 10.0, false);
+    fill_rounded_rect(surface, surface_w, surface_h, pill_x + 82, cur_y, 30, 18, 3, Color::rgb(59, 130, 246));
+    render_text(surface, surface_w, surface_h, pill_x + 88, cur_y + 3, "Off", Color::WHITE, 10.0, true);
+    cur_y += item_h;
+    draw_menu_divider(surface, surface_w, surface_h, menu_x, cur_y, menu_w);
+    cur_y += 7;
+
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Passwords and autofill", "", true, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "History", "", true, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Bookmarks and lists", "", true, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Downloads", "Ctrl+J", false, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Extensions", "", false, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Delete browsing data...", "Ctrl+Shift+Del", false, false);
+    cur_y += item_h;
+    draw_menu_divider(surface, surface_w, surface_h, menu_x, cur_y, menu_w);
+    cur_y += 7;
+
+    // Zoom: - 100% + ⛶
+    render_text(surface, surface_w, surface_h, menu_x + 16, cur_y + 4, "Zoom", Color::WHITE, 12.0, false);
+    let zoom_x = menu_x + menu_w - 100;
+    render_text(surface, surface_w, surface_h, zoom_x, cur_y + 3, "-", Color::WHITE, 13.0, true);
+    render_text(surface, surface_w, surface_h, zoom_x + 18, cur_y + 4, "100%", Color::rgb(226, 232, 240), 11.0, false);
+    render_text(surface, surface_w, surface_h, zoom_x + 58, cur_y + 3, "+", Color::WHITE, 13.0, true);
+    render_text(surface, surface_w, surface_h, zoom_x + 78, cur_y + 3, "[]", Color::rgb(148, 163, 184), 11.0, false);
+    cur_y += item_h;
+    draw_menu_divider(surface, surface_w, surface_h, menu_x, cur_y, menu_w);
+    cur_y += 7;
+
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Print...", "Ctrl+P", false, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Find and edit", "", true, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Save and share", "", true, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "More tools", "", true, show_more_tools);
+    cur_y += item_h;
+    draw_menu_divider(surface, surface_w, surface_h, menu_x, cur_y, menu_w);
+    cur_y += 7;
+
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Help", "", true, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Settings", "", false, false);
+    cur_y += item_h;
+    draw_menu_row(surface, surface_w, surface_h, menu_x, cur_y, menu_w, "Exit", "", false, false);
+}
+
+fn draw_menu_row(
+    surface: &mut [u32],
+    sw: usize,
+    sh: usize,
+    x: i32,
+    y: i32,
+    w: i32,
+    label: &str,
+    shortcut: &str,
+    chevron: bool,
+    is_active: bool,
+) {
+    if is_active {
+        fill_rounded_rect(surface, sw, sh, x + 4, y - 2, w - 8, 24, 4, Color::rgb(51, 65, 85));
+    }
+    render_text(surface, sw, sh, x + 16, y + 4, label, Color::WHITE, 12.0, is_active);
+    if !shortcut.is_empty() {
+        let sc_x = x + w - (shortcut.len() * 8) as i32 - 16;
+        render_text(surface, sw, sh, sc_x, y + 4, shortcut, Color::rgb(148, 163, 184), 11.0, false);
+    }
+    if chevron {
+        draw_chevron_right(surface, sw, sh, x + w - 18, y + 7, Color::rgb(148, 163, 184));
+    }
+}
+
+fn draw_menu_divider(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, w: i32) {
+    fill_rect(surface, sw, sh, x + 8, y + 3, w - 16, 1, Color::rgb(45, 55, 75));
+}
+
+/// Renders the "More tools >" secondary flyout submenu (Image 5).
+pub fn render_more_tools_submenu(
+    surface: &mut [u32],
+    surface_w: usize,
+    surface_h: usize,
+) {
+    let w = surface_w as i32;
+    let sub_w = 260;
+    let sub_h = 330;
+    let main_menu_w = 350;
+    let menu_x = w - main_menu_w - 12;
+    let sub_x = menu_x - sub_w - 4;
+    let sub_y = TOTAL_CHROME_HEIGHT + 236;
+
+    // Drop shadow
+    fill_rect(surface, surface_w, surface_h, sub_x + 4, sub_y + 4, sub_w, sub_h, Color::rgb(0, 0, 0));
+    // Container
+    fill_rounded_rect(surface, surface_w, surface_h, sub_x, sub_y, sub_w, sub_h, 8, Color::rgb(24, 32, 47));
+    draw_border(surface, surface_w, surface_h, sub_x, sub_y, sub_w, sub_h, 1, 8, Color::rgb(51, 65, 85));
+
+    let mut cur_y = sub_y + 8;
+    let item_h = 24;
+
+    // Items from Image 5:
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Add new profile", "", false);
+    cur_y += item_h;
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Open Guest profile", "", false);
+    cur_y += item_h;
+    draw_menu_divider(surface, surface_w, surface_h, sub_x, cur_y, sub_w);
+    cur_y += 7;
+
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Sync", "", false);
+    cur_y += item_h;
+    draw_menu_divider(surface, surface_w, surface_h, sub_x, cur_y, sub_w);
+    cur_y += 7;
+
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Tab search", "Ctrl+Shift+A", false);
+    cur_y += item_h;
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Name window...", "", false);
+    cur_y += item_h;
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Quick commands", "Ctrl+Space", false);
+    cur_y += item_h;
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Show apps", "", false);
+    cur_y += item_h;
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Show tabs vertically", "", false);
+    cur_y += item_h;
+    draw_menu_divider(surface, surface_w, surface_h, sub_x, cur_y, sub_w);
+    cur_y += 7;
+
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Performance", "", false);
+    cur_y += item_h;
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Developer tools", "Ctrl+Shift+I", true);
+    cur_y += item_h;
+    draw_submenu_row(surface, surface_w, surface_h, sub_x, cur_y, sub_w, "Task manager", "Shift+Esc", false);
+}
+
+fn draw_submenu_row(
+    surface: &mut [u32],
+    sw: usize,
+    sh: usize,
+    x: i32,
+    y: i32,
+    w: i32,
+    label: &str,
+    shortcut: &str,
+    is_highlighted: bool,
+) {
+    if is_highlighted {
+        fill_rounded_rect(surface, sw, sh, x + 4, y - 2, w - 8, 24, 4, Color::rgb(51, 65, 85));
+    }
+    render_text(surface, sw, sh, x + 14, y + 4, label, Color::WHITE, 12.0, is_highlighted);
+    if !shortcut.is_empty() {
+        let sc_x = x + w - (shortcut.len() * 8) as i32 - 14;
+        render_text(surface, sw, sh, sc_x, y + 4, shortcut, Color::rgb(148, 163, 184), 11.0, false);
     }
 }
 
@@ -237,7 +539,7 @@ pub fn hit_test_chrome(
         }
 
         let omni_x = 112;
-        let right_actions_w = 230;
+        let right_actions_w = 270;
         let omni_w = (w - omni_x - right_actions_w).max(220);
 
         if x >= omni_x && x < omni_x + omni_w {
@@ -258,16 +560,35 @@ pub fn hit_test_chrome(
         if x >= action_x && x < action_x + 36 {
             return ChromeClickTarget::ToggleDevTools;
         }
+
+        // Hamburger Main Menu button at top right
+        let menu_x = w - 42;
+        if x >= menu_x && x <= w - 6 {
+            return ChromeClickTarget::ToggleMainMenu;
+        }
     }
 
     // 3. Bookmarks Bar
     let bm_y = TAB_STRIP_HEIGHT + NAVBAR_HEIGHT;
     if y >= bm_y && y < bm_y + BOOKMARKS_HEIGHT {
+        let all_bm_w = 110;
+        let all_bm_x = w - all_bm_w - 8;
+        if x >= all_bm_x && x < all_bm_x + all_bm_w {
+            return ChromeClickTarget::BookmarkFolderClick(bookmarks.items.len() - 1);
+        }
+
         let mut bm_x = 12;
-        for bm in &bookmarks.items {
-            let item_w = (bm.title.len() * 8) as i32 + 28;
+        for (idx, bm) in bookmarks.items.iter().enumerate() {
+            if idx == bookmarks.items.len() - 1 {
+                continue;
+            }
+            let item_w = (bm.title().len() * 8) as i32 + 28;
             if x >= bm_x && x < bm_x + item_w {
-                return ChromeClickTarget::BookmarkClick(bm.url.clone());
+                if bm.is_folder() {
+                    return ChromeClickTarget::BookmarkFolderClick(idx);
+                } else if let Some(url) = bm.url() {
+                    return ChromeClickTarget::BookmarkClick(url.to_owned());
+                }
             }
             bm_x += item_w;
         }
@@ -319,7 +640,6 @@ fn draw_forward_arrow(surface: &mut [u32], sw: usize, sh: usize, cx: i32, cy: i3
 }
 
 fn draw_reload_icon(surface: &mut [u32], sw: usize, sh: usize, cx: i32, cy: i32, color: Color) {
-    // 3/4 circle arc (diameter 10)
     for dy in -4..=4 {
         for dx in -4..=4 {
             let dist_sq = dx * dx + dy * dy;
@@ -328,7 +648,6 @@ fn draw_reload_icon(surface: &mut [u32], sw: usize, sh: usize, cx: i32, cy: i32,
             }
         }
     }
-    // Arrow head at top-right
     fill_rect(surface, sw, sh, cx + 1, cy - 6, 4, 2, color);
     fill_rect(surface, sw, sh, cx + 3, cy - 6, 2, 4, color);
 }
@@ -390,6 +709,32 @@ fn draw_devtools_icon(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32,
     fill_rect(surface, sw, sh, x + 9, y + 3, 2, 2, color);
     fill_rect(surface, sw, sh, x + 7, y + 1, 2, 2, color);
     fill_rect(surface, sw, sh, x + 7, y + 5, 2, 2, color);
+}
+
+fn draw_hamburger_icon(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, color: Color) {
+    fill_rect(surface, sw, sh, x, y + 2, 14, 2, color);
+    fill_rect(surface, sw, sh, x, y + 6, 14, 2, color);
+    fill_rect(surface, sw, sh, x, y + 10, 14, 2, color);
+}
+
+fn draw_folder_icon(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, color: Color) {
+    fill_rect(surface, sw, sh, x, y, 6, 2, color);
+    fill_rect(surface, sw, sh, x, y + 2, 13, 8, color);
+    fill_rect(surface, sw, sh, x + 1, y + 3, 11, 2, Color::rgb(30, 41, 59));
+}
+
+fn draw_chevron_right(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, color: Color) {
+    for d in 0..4 {
+        fill_rect(surface, sw, sh, x + d, y + d, 2, 1, color);
+        fill_rect(surface, sw, sh, x + d, y + 6 - d, 2, 1, color);
+    }
+}
+
+fn draw_sheets_icon(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32) {
+    fill_rect(surface, sw, sh, x, y, 12, 12, Color::rgb(34, 197, 94));
+    fill_rect(surface, sw, sh, x + 2, y + 3, 8, 1, Color::WHITE);
+    fill_rect(surface, sw, sh, x + 2, y + 6, 8, 1, Color::WHITE);
+    fill_rect(surface, sw, sh, x + 2, y + 9, 8, 1, Color::WHITE);
 }
 
 fn draw_close_x(surface: &mut [u32], sw: usize, sh: usize, cx: i32, cy: i32, color: Color) {

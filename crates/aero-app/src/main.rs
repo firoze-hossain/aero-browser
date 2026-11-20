@@ -69,6 +69,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut initial_url = "about:newtab";
     let mut headless = false;
     let mut screenshot_path: Option<String> = None;
+    let mut open_menu = false;
+    let mut open_more_tools = false;
+    let mut open_devtools = false;
+    let mut open_bookmark_name: Option<String> = None;
 
     let mut i = 1;
     while i < args.len() {
@@ -95,6 +99,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "--headless" => {
                 headless = true;
             }
+            "--open-menu" => {
+                open_menu = true;
+            }
+            "--open-more-tools" => {
+                open_more_tools = true;
+            }
+            "--open-devtools" => {
+                open_devtools = true;
+            }
+            "--open-bookmark" => {
+                if i + 1 < args.len() {
+                    i += 1;
+                    open_bookmark_name = Some(args[i].clone());
+                }
+            }
             "--screenshot" => {
                 if i + 1 < args.len() {
                     i += 1;
@@ -115,6 +134,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if initial_url != "about:newtab" {
         println!("[Aero] Navigating initial tab to: {}", initial_url);
         browser.navigate(initial_url);
+    }
+
+    if open_menu {
+        browser.show_main_menu = true;
+    }
+    if open_more_tools {
+        browser.show_main_menu = true;
+        browser.show_more_tools_submenu = true;
+    }
+    if open_devtools {
+        browser.devtools.is_open = true;
+    }
+    if let Some(ref bm_name) = open_bookmark_name {
+        if let Some(idx) = browser.bookmarks.items.iter().position(|b| b.title().contains(bm_name)) {
+            browser.open_bookmark_folder = Some(idx);
+        }
     }
 
     if let Some(ref path) = screenshot_path {

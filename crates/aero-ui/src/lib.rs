@@ -209,4 +209,116 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_bookmark_folders_and_dropdown_navigation() {
+        let mut browser = AeroBrowser::new();
+
+        // 1. Verify default bookmark folders matching user's Brave bar
+        let f_7th = browser.bookmarks.items.iter().find(|b| b.title() == "7th Dream Pr...").unwrap();
+        assert!(f_7th.is_folder());
+        let children = f_7th.children().unwrap();
+        assert!(children.iter().any(|c| c.title().contains("Google Sheets")));
+        assert!(children.iter().any(|c| c.title() == "novaos"));
+        assert!(children.iter().any(|c| c.title() == "roze"));
+        assert!(children.iter().any(|c| c.title() == "stratosdb"));
+
+        // 2. Click folder to open dropdown
+        let folder_idx = browser.bookmarks.items.iter().position(|b| b.title() == "7th Dream Pr...").unwrap();
+        browser.open_bookmark_folder = Some(folder_idx);
+
+        // 3. Render frame with open folder dropdown
+        let mut surface = vec![0u32; 1024 * 720];
+        browser.render(&mut surface, 1024, 720);
+        let non_zero = surface.iter().filter(|&&p| p != 0).count();
+        assert!(non_zero > 1000);
+
+        // 4. Hit-test click inside dropdown on NovaOS_Build_Plan.xlsx
+        // dd_x is calculated from folder position, dd_y is TOTAL_CHROME_HEIGHT
+        let mut fx = 12;
+        for (i, bm) in browser.bookmarks.items.iter().enumerate() {
+            if i == folder_idx { break; }
+            fx += (bm.title().len() * 8) as i32 + 28;
+        }
+        let dd_w = 320;
+        let dd_x = fx.min(1024 - dd_w - 8).max(8);
+        let dd_y = TOTAL_CHROME_HEIGHT;
+        // Second item is NovaOS_Build_Plan.xlsx (y = dd_y + 6 + 30 = dd_y + 36)
+        let clicked = browser.handle_click(dd_x + 50, dd_y + 40, 1024, 720);
+        assert!(clicked);
+        assert_eq!(browser.active_tab().url, "https://docs.google.com/spreadsheets/d/novaos_build_plan");
+        assert!(browser.open_bookmark_folder.is_none());
+    }
+
+    #[test]
+    fn test_main_toggle_menu_and_more_tools_submenu() {
+        let mut browser = AeroBrowser::new();
+
+        // 1. Click top-right hamburger toggle button [≡]
+        let clicked = browser.handle_click(1024 - 20, 50, 1024, 720);
+        assert!(clicked);
+        assert!(browser.show_main_menu);
+
+        // 2. Click "More tools >" in the main menu
+        // menu_x = 1024 - 280 - 10 = 734
+        // More tools is row 18 (y ~= TOTAL_CHROME_HEIGHT - 4 + 8 + 18 * 24 + dividers)
+        browser.show_more_tools_submenu = true;
+
+        // 3. Click "Developer tools" from submenu
+        let sub_w = 260;
+        let menu_x = 1024 - 350 - 12;
+        let sub_x = menu_x - sub_w - 4;
+        let sub_y = TOTAL_CHROME_HEIGHT + 236;
+        // DevTools is at rel_y ~245
+        let dev_clicked = browser.handle_click(sub_x + 50, sub_y + 245, 1024, 720);
+        assert!(dev_clicked);
+        assert!(browser.devtools.is_open);
+        assert!(!browser.show_main_menu);
+        assert!(!browser.show_more_tools_submenu);
+
+        // 4. Open main menu again and click "Settings"
+        browser.show_main_menu = true;
+        let menu_y = TOTAL_CHROME_HEIGHT - 4;
+        // Settings is at rel_y ~510
+        let settings_clicked = browser.handle_click(menu_x + 50, menu_y + 510, 1024, 720);
+        assert!(settings_clicked);
+        assert_eq!(browser.active_tab().url, "about:settings");
+        assert!(!browser.show_main_menu);
+    }
+
+    #[test]
+    fn test_settings_page_rendering_and_category_navigation() {
+        let mut browser = AeroBrowser::new();
+        browser.navigate("about:settings");
+
+        assert_eq!(browser.active_tab().url, "about:settings");
+        let html = &browser.active_tab().html_source;
+        assert!(html.contains("Get started"));
+        assert!(html.contains("Appearance"));
+        assert!(html.contains("Shields"));
+        assert!(html.contains("Sync your settings across devices"));
+        assert!(html.contains("Profile 1"));
+        assert!(html.contains("Make Aero default browser"));
+        assert!(html.contains("On startup"));
+        assert!(html.contains("Dashboard"));
+
+        // Click sidebar category: Appearance (index 1: y = TOTAL_CHROME_HEIGHT + 56 + 32)
+        let clicked = browser.handle_click(80, TOTAL_CHROME_HEIGHT + 56 + 36, 1024, 720);
+        assert!(clicked);
+        assert_eq!(browser.active_tab().url, "about:settings?category=appearance");
+        assert!(browser.active_tab().html_source.contains("Aero Theme & Colors"));
+
+        // Click sidebar category: Shields (index 3: y = TOTAL_CHROME_HEIGHT + 56 + 3 * 32)
+        let clicked_shields = browser.handle_click(80, TOTAL_CHROME_HEIGHT + 56 + 100, 1024, 720);
+        assert!(clicked_shields);
+        assert_eq!(browser.active_tab().url, "about:settings?category=shields");
+        assert!(browser.active_tab().html_source.contains("Aero Brave Shields Engine"));
+
+        // Click sidebar category: About Aero (index 16)
+        let clicked_about = browser.handle_click(80, TOTAL_CHROME_HEIGHT + 56 + 16 * 32 + 10, 1024, 720);
+        assert!(clicked_about);
+        assert_eq!(browser.active_tab().url, "about:settings?category=about");
+        assert!(browser.active_tab().html_source.contains("About Aero Browser"));
+        assert!(browser.active_tab().html_source.contains("Multi-Paradigm Engine Architecture"));
+    }
 }
