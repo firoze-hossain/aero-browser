@@ -101,13 +101,13 @@ pub fn render_devtools_panel(
         }
         DevToolsTab::Network => {
             render_text(surface, surface_w, surface_h, x + 16, y + 42, "Network Activity (0 Requests pending)", Color::TEXT_MUTED, 12.0, false);
-            render_text(surface, surface_w, surface_h, x + 16, y + 64, "• GET / 200 OK (text/html, 1.2 KB, 8ms)", Color::rgb(74, 222, 128), 12.0, false);
-            render_text(surface, surface_w, surface_h, x + 16, y + 84, "• BLOCKED /tracker.js (Aero Shields)", Color::rgb(239, 68, 68), 12.0, false);
+            render_text(surface, surface_w, surface_h, x + 16, y + 64, "- GET / 200 OK (text/html, 1.2 KB, 8ms)", Color::rgb(74, 222, 128), 12.0, false);
+            render_text(surface, surface_w, surface_h, x + 16, y + 84, "- BLOCKED /tracker.js (Aero Shields)", Color::rgb(239, 68, 68), 12.0, false);
         }
         DevToolsTab::Shields => {
             render_text(surface, surface_w, surface_h, x + 16, y + 42, "Aero Privacy Engine Telemetry", Color::BRAVE_ORANGE, 13.0, true);
-            render_text(surface, surface_w, surface_h, x + 16, y + 64, "• Blocklist Rules: 26 active pattern matchers", Color::TEXT_MAIN, 12.0, false);
-            render_text(surface, surface_w, surface_h, x + 16, y + 84, "• Cryptographic HTTPS Upgrade: Enabled", Color::TEXT_MAIN, 12.0, false);
+            render_text(surface, surface_w, surface_h, x + 16, y + 64, "- Blocklist Rules: 26 active pattern matchers", Color::TEXT_MAIN, 12.0, false);
+            render_text(surface, surface_w, surface_h, x + 16, y + 84, "- Cryptographic HTTPS Upgrade: Enabled", Color::TEXT_MAIN, 12.0, false);
         }
     }
 }

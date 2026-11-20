@@ -53,12 +53,17 @@ impl<'a> StyledNode<'a> {
             _ => {
                 // HTML default display values
                 if let Some(tag) = self.node.tag_name() {
-                    match tag {
+                    let tag_lower = tag.to_lowercase();
+                    match tag_lower.as_str() {
+                        "head" | "title" | "meta" | "link" | "style" | "script" => Display::None,
                         "div" | "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "header"
                         | "footer" | "section" | "article" | "nav" | "main" | "ul" | "ol"
-                        | "li" | "form" | "table" | "pre" | "blockquote" | "hr" => Display::Block,
+                        | "li" | "form" | "table" | "pre" | "blockquote" | "hr"
+                        | "html" | "body" => Display::Block,
                         _ => Display::Inline,
                     }
+                } else if matches!(self.node.node_type, NodeType::Document) {
+                    Display::Block
                 } else {
                     Display::Inline
                 }
@@ -111,12 +116,13 @@ pub fn build_style_tree<'a>(
         }
     }
 
-    // Property inheritance from parent for text properties
+    // Property inheritance from parent for typography & text properties
     if let Some(parent) = parent_style {
         inherit_property(&mut specified_values, parent, "color");
         inherit_property(&mut specified_values, parent, "font-size");
         inherit_property(&mut specified_values, parent, "font-weight");
         inherit_property(&mut specified_values, parent, "line-height");
+        inherit_property(&mut specified_values, parent, "text-align");
     }
 
     let mut current_styled = StyledNode {
@@ -135,34 +141,39 @@ pub fn build_style_tree<'a>(
     current_styled
 }
 
-fn inherit_property(values: &mut Vec<(String, Value)>, parent: &StyledNode, prop: &str) {
-    if !values.iter().any(|(k, _)| k == prop) {
-        if let Some(parent_val) = parent.value(prop) {
-            values.push((prop.to_owned(), parent_val.clone()));
+fn inherit_property(
+    values: &mut Vec<(String, Value)>,
+    parent: &StyledNode,
+    name: &str,
+) {
+    if !values.iter().any(|(k, _)| k == name) {
+        if let Some(parent_val) = parent.value(name) {
+            values.push((name.to_owned(), parent_val.clone()));
         }
     }
 }
 
-type MatchedRule<'a> = (Specificity, &'a Rule);
-
-fn match_rules<'a>(elem: &ElementData, stylesheet: &'a StyleSheet) -> Vec<(String, Value)> {
-    let mut matched: Vec<MatchedRule<'a>> = Vec::new();
+fn match_rules(elem: &ElementData, stylesheet: &StyleSheet) -> Vec<(String, Value)> {
+    let mut matched_rules: Vec<MatchedRule> = Vec::new();
 
     for rule in &stylesheet.rules {
         for selector in &rule.selectors {
             if selector.matches(elem) {
-                matched.push((selector.specificity(), rule));
+                matched_rules.push(MatchedRule {
+                    specificity: selector.specificity(),
+                    rule,
+                });
                 break;
             }
         }
     }
 
-    // Sort by specificity ascending so higher specificity overwrites earlier values
-    matched.sort_by(|a, b| a.0.cmp(&b.0));
+    // Sort by CSS specificity tuple (a, b, c)
+    matched_rules.sort_by(|a, b| a.specificity.cmp(&b.specificity));
 
     let mut values: Vec<(String, Value)> = Vec::new();
-    for (_, rule) in matched {
-        for decl in &rule.declarations {
+    for matched in matched_rules {
+        for decl in &matched.rule.declarations {
             if let Some(pos) = values.iter().position(|(k, _)| k == &decl.name) {
                 values[pos] = (decl.name.clone(), decl.value.clone());
             } else {
@@ -172,4 +183,9 @@ fn match_rules<'a>(elem: &ElementData, stylesheet: &'a StyleSheet) -> Vec<(Strin
     }
 
     values
+}
+
+struct MatchedRule<'a> {
+    specificity: Specificity,
+    rule: &'a Rule,
 }

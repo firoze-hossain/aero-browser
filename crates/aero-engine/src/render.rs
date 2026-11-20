@@ -189,9 +189,17 @@ fn render_content(list: &mut DisplayList, layout_box: &LayoutBox) {
         if let crate::dom::NodeType::Text(ref text) = styled.node.node_type {
             let trimmed = text.trim();
             if !trimmed.is_empty() {
+                let is_center = styled.lookup("text-align", "left") == crate::css::Value::Keyword("center".to_owned());
+                let text_w = crate::font::measure_text(trimmed, font_size).0;
+                let text_x = if is_center {
+                    layout_box.dimensions.content.x + (layout_box.dimensions.content.width - text_w).max(0.0) / 2.0
+                } else {
+                    layout_box.dimensions.content.x
+                };
+
                 list.push(DisplayItem::TextRun {
                     text: trimmed.to_owned(),
-                    x: layout_box.dimensions.content.x,
+                    x: text_x,
                     y: layout_box.dimensions.content.y,
                     color,
                     font_size,

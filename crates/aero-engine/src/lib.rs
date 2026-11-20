@@ -42,6 +42,19 @@ pub use render::{build_display_list, DisplayItem, DisplayList};
 pub use shields::{ShieldConfig, ShieldEngine, ShieldStats, UrlAction};
 pub use style::{build_style_tree, StyledNode};
 
+fn extract_embedded_styles(node: &Node, stylesheet: &mut StyleSheet) {
+    if let Some(tag) = node.tag_name() {
+        if tag.eq_ignore_ascii_case("style") {
+            let css_text = node.text_content();
+            let parsed = CssParser::parse(&css_text);
+            stylesheet.rules.extend(parsed.rules);
+        }
+    }
+    for child in &node.children {
+        extract_embedded_styles(child, stylesheet);
+    }
+}
+
 /// High-level convenience function to parse HTML and CSS, reflow layout,
 /// and rasterize directly onto a 32-bit pixel surface.
 pub fn render_html_to_surface(
@@ -54,8 +67,9 @@ pub fn render_html_to_surface(
     // 1. Parse HTML into DOM tree
     let dom_root = HtmlParser::parse(html_src);
 
-    // 2. Load default user-agent stylesheet
-    let stylesheet = css::default_user_agent_stylesheet();
+    // 2. Load default user-agent stylesheet + extract embedded <style> rules
+    let mut stylesheet = css::default_user_agent_stylesheet();
+    extract_embedded_styles(&dom_root, &mut stylesheet);
 
     // 3. Resolve CSS styling cascade to build StyledNode tree
     let styled_root = build_style_tree(&dom_root, &stylesheet, None);
@@ -68,12 +82,38 @@ pub fn render_html_to_surface(
     viewport_dims.content.width = viewport_w as f32;
     layout_root.layout(viewport_dims);
 
-    let total_content_height = layout_root.dimensions.content.height;
+    let total_content_height = layout_root.dimensions.content.height.max(viewport_h as f32);
 
     // 6. Generate Display List
     let display_list = build_display_list(&layout_root);
 
-    // 7. Rasterize Display List to surface
+    // 7. Clear surface with page background color (#0b0f19 dark mode or body bg)
+    let bg_color = styled_root.background_color()
+        .or_else(|| {
+            for c in &styled_root.children {
+                if c.node.tag_name() == Some("body") {
+                    if let Some(bg) = c.background_color() {
+                        return Some(bg);
+                    }
+                }
+                for gc in &c.children {
+                    if gc.node.tag_name() == Some("body") {
+                        if let Some(bg) = gc.background_color() {
+                            return Some(bg);
+                        }
+                    }
+                }
+            }
+            None
+        })
+        .unwrap_or(Color::rgb(11, 15, 25)); // #0b0f19
+
+    let bg_xrgb = bg_color.to_xrgb();
+    for p in surface.iter_mut() {
+        *p = bg_xrgb;
+    }
+
+    // 8. Rasterize Display List to surface
     display_list.paint(surface, viewport_w, viewport_h, scroll_y);
 
     (total_content_height, display_list)

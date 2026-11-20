@@ -59,7 +59,7 @@ pub fn render_shields_flyout(
     let toggle_y = py + 12;
     let toggle_col = if is_up { Color::rgb(22, 163, 74) } else { Color::rgb(220, 38, 38) };
     fill_rounded_rect(surface, surface_w, surface_h, toggle_x, toggle_y, toggle_btn_w, toggle_btn_h, 12, toggle_col);
-    let toggle_text = if is_up { "UP  ●" } else { "●  DOWN" };
+    let toggle_text = if is_up { "UP  ON" } else { "OFF  DOWN" };
     render_text(surface, surface_w, surface_h, toggle_x + 14, toggle_y + 5, toggle_text, Color::WHITE, 11.0, true);
 
     // Stats Grid
@@ -86,11 +86,11 @@ pub fn render_shields_flyout(
 
     // Bottom note
     let foot_y = py + panel_h - 24;
-    render_text(surface, surface_w, surface_h, px + 16, foot_y, "✓ Shield protection active on NovaOS", Color::rgb(148, 163, 184), 11.0, false);
+    render_text(surface, surface_w, surface_h, px + 16, foot_y, "Shield protection active on NovaOS", Color::rgb(148, 163, 184), 11.0, false);
 }
 
 fn render_option_row(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, label: &str, checked: bool) {
-    let check_icon = if checked { "☑" } else { "☐" };
+    let check_icon = if checked { "[x]" } else { "[ ]" };
     let check_col = if checked { Color::rgb(56, 189, 248) } else { Color::rgb(100, 116, 139) };
     render_text(surface, sw, sh, x, y, check_icon, check_col, 13.0, true);
     render_text(surface, sw, sh, x + 20, y, label, Color::rgb(226, 232, 240), 12.0, false);

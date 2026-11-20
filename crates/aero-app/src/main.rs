@@ -152,12 +152,15 @@ fn present_frame<C: Connection>(
     Ok(())
 }
 
-fn run_x11_gui(browser: &mut AeroBrowser, width: usize, height: usize) -> Result<(), Box<dyn std::error::Error>> {
+fn run_x11_gui(browser: &mut AeroBrowser, initial_width: usize, initial_height: usize) -> Result<(), Box<dyn std::error::Error>> {
     println!("[Aero] Connecting to X11 display server...");
     let (conn, screen_num) = x11rb::connect(None)?;
     let screen = &conn.setup().roots[screen_num];
     let root = screen.root;
     let depth = screen.root_depth;
+
+    let mut width = initial_width;
+    let mut height = initial_height;
 
     let win = conn.generate_id()?;
     let gc = conn.generate_id()?;
@@ -222,7 +225,7 @@ fn run_x11_gui(browser: &mut AeroBrowser, width: usize, height: usize) -> Result
     conn.map_window(win)?;
     conn.flush()?;
 
-    println!("[Aero] Native desktop window created ({}x{}). Entering interactive event loop.", width, height);
+    println!("[Aero] Native desktop window created ({}x{}). Responsive auto-adjust enabled.", width, height);
 
     let mut surface = vec![0u32; width * height];
     let mut needs_redraw = true;
@@ -236,6 +239,16 @@ fn run_x11_gui(browser: &mut AeroBrowser, width: usize, height: usize) -> Result
 
         let event = conn.wait_for_event()?;
         match event {
+            Event::ConfigureNotify(ev) => {
+                let new_w = ev.width as usize;
+                let new_h = ev.height as usize;
+                if (new_w != width || new_h != height) && new_w >= 320 && new_h >= 240 {
+                    width = new_w;
+                    height = new_h;
+                    surface = vec![0u32; width * height];
+                    needs_redraw = true;
+                }
+            }
             Event::Expose(_) => {
                 needs_redraw = true;
             }

@@ -132,69 +132,73 @@ body {{
     color: #f1f5f9;
     font-family: sans-serif;
     margin: 0;
-    padding: 40px 24px;
+    padding: 36px 20px;
     text-align: center;
 }}
 .dashboard {{
-    max-width: 840px;
+    max-width: 820px;
     margin: 0 auto;
 }}
 .logo-title {{
-    font-size: 36px;
+    font-size: 28px;
     font-weight: bold;
     color: #ff5500;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }}
 .subtitle {{
     font-size: 14px;
     color: #94a3b8;
-    margin-bottom: 28px;
+    margin-bottom: 26px;
 }}
 .stats-bar {{
     background-color: #1e293b;
     border: 1px solid #334155;
     border-radius: 12px;
     padding: 16px 20px;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
     display: block;
 }}
 .stat-item {{
     display: inline-block;
-    margin: 0 24px;
+    width: 220px;
+    margin: 4px 10px;
+    text-align: center;
 }}
 .stat-val {{
     font-size: 24px;
     font-weight: bold;
     color: #38bdf8;
+    margin-bottom: 6px;
+    display: block;
 }}
 .stat-lbl {{
-    font-size: 12px;
+    font-size: 11px;
     color: #94a3b8;
     text-transform: uppercase;
+    display: block;
 }}
 .search-box {{
     background-color: #1e293b;
     border: 1px solid #475569;
-    border-radius: 24px;
+    border-radius: 20px;
     padding: 12px 20px;
     width: 60%;
-    margin: 0 auto 36px auto;
+    margin: 0 auto 28px auto;
     color: #94a3b8;
-    font-size: 15px;
+    font-size: 14px;
 }}
 .quick-dial {{
-    margin-top: 20px;
+    margin-top: 16px;
 }}
 .tile {{
     background-color: #1e293b;
     border: 1px solid #334155;
     border-radius: 8px;
-    padding: 14px 20px;
+    padding: 10px 18px;
     display: inline-block;
-    margin: 8px 10px;
+    margin: 6px 8px;
     color: #f8fafc;
-    text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
 }}
 </style>
 </head>
@@ -221,7 +225,7 @@ body {{
     <div class=\"search-box\">Search the web or type a URL...</div>
 
     <div class=\"quick-dial\">
-        <div class=\"tile\">★ NovaOS Hub</div>
+        <div class=\"tile\">NovaOS Hub</div>
         <div class=\"tile\">Rust Programming</div>
         <div class=\"tile\">GitHub</div>
         <div class=\"tile\">Wikipedia</div>

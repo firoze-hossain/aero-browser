@@ -137,7 +137,7 @@ impl<'a> LayoutBox<'a> {
     }
 
     fn layout_block(&mut self, containing_block: Dimensions) {
-        // 1. Calculate width & margins
+        // 1. Calculate width & horizontal margins/borders/padding
         self.calculate_block_width(containing_block);
 
         // 2. Position box relative to containing block
@@ -146,28 +146,94 @@ impl<'a> LayoutBox<'a> {
         // 3. Layout child boxes
         self.layout_block_children();
 
-        // 4. Calculate content height based on children
+        // 4. Calculate content height based on children or text
         self.calculate_block_height();
     }
 
     fn layout_inline(&mut self, containing_block: Dimensions) {
-        // Simple inline layout estimation
-        self.dimensions.content.x = containing_block.content.x;
-        self.dimensions.content.y = containing_block.content.y;
-        self.dimensions.content.width = containing_block.content.width;
+        let style = self.get_styled_node();
+        let zero = Value::Length(0.0, crate::css::Unit::Px);
 
-        let mut total_h = 18.0;
-        if let Some(styled) = self.get_styled_node() {
-            if let Some(tag) = styled.node.tag_name() {
-                if tag == "button" {
-                    self.dimensions.content.width = 120.0;
-                    self.dimensions.content.height = 34.0;
-                    self.dimensions.padding = EdgeSizes::all(6.0);
-                    return;
-                }
+        let pad_h = style.and_then(|s| s.value("padding")).unwrap_or(&zero).to_px();
+        let pad_v = pad_h.min(8.0);
+        self.dimensions.padding = EdgeSizes {
+            top: pad_v,
+            bottom: pad_v,
+            left: pad_h,
+            right: pad_h,
+        };
+
+        let border_w = style.and_then(|s| s.value("border-width"))
+            .or_else(|| style.and_then(|s| s.value("border")))
+            .unwrap_or(&zero)
+            .to_px();
+        self.dimensions.border = EdgeSizes::all(border_w);
+
+        let mut margin_h = style.and_then(|s| s.value("margin")).unwrap_or(&zero).to_px();
+        self.dimensions.margin = EdgeSizes::all(margin_h);
+
+        self.dimensions.content.x = containing_block.content.x + self.dimensions.margin.left + self.dimensions.padding.left;
+        self.dimensions.content.y = containing_block.content.y + self.dimensions.margin.top + self.dimensions.padding.top;
+
+        if let Some(s) = style {
+            if let crate::dom::NodeType::Text(ref text) = s.node.node_type {
+                let font_size = s.value("font-size").map(|v| v.to_px()).unwrap_or(15.0);
+                let (tw, th) = crate::font::measure_text(text.trim(), font_size);
+                self.dimensions.content.width = tw;
+                self.dimensions.content.height = th;
+                return;
             }
         }
-        self.dimensions.content.height = total_h;
+
+        let has_block_children = self.children.iter().any(|c| matches!(c.box_type, BoxType::BlockNode(_)));
+        if has_block_children {
+            // Stack block children vertically inside this inline-block container
+            let mut cur_y = self.dimensions.content.y;
+            let mut max_w = 0.0f32;
+            for child in &mut self.children {
+                let mut child_cb = self.dimensions;
+                child_cb.content.x = self.dimensions.content.x;
+                child_cb.content.y = cur_y;
+                child.layout(child_cb);
+
+                let mb = child.dimensions.margin_box();
+                cur_y += mb.height + 6.0;
+                max_w = max_w.max(mb.width);
+            }
+            self.dimensions.content.width = max_w.max(self.dimensions.content.width);
+            self.dimensions.content.height = (cur_y - self.dimensions.content.y).max(30.0);
+            return;
+        }
+
+        // Layout any nested children
+        let mut cur_x = self.dimensions.content.x;
+        let mut cur_y = self.dimensions.content.y;
+        let mut max_row_h: f32 = 20.0;
+        let mut max_w: f32 = 0.0;
+
+        for child in &mut self.children {
+            let mut child_cb = self.dimensions;
+            child_cb.content.x = cur_x;
+            child_cb.content.y = cur_y;
+            child.layout(child_cb);
+
+            let mb = child.dimensions.margin_box();
+            max_row_h = max_row_h.max(mb.height);
+
+            if cur_x + mb.width > containing_block.content.x + containing_block.content.width && cur_x > self.dimensions.content.x {
+                cur_x = self.dimensions.content.x;
+                cur_y += max_row_h + 8.0;
+                max_row_h = mb.height;
+                child.dimensions.content.x = cur_x;
+                child.dimensions.content.y = cur_y;
+            }
+
+            cur_x += mb.width + 8.0;
+            max_w = max_w.max(cur_x - self.dimensions.content.x);
+        }
+
+        self.dimensions.content.width = max_w.max(60.0);
+        self.dimensions.content.height = (cur_y + max_row_h - self.dimensions.content.y).max(24.0);
     }
 
     fn calculate_block_width(&mut self, containing_block: Dimensions) {
@@ -210,19 +276,28 @@ impl<'a> LayoutBox<'a> {
 
         let total_non_content = margin_left + margin_right + border_left + border_right + padding_left + padding_right;
 
-        let content_width = match width {
+        let mut content_width = match width {
             Value::Length(px, crate::css::Unit::Px) => *px,
             Value::Length(pct, crate::css::Unit::Percent) => (containing_block.content.width * (pct / 100.0) - total_non_content).max(0.0),
-            _ => {
-                // auto width fills containing block
-                (containing_block.content.width - total_non_content).max(0.0)
-            }
+            _ => (containing_block.content.width - total_non_content).max(0.0),
         };
 
-        // Center content if margin is auto
+        // Support max-width (e.g. max-width: 840px on .dashboard)
+        if let Some(max_val) = style.and_then(|s| s.value("max-width")) {
+            let max_w = max_val.to_px();
+            if max_w > 0.0 && content_width > max_w {
+                content_width = max_w;
+            }
+        }
+
+        // Center content if margin-left and margin-right are auto or margin is 0 auto
         let underflow = containing_block.content.width - (content_width + total_non_content);
         if underflow > 0.0 {
-            if style.map_or(false, |s| s.lookup("margin", "0") == Value::Keyword("auto".to_owned())) {
+            let has_auto_margin = style.map_or(false, |s| {
+                matches!(s.lookup("margin", "0"), Value::Keyword(ref k) if k == "auto" || k.contains("auto"))
+                    || s.lookup("margin-left", "") == Value::Keyword("auto".to_owned())
+            });
+            if has_auto_margin {
                 margin_left += underflow / 2.0;
                 margin_right += underflow / 2.0;
             }
@@ -279,35 +354,75 @@ impl<'a> LayoutBox<'a> {
         self.dimensions.padding.bottom = padding_bottom;
 
         self.dimensions.content.x = containing_block.content.x + self.dimensions.margin.left + self.dimensions.border.left + self.dimensions.padding.left;
-        self.dimensions.content.y = containing_block.content.height + containing_block.content.y + self.dimensions.margin.top + self.dimensions.border.top + self.dimensions.padding.top;
+        self.dimensions.content.y = containing_block.content.y + self.dimensions.margin.top + self.dimensions.border.top + self.dimensions.padding.top;
     }
 
     fn layout_block_children(&mut self) {
+        let mut cur_y = self.dimensions.content.y;
+        let mut cur_x = self.dimensions.content.x;
+        let mut row_h: f32 = 0.0;
+
         for child in &mut self.children {
-            child.layout(self.dimensions);
-            self.dimensions.content.height += child.dimensions.margin_box().height;
+            let is_inline_flow = matches!(child.box_type, BoxType::InlineNode(_));
+
+            if is_inline_flow {
+                // Inline / inline-block child: layout along horizontal row
+                let mut child_cb = self.dimensions;
+                child_cb.content.x = cur_x;
+                child_cb.content.y = cur_y;
+                child.layout(child_cb);
+
+                let mb = child.dimensions.margin_box();
+                row_h = row_h.max(mb.height);
+
+                if cur_x + mb.width > self.dimensions.content.x + self.dimensions.content.width && cur_x > self.dimensions.content.x {
+                    // Wrap to next row
+                    cur_x = self.dimensions.content.x;
+                    cur_y += row_h + 8.0;
+                    row_h = mb.height;
+                    child.dimensions.content.x = cur_x;
+                    child.dimensions.content.y = cur_y;
+                }
+                cur_x += mb.width + 12.0;
+            } else {
+                // Block child: end current inline row if any, stack vertically
+                if row_h > 0.0 {
+                    cur_y += row_h + 8.0;
+                    row_h = 0.0;
+                    cur_x = self.dimensions.content.x;
+                }
+                let mut child_cb = self.dimensions;
+                child_cb.content.y = cur_y;
+                child.layout(child_cb);
+
+                cur_y += child.dimensions.margin_box().height;
+            }
         }
+
+        if row_h > 0.0 {
+            cur_y += row_h;
+        }
+
+        self.dimensions.content.height = (cur_y - self.dimensions.content.y).max(0.0);
     }
 
     fn calculate_block_height(&mut self) {
-        // If explicit CSS height property is given, override content height
         if let Some(style) = self.get_styled_node() {
             if let Some(Value::Length(h, crate::css::Unit::Px)) = style.value("height") {
                 self.dimensions.content.height = *h;
             } else if self.dimensions.content.height == 0.0 {
-                // Minimum non-empty height for leaf element text
                 if let Some(tag) = style.node.tag_name() {
                     match tag {
-                        "h1" => self.dimensions.content.height = 38.0,
-                        "h2" => self.dimensions.content.height = 30.0,
-                        "h3" => self.dimensions.content.height = 24.0,
-                        "p" | "a" | "span" | "li" => self.dimensions.content.height = 20.0,
+                        "h1" => self.dimensions.content.height = 42.0,
+                        "h2" => self.dimensions.content.height = 32.0,
+                        "h3" => self.dimensions.content.height = 26.0,
+                        "p" | "a" | "span" | "li" => self.dimensions.content.height = 22.0,
                         "button" => self.dimensions.content.height = 36.0,
                         "hr" => self.dimensions.content.height = 2.0,
                         _ => {}
                     }
                 } else if style.node.is_text() {
-                    self.dimensions.content.height = 18.0;
+                    self.dimensions.content.height = 20.0;
                 }
             }
         }
@@ -319,7 +434,6 @@ impl<'a> LayoutBox<'a> {
             return None;
         }
 
-        // Test children in reverse paint order (top-most first)
         for child in self.children.iter().rev() {
             if let Some(found) = child.hit_test(x, y) {
                 return Some(found);
