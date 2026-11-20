@@ -19,12 +19,14 @@ pub mod shields_panel;
 pub mod tab;
 
 pub use bookmarks::{Bookmark, BookmarkManager};
-pub use browser::AeroBrowser;
+pub use browser::{AeroBrowser, LayoutGeometry};
 pub use chrome::{
     hit_test_chrome, render_chrome, ChromeClickTarget, BOOKMARKS_HEIGHT, NAVBAR_HEIGHT,
     TAB_STRIP_HEIGHT, TOTAL_CHROME_HEIGHT,
 };
-pub use devtools::{render_devtools_panel, DevToolsState, DevToolsTab};
+pub use devtools::{
+    render_devtools_panel, DevToolsDragMode, DevToolsState, DevToolsTab, DockSide,
+};
 pub use shields_panel::render_shields_flyout;
 pub use tab::{Tab, TabManager};
 
@@ -386,9 +388,75 @@ mod tests {
         assert_eq!(browser.devtools.dock_side, devtools::DockSide::Left);
         assert!(!browser.devtools.show_more_options);
 
-        // Close DevTools button
-        let clicked_close = browser.handle_click(right_x + 40, devtools_y + 12, 1024, 720);
+        // Close DevTools button on Left-docked panel (dt_w = 440, close_x = 440 - 120 + 36 = 356)
+        let geo = browser.layout_geometry(1024, 720);
+        let clicked_close = browser.handle_click(geo.dt_x + geo.dt_w - 120 + 40, geo.dt_y + 12, 1024, 720);
         assert!(clicked_close);
         assert!(!browser.devtools.is_open);
+    }
+
+    #[test]
+    fn test_devtools_mouse_drag_resize_and_docking_modes() {
+        let mut browser = AeroBrowser::new();
+        browser.devtools.is_open = true;
+
+        // 1. Bottom Dock Drag Resize
+        browser.devtools.dock_side = devtools::DockSide::Bottom;
+        browser.devtools.panel_height = 300;
+        let geo = browser.layout_geometry(1024, 720);
+        assert_eq!(geo.dt_y, 720 - 300);
+
+        // Mouse down on splitter handle
+        let down = browser.handle_mouse_down(512, geo.dt_y - 2, 1024, 720);
+        assert!(down);
+        assert!(browser.devtools.is_dragging);
+        assert_eq!(browser.devtools.drag_mode, DevToolsDragMode::ResizeBottom);
+
+        // Drag up 60px -> height becomes 360
+        let moved = browser.handle_mouse_move(512, geo.dt_y - 62, 1024, 720);
+        assert!(moved);
+        assert_eq!(browser.devtools.panel_height, 360);
+
+        // Mouse up
+        let up = browser.handle_mouse_up(512, geo.dt_y - 62, 1024, 720);
+        assert!(up);
+        assert!(!browser.devtools.is_dragging);
+
+        // 2. Right Dock Drag Resize
+        browser.devtools.dock_side = devtools::DockSide::Right;
+        browser.devtools.panel_width = 400;
+        let geo_r = browser.layout_geometry(1024, 720);
+        assert_eq!(geo_r.dt_x, 1024 - 400);
+
+        // Mouse down on vertical splitter
+        let down_r = browser.handle_mouse_down(geo_r.dt_x - 2, 300, 1024, 720);
+        assert!(down_r);
+        assert_eq!(browser.devtools.drag_mode, DevToolsDragMode::ResizeRight);
+
+        // Drag left 50px -> width becomes 450
+        let moved_r = browser.handle_mouse_move(geo_r.dt_x - 52, 300, 1024, 720);
+        assert!(moved_r);
+        assert_eq!(browser.devtools.panel_width, 450);
+
+        browser.handle_mouse_up(geo_r.dt_x - 52, 300, 1024, 720);
+
+        // 3. Undocked Floating Window
+        browser.devtools.dock_side = devtools::DockSide::Undocked;
+        let geo_u = browser.layout_geometry(1024, 720);
+
+        // Title bar drag moves window
+        let down_u = browser.handle_mouse_down(geo_u.dt_x + 100, geo_u.dt_y + 10, 1024, 720);
+        assert!(down_u);
+        assert_eq!(browser.devtools.drag_mode, DevToolsDragMode::MoveUndocked);
+
+        let moved_u = browser.handle_mouse_move(geo_u.dt_x + 130, geo_u.dt_y + 30, 1024, 720);
+        assert!(moved_u);
+        browser.handle_mouse_up(geo_u.dt_x + 130, geo_u.dt_y + 30, 1024, 720);
+
+        // Render frame with undocked window
+        let mut surface = vec![0u32; 1024 * 720];
+        browser.render(&mut surface, 1024, 720);
+        let non_zero = surface.iter().filter(|&&p| p != 0).count();
+        assert!(non_zero > 100_000);
     }
 }

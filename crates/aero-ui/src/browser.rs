@@ -29,11 +29,24 @@ use crate::chrome::{
     TAB_STRIP_HEIGHT, TOTAL_CHROME_HEIGHT,
 };
 use crate::devtools::{
-    hit_test_devtools, render_devtools_panel, DevToolsClickTarget, DevToolsState, DevToolsTab,
-    DockSide,
+    draw_border, fill_rect, fill_rounded_rect, hit_test_devtools, render_devtools_panel,
+    DevToolsClickTarget, DevToolsDragMode, DevToolsState, DevToolsTab, DockSide,
 };
 use crate::shields_panel::render_shields_flyout;
 use crate::tab::{Tab, TabManager};
+
+/// Layout geometry computed for browser viewport and DevTools panel across all 4 dock orientations.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LayoutGeometry {
+    pub vp_x: usize,
+    pub vp_y: usize,
+    pub vp_w: usize,
+    pub vp_h: usize,
+    pub dt_x: i32,
+    pub dt_y: i32,
+    pub dt_w: i32,
+    pub dt_h: i32,
+}
 
 /// The primary Aero Browser state controller.
 pub struct AeroBrowser {
@@ -160,6 +173,218 @@ impl AeroBrowser {
             self.refresh_current_page();
         }
         changed
+    }
+
+    /// Calculates the layout geometry for the webpage viewport and DevTools panel based on dock side.
+    pub fn layout_geometry(&self, width: usize, height: usize) -> LayoutGeometry {
+        let chrome_h = TOTAL_CHROME_HEIGHT as usize;
+        if !self.devtools.is_open {
+            return LayoutGeometry {
+                vp_x: 0,
+                vp_y: chrome_h,
+                vp_w: width,
+                vp_h: height.saturating_sub(chrome_h),
+                dt_x: 0,
+                dt_y: 0,
+                dt_w: 0,
+                dt_h: 0,
+            };
+        }
+
+        match self.devtools.dock_side {
+            DockSide::Bottom => {
+                let max_h = (height.saturating_sub(chrome_h + 80) as i32).max(120);
+                let dt_h = self.devtools.panel_height.clamp(120, max_h);
+                let vp_h = height.saturating_sub(chrome_h + dt_h as usize);
+                let dt_y = (height as i32) - dt_h;
+                LayoutGeometry {
+                    vp_x: 0,
+                    vp_y: chrome_h,
+                    vp_w: width,
+                    vp_h,
+                    dt_x: 0,
+                    dt_y,
+                    dt_w: width as i32,
+                    dt_h,
+                }
+            }
+            DockSide::Right => {
+                let max_w = (width.saturating_sub(180) as i32).max(260);
+                let dt_w = self.devtools.panel_width.clamp(260, max_w);
+                let vp_w = width.saturating_sub(dt_w as usize);
+                let dt_x = (width as i32) - dt_w;
+                let dt_h = (height.saturating_sub(chrome_h)) as i32;
+                LayoutGeometry {
+                    vp_x: 0,
+                    vp_y: chrome_h,
+                    vp_w,
+                    vp_h: height.saturating_sub(chrome_h),
+                    dt_x,
+                    dt_y: chrome_h as i32,
+                    dt_w,
+                    dt_h,
+                }
+            }
+            DockSide::Left => {
+                let max_w = (width.saturating_sub(180) as i32).max(260);
+                let dt_w = self.devtools.panel_width.clamp(260, max_w);
+                let vp_w = width.saturating_sub(dt_w as usize);
+                let dt_h = (height.saturating_sub(chrome_h)) as i32;
+                LayoutGeometry {
+                    vp_x: dt_w as usize,
+                    vp_y: chrome_h,
+                    vp_w,
+                    vp_h: height.saturating_sub(chrome_h),
+                    dt_x: 0,
+                    dt_y: chrome_h as i32,
+                    dt_w,
+                    dt_h,
+                }
+            }
+            DockSide::Undocked => {
+                let dt_w = self.devtools.undocked_w.clamp(360, (width as i32 - 40).max(360));
+                let dt_h = self.devtools.undocked_h.clamp(240, (height as i32 - chrome_h as i32 - 40).max(240));
+                let dt_x = self.devtools.undocked_x.clamp(20, (width as i32 - dt_w - 20).max(20));
+                let dt_y = self.devtools.undocked_y.clamp(chrome_h as i32 + 10, (height as i32 - dt_h - 20).max(chrome_h as i32 + 10));
+                LayoutGeometry {
+                    vp_x: 0,
+                    vp_y: chrome_h,
+                    vp_w: width,
+                    vp_h: height.saturating_sub(chrome_h),
+                    dt_x,
+                    dt_y,
+                    dt_w,
+                    dt_h,
+                }
+            }
+        }
+    }
+
+    /// Handles mouse button down for DevTools resizing or moving.
+    pub fn handle_mouse_down(&mut self, x: i32, y: i32, width: usize, height: usize) -> bool {
+        if !self.devtools.is_open {
+            return false;
+        }
+
+        let geo = self.layout_geometry(width, height);
+
+        match self.devtools.dock_side {
+            DockSide::Bottom => {
+                // Splitter bar hit test (thickness: 8px around border)
+                if y >= geo.dt_y - 6 && y <= geo.dt_y + 4 && x >= 0 && x < width as i32 {
+                    self.devtools.is_dragging = true;
+                    self.devtools.drag_mode = DevToolsDragMode::ResizeBottom;
+                    self.devtools.drag_start_y = y;
+                    self.devtools.drag_start_dim = self.devtools.panel_height;
+                    return true;
+                }
+            }
+            DockSide::Right => {
+                // Splitter bar hit test (thickness: 8px around left edge of panel)
+                if x >= geo.dt_x - 6 && x <= geo.dt_x + 4 && y >= geo.dt_y && y < height as i32 {
+                    self.devtools.is_dragging = true;
+                    self.devtools.drag_mode = DevToolsDragMode::ResizeRight;
+                    self.devtools.drag_start_x = x;
+                    self.devtools.drag_start_dim = self.devtools.panel_width;
+                    return true;
+                }
+            }
+            DockSide::Left => {
+                // Splitter bar hit test (thickness: 8px around right edge of panel)
+                if x >= geo.dt_w - 4 && x <= geo.dt_w + 6 && y >= geo.dt_y && y < height as i32 {
+                    self.devtools.is_dragging = true;
+                    self.devtools.drag_mode = DevToolsDragMode::ResizeLeft;
+                    self.devtools.drag_start_x = x;
+                    self.devtools.drag_start_dim = self.devtools.panel_width;
+                    return true;
+                }
+            }
+            DockSide::Undocked => {
+                // Undocked Title Bar at geo.dt_y .. geo.dt_y + 26
+                if x >= geo.dt_x && x < geo.dt_x + geo.dt_w && y >= geo.dt_y && y < geo.dt_y + 26 {
+                    // Re-dock to bottom button [⬓]
+                    if x >= geo.dt_x + geo.dt_w - 52 && x < geo.dt_x + geo.dt_w - 28 {
+                        self.devtools.dock_side = DockSide::Bottom;
+                        return true;
+                    }
+                    // Close button [✕]
+                    if x >= geo.dt_x + geo.dt_w - 26 && x < geo.dt_x + geo.dt_w - 4 {
+                        self.devtools.is_open = false;
+                        return true;
+                    }
+                    // Moving floating window
+                    self.devtools.is_dragging = true;
+                    self.devtools.drag_mode = DevToolsDragMode::MoveUndocked;
+                    self.devtools.drag_start_x = x - geo.dt_x;
+                    self.devtools.drag_start_y = y - geo.dt_y;
+                    return true;
+                }
+                // Resize bottom-right corner
+                if x >= geo.dt_x + geo.dt_w - 14 && x <= geo.dt_x + geo.dt_w && y >= geo.dt_y + geo.dt_h - 14 && y <= geo.dt_y + geo.dt_h {
+                    self.devtools.is_dragging = true;
+                    self.devtools.drag_mode = DevToolsDragMode::ResizeUndockedCorner;
+                    return true;
+                }
+            }
+        }
+
+        false
+    }
+
+    /// Handles mouse motion to update DevTools size or position while dragging.
+    pub fn handle_mouse_move(&mut self, x: i32, y: i32, width: usize, height: usize) -> bool {
+        if !self.devtools.is_dragging {
+            return false;
+        }
+
+        let chrome_h = TOTAL_CHROME_HEIGHT as i32;
+
+        match self.devtools.drag_mode {
+            DevToolsDragMode::ResizeBottom => {
+                let delta_y = y - self.devtools.drag_start_y;
+                let new_h = self.devtools.drag_start_dim - delta_y;
+                let max_h = (height as i32 - chrome_h - 60).max(120);
+                self.devtools.panel_height = new_h.clamp(120, max_h);
+                true
+            }
+            DevToolsDragMode::ResizeRight => {
+                let delta_x = x - self.devtools.drag_start_x;
+                let new_w = self.devtools.drag_start_dim - delta_x;
+                let max_w = (width as i32 - 180).max(260);
+                self.devtools.panel_width = new_w.clamp(260, max_w);
+                true
+            }
+            DevToolsDragMode::ResizeLeft => {
+                let delta_x = x - self.devtools.drag_start_x;
+                let new_w = self.devtools.drag_start_dim + delta_x;
+                let max_w = (width as i32 - 180).max(260);
+                self.devtools.panel_width = new_w.clamp(260, max_w);
+                true
+            }
+            DevToolsDragMode::MoveUndocked => {
+                self.devtools.undocked_x = (x - self.devtools.drag_start_x).clamp(0, (width as i32 - 100).max(0));
+                self.devtools.undocked_y = (y - self.devtools.drag_start_y).clamp(chrome_h, (height as i32 - 80).max(chrome_h));
+                true
+            }
+            DevToolsDragMode::ResizeUndockedCorner => {
+                let new_w = x - self.devtools.undocked_x;
+                let new_h = y - self.devtools.undocked_y;
+                self.devtools.undocked_w = new_w.clamp(360, (width as i32 - 20).max(360));
+                self.devtools.undocked_h = new_h.clamp(240, (height as i32 - chrome_h - 20).max(240));
+                true
+            }
+            DevToolsDragMode::None => false,
+        }
+    }
+
+    /// Handles mouse button release to finalize dragging.
+    pub fn handle_mouse_up(&mut self, _x: i32, _y: i32, _width: usize, _height: usize) -> bool {
+        if self.devtools.is_dragging {
+            self.devtools.is_dragging = false;
+            self.devtools.drag_mode = DevToolsDragMode::None;
+            return true;
+        }
+        false
     }
 
     /// Returns a reference to the active tab.
@@ -433,67 +658,85 @@ impl AeroBrowser {
         }
 
         // 2. DevTools click test if open
-        let devtools_h = if self.devtools.is_open { self.devtools.panel_height } else { 0 };
-        let devtools_y = h - devtools_h;
+        if self.devtools.is_open {
+            let geo = self.layout_geometry(width, height);
+            let (dt_panel_x, dt_panel_y, dt_panel_w, dt_panel_h) = if self.devtools.dock_side == DockSide::Undocked {
+                // If clicked on undocked title bar
+                if x >= geo.dt_x && x < geo.dt_x + geo.dt_w && y >= geo.dt_y && y < geo.dt_y + 26 {
+                    if x >= geo.dt_x + geo.dt_w - 52 && x < geo.dt_x + geo.dt_w - 28 {
+                        self.devtools.dock_side = DockSide::Bottom;
+                        return true;
+                    }
+                    if x >= geo.dt_x + geo.dt_w - 26 && x < geo.dt_x + geo.dt_w - 4 {
+                        self.devtools.is_open = false;
+                        return true;
+                    }
+                    return true;
+                }
+                (geo.dt_x, geo.dt_y + 26, geo.dt_w, geo.dt_h - 26)
+            } else {
+                (geo.dt_x, geo.dt_y, geo.dt_w, geo.dt_h)
+            };
 
-        if self.devtools.is_open && y >= devtools_y {
-            let target = hit_test_devtools(x, y, 0, devtools_y, width as i32, devtools_h, &self.devtools);
-            match target {
-                DevToolsClickTarget::SelectTab(tab) => {
-                    self.devtools.active_tab = tab;
-                    self.devtools.show_more_options = false;
-                    return true;
-                }
-                DevToolsClickTarget::ToggleInspectElement => {
-                    self.devtools.inspect_element_mode = !self.devtools.inspect_element_mode;
-                    return true;
-                }
-                DevToolsClickTarget::ToggleResponsive => {
-                    self.devtools.responsive_mode = !self.devtools.responsive_mode;
-                    return true;
-                }
-                DevToolsClickTarget::ToggleMoreOptions => {
-                    self.devtools.show_more_options = !self.devtools.show_more_options;
-                    return true;
-                }
-                DevToolsClickTarget::CloseDevTools => {
-                    self.devtools.is_open = false;
-                    self.devtools.show_more_options = false;
-                    return true;
-                }
-                DevToolsClickTarget::SetDockSide(dock) => {
-                    self.devtools.dock_side = dock;
-                    self.devtools.show_more_options = false;
-                    return true;
-                }
-                DevToolsClickTarget::SetNetworkFilter(filter) => {
-                    self.devtools.network_type_filter = filter;
-                    return true;
-                }
-                DevToolsClickTarget::SetMemoryProfileType(idx) => {
-                    self.devtools.memory_profiling_type = idx;
-                    return true;
-                }
-                DevToolsClickTarget::SetAppSelectedItem(item) => {
-                    self.devtools.app_selected_item = item;
-                    return true;
-                }
-                DevToolsClickTarget::ToggleRecord => {
-                    if self.devtools.active_tab == DevToolsTab::Network {
-                        self.devtools.network_recording = !self.devtools.network_recording;
-                    } else if self.devtools.active_tab == DevToolsTab::Performance {
-                        self.devtools.perf_recording = !self.devtools.perf_recording;
-                    }
-                    return true;
-                }
-                DevToolsClickTarget::ClearData | DevToolsClickTarget::TakeSnapshot => {
-                    return true;
-                }
-                DevToolsClickTarget::None => {
-                    if self.devtools.show_more_options {
+            if x >= dt_panel_x && x < dt_panel_x + dt_panel_w && y >= dt_panel_y && y < dt_panel_y + dt_panel_h {
+                let target = hit_test_devtools(x, y, dt_panel_x, dt_panel_y, dt_panel_w, dt_panel_h, &self.devtools);
+                match target {
+                    DevToolsClickTarget::SelectTab(tab) => {
+                        self.devtools.active_tab = tab;
                         self.devtools.show_more_options = false;
+                        return true;
                     }
-                    return true;
+                    DevToolsClickTarget::ToggleInspectElement => {
+                        self.devtools.inspect_element_mode = !self.devtools.inspect_element_mode;
+                        return true;
+                    }
+                    DevToolsClickTarget::ToggleResponsive => {
+                        self.devtools.responsive_mode = !self.devtools.responsive_mode;
+                        return true;
+                    }
+                    DevToolsClickTarget::ToggleMoreOptions => {
+                        self.devtools.show_more_options = !self.devtools.show_more_options;
+                        return true;
+                    }
+                    DevToolsClickTarget::CloseDevTools => {
+                        self.devtools.is_open = false;
+                        self.devtools.show_more_options = false;
+                        return true;
+                    }
+                    DevToolsClickTarget::SetDockSide(dock) => {
+                        self.devtools.dock_side = dock;
+                        self.devtools.show_more_options = false;
+                        return true;
+                    }
+                    DevToolsClickTarget::SetNetworkFilter(filter) => {
+                        self.devtools.network_type_filter = filter;
+                        return true;
+                    }
+                    DevToolsClickTarget::SetMemoryProfileType(idx) => {
+                        self.devtools.memory_profiling_type = idx;
+                        return true;
+                    }
+                    DevToolsClickTarget::SetAppSelectedItem(item) => {
+                        self.devtools.app_selected_item = item;
+                        return true;
+                    }
+                    DevToolsClickTarget::ToggleRecord => {
+                        if self.devtools.active_tab == DevToolsTab::Network {
+                            self.devtools.network_recording = !self.devtools.network_recording;
+                        } else if self.devtools.active_tab == DevToolsTab::Performance {
+                            self.devtools.perf_recording = !self.devtools.perf_recording;
+                        }
+                        return true;
+                    }
+                    DevToolsClickTarget::ClearData | DevToolsClickTarget::TakeSnapshot => {
+                        return true;
+                    }
+                    DevToolsClickTarget::None => {
+                        if self.devtools.show_more_options {
+                            self.devtools.show_more_options = false;
+                        }
+                        return true;
+                    }
                 }
             }
         }
@@ -1074,50 +1317,129 @@ impl AeroBrowser {
             self.omnibox_focused,
         );
 
-        // 2. Compute Viewport dimensions
-        let chrome_h = TOTAL_CHROME_HEIGHT as usize;
-        let devtools_h = if self.devtools.is_open { self.devtools.panel_height as usize } else { 0 };
-        let vp_h = height.saturating_sub(chrome_h + devtools_h);
+        // 2. Compute Viewport and DevTools layout geometry based on DockSide
+        let geo = self.layout_geometry(width, height);
 
-        if vp_h > 0 {
-            let vp_offset = chrome_h * width;
-            let vp_len = vp_h * width;
-
-            if surface.len() >= vp_offset + vp_len {
-                let vp_slice = &mut surface[vp_offset..vp_offset + vp_len];
-
-                // Render page HTML into viewport slice
+        if geo.vp_h > 0 && geo.vp_w > 0 {
+            if geo.vp_x == 0 && geo.vp_w == width {
+                // Viewport spans full width (Bottom dock, Undocked, or DevTools closed)
+                let vp_offset = geo.vp_y * width;
+                let vp_len = geo.vp_h * width;
+                if surface.len() >= vp_offset + vp_len {
+                    let vp_slice = &mut surface[vp_offset..vp_offset + vp_len];
+                    let active_tab = self.tab_mgr.active_tab();
+                    let (content_height, _) = render_html_to_surface(
+                        &active_tab.html_source,
+                        vp_slice,
+                        width,
+                        geo.vp_h,
+                        active_tab.scroll_y,
+                    );
+                    self.tab_mgr.active_tab_mut().max_scroll = (content_height - geo.vp_h as f32).max(0.0);
+                }
+            } else {
+                // Viewport has custom width/offset (Right or Left dock)
+                let mut vp_buffer = vec![0u32; geo.vp_w * geo.vp_h];
                 let active_tab = self.tab_mgr.active_tab();
                 let (content_height, _) = render_html_to_surface(
                     &active_tab.html_source,
-                    vp_slice,
-                    width,
-                    vp_h,
+                    &mut vp_buffer,
+                    geo.vp_w,
+                    geo.vp_h,
                     active_tab.scroll_y,
                 );
+                self.tab_mgr.active_tab_mut().max_scroll = (content_height - geo.vp_h as f32).max(0.0);
 
-                // Update tab scroll boundaries
-                self.tab_mgr.active_tab_mut().max_scroll = (content_height - vp_h as f32).max(0.0);
+                // Blit row-by-row into surface
+                for row in 0..geo.vp_h {
+                    let src_start = row * geo.vp_w;
+                    let dst_start = (geo.vp_y + row) * width + geo.vp_x;
+                    if dst_start + geo.vp_w <= surface.len() {
+                        surface[dst_start..dst_start + geo.vp_w].copy_from_slice(&vp_buffer[src_start..src_start + geo.vp_w]);
+                    }
+                }
             }
         }
 
-        // 3. Render Chrome DevTools Inspector if open
-        if self.devtools.is_open && devtools_h > 0 {
-            let devtools_y = (height - devtools_h) as i32;
-            let dom = self.cached_dom.get_or_insert_with(|| {
-                HtmlParser::parse(&self.tab_mgr.active_tab().html_source)
-            });
-            render_devtools_panel(
-                surface,
-                width,
-                height,
-                0,
-                devtools_y,
-                width as i32,
-                devtools_h as i32,
-                &self.devtools,
-                dom,
-            );
+        // 3. Render DevTools according to DockSide
+        if self.devtools.is_open && geo.dt_w > 0 && geo.dt_h > 0 {
+            match self.devtools.dock_side {
+                DockSide::Bottom => {
+                    // Splitter bar
+                    let split_y = geo.dt_y - 3;
+                    let is_resizing = self.devtools.is_dragging && self.devtools.drag_mode == DevToolsDragMode::ResizeBottom;
+                    let split_col = if is_resizing { Color::rgb(56, 189, 248) } else { Color::rgb(45, 55, 75) };
+                    fill_rect(surface, width, height, 0, split_y, width as i32, 3, split_col);
+                    // Center grip handle
+                    let grip_x = (width as i32 / 2) - 20;
+                    fill_rect(surface, width, height, grip_x, split_y + 1, 40, 1, Color::rgb(148, 163, 184));
+
+                    let dom = self.cached_dom.get_or_insert_with(|| {
+                        HtmlParser::parse(&self.tab_mgr.active_tab().html_source)
+                    });
+                    render_devtools_panel(surface, width, height, 0, geo.dt_y, width as i32, geo.dt_h, &self.devtools, dom);
+                }
+                DockSide::Right => {
+                    // Splitter bar
+                    let split_x = geo.dt_x - 3;
+                    let is_resizing = self.devtools.is_dragging && self.devtools.drag_mode == DevToolsDragMode::ResizeRight;
+                    let split_col = if is_resizing { Color::rgb(56, 189, 248) } else { Color::rgb(45, 55, 75) };
+                    fill_rect(surface, width, height, split_x, geo.dt_y, 3, geo.dt_h, split_col);
+                    // Center grip handle
+                    let grip_y = geo.dt_y + (geo.dt_h / 2) - 20;
+                    fill_rect(surface, width, height, split_x + 1, grip_y, 1, 40, Color::rgb(148, 163, 184));
+
+                    let dom = self.cached_dom.get_or_insert_with(|| {
+                        HtmlParser::parse(&self.tab_mgr.active_tab().html_source)
+                    });
+                    render_devtools_panel(surface, width, height, geo.dt_x, geo.dt_y, geo.dt_w, geo.dt_h, &self.devtools, dom);
+                }
+                DockSide::Left => {
+                    // Splitter bar
+                    let split_x = geo.dt_w;
+                    let is_resizing = self.devtools.is_dragging && self.devtools.drag_mode == DevToolsDragMode::ResizeLeft;
+                    let split_col = if is_resizing { Color::rgb(56, 189, 248) } else { Color::rgb(45, 55, 75) };
+                    fill_rect(surface, width, height, split_x, geo.dt_y, 3, geo.dt_h, split_col);
+                    // Center grip handle
+                    let grip_y = geo.dt_y + (geo.dt_h / 2) - 20;
+                    fill_rect(surface, width, height, split_x + 1, grip_y, 1, 40, Color::rgb(148, 163, 184));
+
+                    let dom = self.cached_dom.get_or_insert_with(|| {
+                        HtmlParser::parse(&self.tab_mgr.active_tab().html_source)
+                    });
+                    render_devtools_panel(surface, width, height, 0, geo.dt_y, geo.dt_w, geo.dt_h, &self.devtools, dom);
+                }
+                DockSide::Undocked => {
+                    // Window Drop Shadow
+                    fill_rect(surface, width, height, geo.dt_x + 4, geo.dt_y + 4, geo.dt_w, geo.dt_h, Color::rgb(0, 0, 0));
+                    // Outer Frame
+                    fill_rounded_rect(surface, width, height, geo.dt_x, geo.dt_y, geo.dt_w, geo.dt_h, 6, Color::rgb(15, 23, 42));
+                    draw_border(surface, width, height, geo.dt_x, geo.dt_y, geo.dt_w, geo.dt_h, 1, 6, Color::rgb(56, 189, 248));
+
+                    // Window Title Bar (height: 26px)
+                    fill_rect(surface, width, height, geo.dt_x, geo.dt_y, geo.dt_w, 26, Color::rgb(30, 41, 59));
+                    fill_rect(surface, width, height, geo.dt_x, geo.dt_y + 25, geo.dt_w, 1, Color::rgb(51, 65, 85));
+                    aero_engine::font::render_text(surface, width, height, geo.dt_x + 10, geo.dt_y + 6, "Developer Tools - Aero Browser", Color::WHITE, 12.0, true);
+
+                    // Re-dock to bottom button [⬓]
+                    aero_engine::font::render_text(surface, width, height, geo.dt_x + geo.dt_w - 48, geo.dt_y + 6, "⬓", Color::rgb(56, 189, 248), 12.0, true);
+                    // Close button [✕]
+                    aero_engine::font::render_text(surface, width, height, geo.dt_x + geo.dt_w - 22, geo.dt_y + 6, "✕", Color::rgb(148, 163, 184), 12.0, false);
+
+                    // Panel Content
+                    let dom = self.cached_dom.get_or_insert_with(|| {
+                        HtmlParser::parse(&self.tab_mgr.active_tab().html_source)
+                    });
+                    render_devtools_panel(surface, width, height, geo.dt_x, geo.dt_y + 26, geo.dt_w, geo.dt_h - 26, &self.devtools, dom);
+
+                    // Resize corner grip (bottom-right)
+                    let cr_x = geo.dt_x + geo.dt_w - 10;
+                    let cr_y = geo.dt_y + geo.dt_h - 10;
+                    fill_rect(surface, width, height, cr_x + 4, cr_y + 6, 4, 1, Color::rgb(148, 163, 184));
+                    fill_rect(surface, width, height, cr_x + 2, cr_y + 4, 6, 1, Color::rgb(148, 163, 184));
+                    fill_rect(surface, width, height, cr_x, cr_y + 2, 8, 1, Color::rgb(148, 163, 184));
+                }
+            }
         }
 
         // 4. Render Brave Shields Flyout drop-down if active

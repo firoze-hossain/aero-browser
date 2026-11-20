@@ -51,6 +51,17 @@ pub enum DockSide {
     Undocked,
 }
 
+/// Drag mode for mouse resizing and moving of DevTools.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DevToolsDragMode {
+    None,
+    ResizeBottom,
+    ResizeRight,
+    ResizeLeft,
+    MoveUndocked,
+    ResizeUndockedCorner,
+}
+
 /// Interactive state of the DevTools panel.
 #[derive(Debug, Clone)]
 pub struct DevToolsState {
@@ -59,6 +70,15 @@ pub struct DevToolsState {
     pub dock_side: DockSide,
     pub panel_height: i32,
     pub panel_width: i32,
+    pub undocked_x: i32,
+    pub undocked_y: i32,
+    pub undocked_w: i32,
+    pub undocked_h: i32,
+    pub is_dragging: bool,
+    pub drag_mode: DevToolsDragMode,
+    pub drag_start_x: i32,
+    pub drag_start_y: i32,
+    pub drag_start_dim: i32,
     pub show_more_options: bool,
     pub show_console_drawer: bool,
     pub inspect_element_mode: bool,
@@ -91,6 +111,15 @@ impl Default for DevToolsState {
             dock_side: DockSide::Bottom,
             panel_height: 350,
             panel_width: 440,
+            undocked_x: 80,
+            undocked_y: 90,
+            undocked_w: 720,
+            undocked_h: 460,
+            is_dragging: false,
+            drag_mode: DevToolsDragMode::None,
+            drag_start_x: 0,
+            drag_start_y: 0,
+            drag_start_dim: 0,
             show_more_options: false,
             show_console_drawer: false,
             inspect_element_mode: false,
@@ -148,10 +177,10 @@ pub fn hit_test_devtools(
 
     // Check more options popup first if open
     if state.show_more_options {
-        let pop_x = devtools_x + devtools_w - 240;
-        let pop_y = content_y + 2;
+        let pop_x = (devtools_x + devtools_w - 240).max(10);
+        let pop_y = (content_y + 2).max(10);
         let pop_w = 236;
-        let pop_h = 280;
+        let pop_h = 300;
 
         if x >= pop_x && x < pop_x + pop_w && y >= pop_y && y < pop_y + pop_h {
             // Check dock buttons
@@ -196,9 +225,15 @@ pub fn hit_test_devtools(
             ("Lighthouse", DevToolsTab::Lighthouse),
         ];
 
+        let right_x = devtools_x + devtools_w - 120;
+        let is_compact = devtools_w < 650;
+        let right_limit = right_x - if is_compact { 40 } else { 80 };
         let mut tab_x = devtools_x + 58;
         for (name, tab_enum) in &tabs {
-            let tab_w = (name.len() * 8) as i32 + 14;
+            let tab_w = if is_compact { (name.len() * 6) as i32 + 8 } else { (name.len() * 8) as i32 + 14 };
+            if tab_x + tab_w > right_limit {
+                break;
+            }
             if x >= tab_x && x < tab_x + tab_w {
                 return DevToolsClickTarget::SelectTab(*tab_enum);
             }
@@ -352,23 +387,30 @@ pub fn render_devtools_panel(
         ("Lighthouse", DevToolsTab::Lighthouse),
     ];
 
+    let right_x = x + w - 120;
+    let is_compact = w < 650;
+    let right_limit = right_x - if is_compact { 40 } else { 80 };
     let mut tab_x = x + 58;
     for (name, tab_enum) in &tabs {
         let is_active = state.active_tab == *tab_enum;
-        let tab_w = (name.len() * 8) as i32 + 14;
+        let tab_w = if is_compact { (name.len() * 6) as i32 + 8 } else { (name.len() * 8) as i32 + 14 };
+
+        if tab_x + tab_w > right_limit && !is_active {
+            render_text(surface, surface_w, surface_h, tab_x + 2, y + 7, ">>", Color::rgb(148, 163, 184), 11.0, false);
+            break;
+        }
 
         if is_active {
-            render_text(surface, surface_w, surface_h, tab_x + 6, y + 7, name, Color::rgb(56, 189, 248), 12.0, true);
-            fill_rect(surface, surface_w, surface_h, tab_x + 6, y + header_h - 2, tab_w - 12, 2, Color::rgb(56, 189, 248));
+            render_text(surface, surface_w, surface_h, tab_x + 4, y + 7, name, Color::rgb(56, 189, 248), if is_compact { 11.0 } else { 12.0 }, true);
+            fill_rect(surface, surface_w, surface_h, tab_x + 4, y + header_h - 2, tab_w - 8, 2, Color::rgb(56, 189, 248));
         } else {
-            render_text(surface, surface_w, surface_h, tab_x + 6, y + 7, name, Color::rgb(148, 163, 184), 12.0, false);
+            render_text(surface, surface_w, surface_h, tab_x + 4, y + 7, name, Color::rgb(148, 163, 184), if is_compact { 11.0 } else { 12.0 }, false);
         }
 
         tab_x += tab_w;
     }
 
     // Right Controls: Issues pill, Settings [⚙], More options [⋮], Close [✕]
-    let right_x = x + w - 120;
     // Issue badge: ! 1  x 3
     render_text(surface, surface_w, surface_h, right_x - 65, y + 7, "! 1  x 3", Color::rgb(251, 146, 60), 11.0, true);
 
@@ -417,9 +459,11 @@ pub fn render_devtools_panel(
         }
     }
 
-    // 3. Render Top-Right More Options / Docking Popup if open (Image 5)
+    // 3. Render Top-Right More Options / Docking Popup if open (Image 5 & Image 2)
     if state.show_more_options {
-        render_dock_side_popup(surface, surface_w, surface_h, x + w - 240, content_y + 2, state.dock_side);
+        let pop_x = (x + w - 240).clamp(10, (surface_w as i32 - 246).max(10));
+        let pop_y = (content_y + 2).clamp(10, (surface_h as i32 - 310).max(10));
+        render_dock_side_popup(surface, surface_w, surface_h, pop_x, pop_y, state.dock_side);
     }
 }
 
@@ -1097,7 +1141,7 @@ fn render_dock_side_popup(
     active_dock: DockSide,
 ) {
     let pop_w = 236;
-    let pop_h = 280;
+    let pop_h = 300;
 
     // Drop shadow
     fill_rect(surface, sw, sh, x + 4, y + 4, pop_w, pop_h, Color::rgb(0, 0, 0));
@@ -1105,27 +1149,40 @@ fn render_dock_side_popup(
     fill_rounded_rect(surface, sw, sh, x, y, pop_w, pop_h, 8, Color::rgb(24, 32, 47));
     draw_border(surface, sw, sh, x, y, pop_w, pop_h, 1, 8, Color::rgb(51, 65, 85));
 
-    // Dock Side Row (Image 5)
+    // Dock Side Row (Image 5 & Image 2)
     render_text(surface, sw, sh, x + 12, y + 10, "Dock side", Color::rgb(148, 163, 184), 11.0, false);
 
     let dock_btns = [
-        (DockSide::Undocked, "⛶"),
-        (DockSide::Left, "◧"),
-        (DockSide::Bottom, "⬓"),
-        (DockSide::Right, "◨"),
+        (DockSide::Undocked, "⛶", "Undock into separate window"),
+        (DockSide::Left, "◧", "Dock to left"),
+        (DockSide::Bottom, "⬓", "Dock to bottom"),
+        (DockSide::Right, "◨", "Dock to right"),
     ];
 
     let mut db_x = x + 105;
-    for (dock_enum, icon) in &dock_btns {
+    let mut active_tooltip = "";
+    for (dock_enum, icon, tooltip) in &dock_btns {
         let is_sel = active_dock == *dock_enum;
+        if is_sel {
+            active_tooltip = tooltip;
+        }
         let bg = if is_sel { Color::rgb(37, 99, 235) } else { Color::rgb(30, 41, 59) };
         fill_rounded_rect(surface, sw, sh, db_x, y + 6, 26, 22, 3, bg);
-        draw_border(surface, sw, sh, db_x, y + 6, 26, 22, 1, 3, Color::rgb(51, 65, 85));
+        draw_border(surface, sw, sh, db_x, y + 6, 26, 22, 1, 3, if is_sel { Color::rgb(56, 189, 248) } else { Color::rgb(51, 65, 85) });
         render_text(surface, sw, sh, db_x + 7, y + 8, icon, Color::WHITE, 12.0, is_sel);
         db_x += 30;
     }
 
-    fill_rect(surface, sw, sh, x + 8, y + 36, pop_w - 16, 1, Color::rgb(45, 55, 75));
+    // Active tooltip pill under dock buttons (Image 2)
+    if !active_tooltip.is_empty() {
+        let pill_w = (active_tooltip.len() * 6) as i32 + 12;
+        let pill_x = (x + pop_w - pill_w - 8).max(x + 10);
+        fill_rounded_rect(surface, sw, sh, pill_x, y + 31, pill_w, 18, 3, Color::rgb(15, 23, 42));
+        draw_border(surface, sw, sh, pill_x, y + 31, pill_w, 18, 1, 3, Color::rgb(56, 189, 248));
+        render_text(surface, sw, sh, pill_x + 6, y + 34, active_tooltip, Color::rgb(226, 232, 240), 9.0, false);
+    }
+
+    fill_rect(surface, sw, sh, x + 8, y + 54, pop_w - 16, 1, Color::rgb(45, 55, 75));
 
     // Menu options from Image 5:
     let options = [
@@ -1139,7 +1196,7 @@ fn render_dock_side_popup(
         ("Help", ">"),
     ];
 
-    let mut opt_y = y + 44;
+    let mut opt_y = y + 62;
     for (label, sc) in &options {
         if *label == "---" {
             fill_rect(surface, sw, sh, x + 8, opt_y + 3, pop_w - 16, 1, Color::rgb(45, 55, 75));
@@ -1281,7 +1338,7 @@ fn draw_reload_icon(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, c
     }
 }
 
-fn fill_rect(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, w: i32, h: i32, color: Color) {
+pub(crate) fn fill_rect(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, w: i32, h: i32, color: Color) {
     let x0 = x.clamp(0, sw as i32) as usize;
     let y0 = y.clamp(0, sh as i32) as usize;
     let x1 = (x + w).clamp(0, sw as i32) as usize;
@@ -1296,11 +1353,11 @@ fn fill_rect(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, w: i32, 
     }
 }
 
-fn fill_rounded_rect(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, w: i32, h: i32, _r: i32, color: Color) {
+pub(crate) fn fill_rounded_rect(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, w: i32, h: i32, _r: i32, color: Color) {
     fill_rect(surface, sw, sh, x, y, w, h, color);
 }
 
-fn draw_border(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, w: i32, h: i32, b: i32, _r: i32, color: Color) {
+pub(crate) fn draw_border(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, w: i32, h: i32, b: i32, _r: i32, color: Color) {
     fill_rect(surface, sw, sh, x, y, w, b, color);
     fill_rect(surface, sw, sh, x, y + h - b, w, b, color);
     fill_rect(surface, sw, sh, x, y, b, h, color);

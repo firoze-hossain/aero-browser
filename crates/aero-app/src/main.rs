@@ -74,6 +74,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut open_devtools = false;
     let mut open_devtools_tab: Option<String> = None;
     let mut open_devtools_options = false;
+    let mut dock_side_arg: Option<String> = None;
     let mut open_bookmark_name: Option<String> = None;
 
     let mut i = 1;
@@ -118,6 +119,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             "--open-devtools-options" => {
                 open_devtools_options = true;
+            }
+            "--dock-side" => {
+                if i + 1 < args.len() {
+                    i += 1;
+                    dock_side_arg = Some(args[i].clone());
+                }
             }
             "--open-bookmark" => {
                 if i + 1 < args.len() {
@@ -175,6 +182,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if open_devtools_options {
         browser.devtools.is_open = true;
         browser.devtools.show_more_options = true;
+    }
+    if let Some(ref ds) = dock_side_arg {
+        browser.devtools.is_open = true;
+        match ds.to_lowercase().as_str() {
+            "bottom" => browser.devtools.dock_side = aero_ui::DockSide::Bottom,
+            "right" => browser.devtools.dock_side = aero_ui::DockSide::Right,
+            "left" => browser.devtools.dock_side = aero_ui::DockSide::Left,
+            "undocked" | "window" => browser.devtools.dock_side = aero_ui::DockSide::Undocked,
+            _ => {}
+        }
     }
     if let Some(ref bm_name) = open_bookmark_name {
         if let Some(idx) = browser.bookmarks.items.iter().position(|b| b.title().contains(bm_name)) {
@@ -371,10 +388,15 @@ fn run_x11_gui(browser: &mut AeroBrowser, initial_width: usize, initial_height: 
                 Event::ButtonPress(ev) => {
                     match ev.detail {
                         1 => {
-                            // Left click
-                            let changed = browser.handle_click(ev.event_x as i32, ev.event_y as i32, width, height);
-                            if changed {
+                            // Left button down: check for devtools drag first
+                            let down_handled = browser.handle_mouse_down(ev.event_x as i32, ev.event_y as i32, width, height);
+                            if down_handled {
                                 needs_redraw = true;
+                            } else {
+                                let changed = browser.handle_click(ev.event_x as i32, ev.event_y as i32, width, height);
+                                if changed {
+                                    needs_redraw = true;
+                                }
                             }
                         }
                         4 => {
@@ -390,6 +412,18 @@ fn run_x11_gui(browser: &mut AeroBrowser, initial_width: usize, initial_height: 
                             }
                         }
                         _ => {}
+                    }
+                }
+                Event::ButtonRelease(ev) => {
+                    if ev.detail == 1 {
+                        if browser.handle_mouse_up(ev.event_x as i32, ev.event_y as i32, width, height) {
+                            needs_redraw = true;
+                        }
+                    }
+                }
+                Event::MotionNotify(ev) => {
+                    if browser.handle_mouse_move(ev.event_x as i32, ev.event_y as i32, width, height) {
+                        needs_redraw = true;
                     }
                 }
                 Event::KeyPress(ev) => {
