@@ -157,66 +157,12 @@ impl Tab {
     #[cfg(feature = "std")]
     pub fn get_default_home_feed() -> Vec<YouTubeVideo> {
         vec![
-            YouTubeVideo {
-                video_id: "yt_noman2".to_owned(),
-                title: "Apni Allahar Hoye Jan (Turn to Allah) || Shaykh Nouman Ali Khan".to_owned(),
-                channel: "Shaykh Nouman Ali Khan Bangla".to_owned(),
-                views: "40K views".to_owned(),
-                duration: "21:15".to_owned(),
-                published: "3d ago".to_owned(),
-                description: "Spiritual lecture on seeking closeness to Allah and worldly peace.".to_owned(),
-                verified: true,
-            },
-            YouTubeVideo {
-                video_id: "yt_parliament".to_owned(),
-                title: "Mugdho Puro Sangsad (Historic Parliament Speech) | ATN News".to_owned(),
-                channel: "ATN News".to_owned(),
-                views: "1.2M views".to_owned(),
-                duration: "22:34".to_owned(),
-                published: "2d ago".to_owned(),
-                description: "Historic parliament address sparking major national headlines.".to_owned(),
-                verified: true,
-            },
-            YouTubeVideo {
-                video_id: "yt_humble".to_owned(),
-                title: "True Men of Knowledge are Extremely Humble || Dr. Noman Ali Khan".to_owned(),
-                channel: "Motivation".to_owned(),
-                views: "6.5K views".to_owned(),
-                duration: "17:06".to_owned(),
-                published: "2d ago".to_owned(),
-                description: "In-depth lecture on humility, wisdom, and character of scholars.".to_owned(),
-                verified: true,
-            },
-            YouTubeVideo {
-                video_id: "yt_barsha".to_owned(),
-                title: "Barita Aji Chere Dite Hobe (Eviction Report) | Ananta Jalil | ATN News".to_owned(),
-                channel: "ATN News".to_owned(),
-                views: "106K views".to_owned(),
-                duration: "1:14".to_owned(),
-                published: "23h ago".to_owned(),
-                description: "Latest entertainment news report from national newsroom.".to_owned(),
-                verified: true,
-            },
-            YouTubeVideo {
-                video_id: "yt_mashrafe".to_owned(),
-                title: "Dirghodin Por Dekha Millo Mashrafe (Mashrafe Exclusive) | Khabar Protidin".to_owned(),
-                channel: "Khabar Protidin".to_owned(),
-                views: "2.7M views".to_owned(),
-                duration: "28:15".to_owned(),
-                published: "2d ago".to_owned(),
-                description: "Special interview with former cricket captain Mashrafe Bin Mortaza.".to_owned(),
-                verified: true,
-            },
-            YouTubeVideo {
-                video_id: "4NlKj7Saogc".to_owned(),
-                title: "Muslim Torunder Uddesshe Kichu Kotha || Nouman Ali Khan (NAKInBangla)".to_owned(),
-                channel: "NAKInBangla".to_owned(),
-                views: "155K views".to_owned(),
-                duration: "56:28".to_owned(),
-                published: "1y ago".to_owned(),
-                description: "Support us in patreon: https://patreon.com/spektrummedia Advice for Muslim Youth.".to_owned(),
-                verified: true,
-            },
+            Self::get_video_by_id("yt_humble"),
+            Self::get_video_by_id("yt_mashrafe"),
+            Self::get_video_by_id("yt_noman2"),
+            Self::get_video_by_id("yt_parliament"),
+            Self::get_video_by_id("yt_barsha"),
+            Self::get_video_by_id("4NlKj7Saogc"),
         ]
     }
 
@@ -249,14 +195,54 @@ impl Tab {
     #[cfg(feature = "std")]
     pub fn get_video_by_id(vid: &str) -> YouTubeVideo {
         match vid {
-            "bY1cozLiK14" => YouTubeVideo {
-                video_id: "bY1cozLiK14".to_owned(),
-                title: "Vlad and Niki new mother explore ice cream truck (ভ্লাদ এবং নিকি)".to_owned(),
-                channel: "Niki TV".to_owned(),
-                views: "11M views".to_owned(),
-                duration: "4:47".to_owned(),
-                published: "5y ago".to_owned(),
-                description: "Vlad and Niki explore new ice cream truck adventure for kids with giant gelato cones!".to_owned(),
+            "yt_humble" => YouTubeVideo {
+                video_id: "yt_humble".to_owned(),
+                title: "Chupchap Shobaike Chere Dite Shikhun | Powerful Motivational Speech | Motiversity".to_owned(),
+                channel: "Motiversity Bangla".to_owned(),
+                views: "143K views".to_owned(),
+                duration: "18:26".to_owned(),
+                published: "3w ago".to_owned(),
+                description: "Powerful motivational speech on self-respect, inner peace, and letting go of negative surroundings.".to_owned(),
+                verified: true,
+            },
+            "yt_mashrafe" => YouTubeVideo {
+                video_id: "yt_mashrafe".to_owned(),
+                title: "Boyosko Chehara Niye Deshe Ferar Akuti Mashrafe Bin Mortaza | Celebrity News BD".to_owned(),
+                channel: "Celebrity News BD".to_owned(),
+                views: "2M views".to_owned(),
+                duration: "2:09".to_owned(),
+                published: "1d ago".to_owned(),
+                description: "Mashrafe Mortaza opens up about his journey, physical fitness, and heartfelt emotional message to the country.".to_owned(),
+                verified: true,
+            },
+            "yt_noman2" => YouTubeVideo {
+                video_id: "yt_noman2".to_owned(),
+                title: "Asokti: Nofske Niyontron Korar Upay | Dr. Nouman Ali Khan Bangla Dubbing".to_owned(),
+                channel: "Al Quran & Hidayat".to_owned(),
+                views: "186K views".to_owned(),
+                duration: "19:15".to_owned(),
+                published: "7mo ago".to_owned(),
+                description: "Dr. Nouman Ali Khan provides powerful Quranic guidance on overcoming desires, discipline, and spiritual growth.".to_owned(),
+                verified: true,
+            },
+            "yt_parliament" => YouTubeVideo {
+                video_id: "yt_parliament".to_owned(),
+                title: "Mugdho Puro Sangsad (Historic Parliament Debate) | ATN News".to_owned(),
+                channel: "ATN News".to_owned(),
+                views: "1.2M views".to_owned(),
+                duration: "22:34".to_owned(),
+                published: "2d ago".to_owned(),
+                description: "Historic parliament address and floor speeches broadcast live from Jatiya Sangsad Bhaban.".to_owned(),
+                verified: true,
+            },
+            "yt_barsha" => YouTubeVideo {
+                video_id: "yt_barsha".to_owned(),
+                title: "Barita Aji Chere Dite Hobe || Investigation".to_owned(),
+                channel: "ATN News".to_owned(),
+                views: "106K views".to_owned(),
+                duration: "1:14".to_owned(),
+                published: "23h ago".to_owned(),
+                description: "Special investigative report by ATN News Investigation Unit.".to_owned(),
                 verified: true,
             },
             "4NlKj7Saogc" => YouTubeVideo {
@@ -269,9 +255,19 @@ impl Tab {
                 description: "Advice and spiritual guidance for Muslim youth facing modern challenges by Dr. Nouman Ali Khan.".to_owned(),
                 verified: true,
             },
+            "bY1cozLiK14" => YouTubeVideo {
+                video_id: "bY1cozLiK14".to_owned(),
+                title: "Vlad and Niki explore new ice cream truck adventure (Kids Fun)".to_owned(),
+                channel: "Niki TV".to_owned(),
+                views: "11M views".to_owned(),
+                duration: "4:47".to_owned(),
+                published: "5y ago".to_owned(),
+                description: "Vlad and Niki explore new ice cream truck adventure for kids with giant gelato cones!".to_owned(),
+                verified: true,
+            },
             "pagi23" => YouTubeVideo {
                 video_id: "pagi23".to_owned(),
-                title: "Pagol Naki Song (Original) | পাগল নাকি | WAQAS (Official Lyric Video)".to_owned(),
+                title: "Pagol Naki Song (Original) | WAQAS Official Lyric Video".to_owned(),
                 channel: "WAQAS".to_owned(),
                 views: "348K views".to_owned(),
                 duration: "2:38".to_owned(),
@@ -291,62 +287,22 @@ impl Tab {
             },
             "XsNGS_bxzwg" => YouTubeVideo {
                 video_id: "XsNGS_bxzwg".to_owned(),
-                title: "Building NovaOS 2.0: Writing an Operating System in Rust".to_owned(),
+                title: "Building NovaOS 2.0: Writing an Operating System in Pure Rust".to_owned(),
                 channel: "NovaOS Engineering".to_owned(),
                 views: "542K views".to_owned(),
                 duration: "42:15".to_owned(),
                 published: "3d ago".to_owned(),
-                description: "Architecture deep dive into monolithic kernel engineering in 100% pure safe Rust.".to_owned(),
+                description: "Deep dive into building NovaOS 2.0 kernel, nova_uring async rings, and Aero browser engine in pure Rust.".to_owned(),
                 verified: true,
             },
-            "yt_noman2" => YouTubeVideo {
-                video_id: "yt_noman2".to_owned(),
-                title: "Apni Allahar Hoye Jan (Turn to Allah) || Shaykh Nouman Ali Khan".to_owned(),
-                channel: "Shaykh Nouman Ali Khan Bangla".to_owned(),
-                views: "40K views".to_owned(),
-                duration: "21:15".to_owned(),
-                published: "3d ago".to_owned(),
-                description: "Spiritual lecture on seeking closeness to Allah and finding inner tranquility in life.".to_owned(),
-                verified: true,
-            },
-            "yt_parliament" => YouTubeVideo {
-                video_id: "yt_parliament".to_owned(),
-                title: "Mugdho Puro Sangsad (Historic Parliament Speech) | ATN News".to_owned(),
-                channel: "ATN News".to_owned(),
-                views: "1.2M views".to_owned(),
-                duration: "22:34".to_owned(),
-                published: "2d ago".to_owned(),
-                description: "Historic parliament address sparking major national headlines and public discussion.".to_owned(),
-                verified: true,
-            },
-            "yt_humble" | "rel_humble" => YouTubeVideo {
-                video_id: "yt_humble".to_owned(),
-                title: "True Men of Knowledge are Extremely Humble || Dr. Noman Ali Khan".to_owned(),
-                channel: "Motivation".to_owned(),
-                views: "6.5K views".to_owned(),
-                duration: "17:06".to_owned(),
-                published: "2d ago".to_owned(),
-                description: "In-depth lecture exploring humility, wisdom, and character development in true scholars.".to_owned(),
-                verified: true,
-            },
-            "yt_barsha" => YouTubeVideo {
-                video_id: "yt_barsha".to_owned(),
-                title: "Barita Aji Chere Dite Hobe (Eviction Report) | Ananta Jalil | ATN News".to_owned(),
-                channel: "ATN News".to_owned(),
-                views: "106K views".to_owned(),
-                duration: "1:14".to_owned(),
-                published: "23h ago".to_owned(),
-                description: "Latest entertainment news investigation from national broadcast newsroom.".to_owned(),
-                verified: true,
-            },
-            "yt_mashrafe" => YouTubeVideo {
-                video_id: "yt_mashrafe".to_owned(),
-                title: "Dirghodin Por Dekha Millo Mashrafe (Mashrafe Exclusive) | Khabar Protidin".to_owned(),
-                channel: "Khabar Protidin".to_owned(),
-                views: "2.7M views".to_owned(),
-                duration: "28:15".to_owned(),
-                published: "2d ago".to_owned(),
-                description: "Exclusive interview with former cricket captain Mashrafe Bin Mortaza on sports & life.".to_owned(),
+            "rel_marriage" => YouTubeVideo {
+                video_id: "rel_marriage".to_owned(),
+                title: "Biyer Purbe Kichu Proyojonio Poramosho • Nouman Ali Khan".to_owned(),
+                channel: "Bangla Waz".to_owned(),
+                views: "304K views".to_owned(),
+                duration: "30:32".to_owned(),
+                published: "1mo ago".to_owned(),
+                description: "Essential pre-marital advice and Islamic wisdom for youth by Dr. Nouman Ali Khan.".to_owned(),
                 verified: true,
             },
             "rel_hajj" => YouTubeVideo {
@@ -354,44 +310,34 @@ impl Tab {
                 title: "Hojjer Pothe Nobiji Part 4 || Nouman Ali Khan".to_owned(),
                 channel: "NAKInBangla".to_owned(),
                 views: "19K views".to_owned(),
-                duration: "45:53".to_owned(),
+                duration: "45:59".to_owned(),
                 published: "1y ago".to_owned(),
-                description: "The historical and spiritual journey of Hajj and following the footsteps of the Prophet.".to_owned(),
+                description: "The sacred journey of the Prophet Muhammad (PBUH) on Hajj.".to_owned(),
                 verified: true,
             },
             "rel_sirah" => YouTubeVideo {
                 video_id: "rel_sirah".to_owned(),
-                title: "Sobar Jibonei Sukher Obhinoy Keno Eto Nikhut? - Nouman Ali Khan".to_owned(),
-                channel: "SiRah".to_owned(),
+                title: "Sobar Jibonei Sukher Obhinoy Keno Eto Mikhut? - Nouman Ali Khan".to_owned(),
+                channel: "Sirah".to_owned(),
                 views: "1.3K views".to_owned(),
                 duration: "38:57".to_owned(),
                 published: "1d ago".to_owned(),
-                description: "Deep reflections on societal expectations, mental peace, and authentic contentment.".to_owned(),
-                verified: true,
-            },
-            "rel_marriage" => YouTubeVideo {
-                video_id: "rel_marriage".to_owned(),
-                title: "Biyer Purbe Kichu Proyojonio Poramorsho • Nouman Ali Khan".to_owned(),
-                channel: "Bangla Waz".to_owned(),
-                views: "304K views".to_owned(),
-                duration: "30:32".to_owned(),
-                published: "11mo ago".to_owned(),
-                description: "Crucial guidance and advice on marriage preparation, mutual respect, and family building.".to_owned(),
+                description: "Why does everyone pretend to be happy? Profound reflections by Dr. Nouman Ali Khan.".to_owned(),
                 verified: true,
             },
             "rel_destroy" => YouTubeVideo {
                 video_id: "rel_destroy".to_owned(),
-                title: "Amra Nijekey Dhongsho Kore Felchi? | Noman Ali Khan Bangla".to_owned(),
+                title: "Amra Nijekey Dhongsho Kore Felchi? | Nouman Ali Khan Bangla".to_owned(),
                 channel: "Islam Daily".to_owned(),
                 views: "2.3K views".to_owned(),
                 duration: "24:10".to_owned(),
                 published: "1y ago".to_owned(),
-                description: "Are we destroying our own potential? Soul searching lecture by Nouman Ali Khan.".to_owned(),
+                description: "Are we destroying our own spiritual well-being? Islamic reminders.".to_owned(),
                 verified: true,
             },
             _ => YouTubeVideo {
                 video_id: vid.to_owned(),
-                title: format!("Special Feature: {}", vid),
+                title: format!("Featured Video: {}", vid),
                 channel: "Aero Media Official".to_owned(),
                 views: "100K views".to_owned(),
                 duration: "15:00".to_owned(),
@@ -414,7 +360,43 @@ impl Tab {
         &'static str, // avatar_bg
         &'static str, // avatar_text
     ) {
-        if v.title.contains("Vlad") || v.channel.contains("Niki") {
+        if v.title.contains("Chupchap") || v.title.contains("চুপচাপ") || v.video_id == "yt_humble" {
+            (
+                "#18181b",
+                "#3f3f46",
+                "#09090b",
+                "#f59e0b",
+                "🔥 MOTIVATIONAL SPEECH",
+                "CHUPCHAP SORE JAN",
+                "Powerful Self-Respect & Growth • Motiversity",
+                "#1c1917",
+                "MB",
+            )
+        } else if v.title.contains("Mashrafe") || v.title.contains("মাশরাফি") || v.video_id == "yt_mashrafe" {
+            (
+                "#14532d",
+                "#16a34a",
+                "#052e16",
+                "#86efac",
+                "🏏 CRICKET EXCLUSIVE",
+                "MASHRAFE BIN MORTAZA",
+                "Amar Boyos Hoyeche Deshe Ashte Den",
+                "#dc2626",
+                "CN",
+            )
+        } else if v.title.contains("Asokti") || v.title.contains("আসক্তি") || v.video_id == "yt_noman2" {
+            (
+                "#064e3b",
+                "#059669",
+                "#022c22",
+                "#34d399",
+                "🕌 ISLAMIC GUIDANCE",
+                "ASOKTI: NOFS NIYONTRON",
+                "Nouman Ali Khan • Quranic Spiritual Focus",
+                "#78350f",
+                "AQ",
+            )
+        } else if v.title.contains("Vlad") || v.channel.contains("Niki") {
             (
                 "#0284c7",
                 "#38bdf8",
@@ -462,44 +444,31 @@ impl Tab {
                 "#ff5500",
                 "NOVA",
             )
-        } else if v.title.contains("Parliament") || (v.channel.contains("ATN") && v.title.contains("Mugdho")) {
+        } else if v.title.contains("Parliament") || v.video_id == "yt_parliament" {
             (
-                "#881337",
-                "#f43f5e",
+                "#4c0519",
+                "#e11d48",
                 "#0f172a",
                 "#fda4af",
                 "📺 NATIONAL PARLIAMENT",
-                "📡 MUGDHO PURO SANGSAD",
+                "MUGDHO PURO SANGSAD",
                 "ATN News Prime Time Report",
                 "#dc2626",
                 "ATN",
             )
-        } else if v.title.contains("Mashrafe") {
-            (
-                "#14532d",
-                "#22c55e",
-                "#052e16",
-                "#86efac",
-                "🏏 CRICKET EXCLUSIVE",
-                "🏆 MASHRAFE INTERVIEW",
-                "Khabar Protidin Sports Special",
-                "#16a34a",
-                "KP",
-            )
-        } else if v.title.contains("Barita") {
+        } else if v.title.contains("Barita") || v.video_id == "yt_barsha" {
             (
                 "#713f12",
                 "#eab308",
                 "#1c1917",
                 "#fde047",
                 "📰 SPECIAL INVESTIGATION",
-                "🏠 BARITA AJI CHERE DITE HOBE",
+                "BARITA AJI CHERE DITE HOBE",
                 "Entertainment News Investigation",
                 "#dc2626",
                 "ATN",
             )
         } else {
-            // Default / Islamic / Nouman Ali Khan
             (
                 "#064e3b",
                 "#059669",
@@ -513,7 +482,6 @@ impl Tab {
             )
         }
     }
-
     #[cfg(feature = "std")]
     pub fn get_related_videos_for(video_id: &str) -> Vec<YouTubeVideo> {
         vec![
@@ -687,157 +655,127 @@ impl Tab {
 
     #[cfg(feature = "std")]
     pub fn get_player_stage_details(v: &YouTubeVideo) -> (
-        &'static str, // hud_badge
-        &'static str, // slide_tag
-        String,       // slide_main
-        [&'static str; 3], // bullets
-        String,       // speaker_title
-        String,       // speaker_sub
-        String,       // cc_subtitle
+        &'static str, // stage_bg
+        &'static str, // stage_border
+        &'static str, // hud_tag
+        &'static str, // watermark
+        &'static str, // backdrop
+        String,       // headline
+        String,       // sub
+        &'static str, // chyron_badge
+        String,       // chyron_text
         &'static str, // avatar_bg
         &'static str, // avatar_text
     ) {
-        if v.title.contains("Vlad") || v.channel.contains("Niki") {
+        if v.video_id == "yt_parliament" || v.title.contains("Parliament") {
             (
-                "● LIVE 4K UHD 60FPS • Niki TV Official Stream",
-                "🍦 KIDS ADVENTURE &amp; ENTERTAINMENT",
-                "Vlad &amp; Niki: Ice Cream Truck Expedition".to_owned(),
-                [
-                    "• Exploring the magical mega ice cream truck",
-                    "• Flavors quest: Strawberry, Gelato &amp; Bubblegum",
-                    "• Outdoor backyard fun with brother Niki &amp; mom",
-                ],
-                "[ 🌟 VLAD &amp; NIKI ]".to_owned(),
-                "Kids Creators • 110M+ Global Subscribers".to_owned(),
-                "&quot;Look at this giant gelato cone! We found all five rainbow flavors!&quot;".to_owned(),
+                "#020617",
+                "#881337",
+                "1080p60 HD • JATIYA SANGSAD BHABAN",
+                "ATN NEWS 24 HD",
+                "🏛️ NATIONAL PARLIAMENT OF BANGLADESH",
+                "MUGDHO PURO SANGSAD • PARLIAMENTARY DEBATE".to_owned(),
+                "Historic National Assembly Session • Prime Minister & All Benches Present".to_owned(),
+                "⚡ ATN NEWS SPECIAL REPORT",
+                "Special national reform bill passed unanimously across all parliamentary benches".to_owned(),
+                "#dc2626",
+                "ATN",
+            )
+        } else if v.video_id == "yt_mashrafe" || v.title.contains("মাশরাফি") || v.title.contains("Mashrafe") {
+            (
+                "#052e16",
+                "#15803d",
+                "1080p60 HD • ATN SPORTS SPECIAL",
+                "CELEBRITY NEWS BD",
+                "🏏 BANGLADESH CRICKET HEADQUARTERS",
+                "MASHRAFE BIN MORTAZA • PRESS INTERVIEW".to_owned(),
+                "\"Amar Boyos Hoyeche Amake Deshe Ashte Den\" • Live Press Conference".to_owned(),
+                "🔴 CRICKET EXCLUSIVE",
+                "Former captain Mashrafe shares heartfelt emotional message on national duty.".to_owned(),
+                "#dc2626",
+                "CN",
+            )
+        } else if v.video_id == "yt_humble" || v.title.contains("চুপচাপ") || v.title.contains("Chupchap") {
+            (
+                "#09090b",
+                "#d97706",
+                "1080p60 HI-FI • MOTIVERSITY BANGLA",
+                "MOTIVERSITY",
+                "🔥 SILENT RESOLVE & INNER STRENGTH",
+                "CHUPCHAP SORE JAN • POWERFUL SPEECH".to_owned(),
+                "Learn to quietly let go of negative surroundings and focus on growth".to_owned(),
+                "⚡ LIFE LESSONS",
+                "\"Never argue with ignorance. Step aside quietly and let your results speak.\"".to_owned(),
+                "#1c1917",
+                "MB",
+            )
+        } else if v.video_id == "bY1cozLiK14" || v.title.contains("Vlad") {
+            (
+                "#082f49",
+                "#0284c7",
+                "4K UHD 60FPS • NIKI TV OFFICIAL",
+                "VLAD & NIKI",
+                "🍦 MEGA ICE CREAM TRUCK EXPEDITION",
+                "VLAD AND NIKI 4K GELATO QUEST".to_owned(),
+                "Exploring colorful flavors with brother Niki and family".to_owned(),
+                "🌟 KIDS ADVENTURE",
+                "\"Look at this giant gelato cone! We found all five rainbow flavors!\"".to_owned(),
                 "#0284c7",
                 "VLAD",
             )
-        } else if v.title.contains("Pagol Naki") || v.channel.contains("WAQAS") {
+        } else if v.video_id == "pagi23" || v.title.contains("Pagol Naki") {
             (
-                "● LIVE 1080p HI-FI • Studio Acoustic Session",
-                "🎸 OFFICIAL ACOUSTIC MASTER",
-                "Pagol Naki (Original) • WAQAS Acoustic Live".to_owned(),
-                [
-                    "• Bengali Diaries Vol 1: Studio Sound Engineering",
-                    "• Unplugged guitar &amp; intimate acoustic vocals",
-                    "• Written, composed and performed by WAQAS",
-                ],
-                "[ 🎵 WAQAS ]".to_owned(),
-                "Singer-Songwriter • Studio Sessions".to_owned(),
-                "&quot;Tumi ki pagol naki... amar moner kotha shune jao ekbar...&quot;".to_owned(),
+                "#3b0764",
+                "#9333ea",
+                "1080p HI-FI • ACOUSTIC SESSIONS",
+                "WAQAS OFFICIAL",
+                "🎸 STUDIO UNPLUGGED LIVE",
+                "PAGOL NAKI (ORIGINAL) • ACOUSTIC".to_owned(),
+                "Bengali Diaries Volume 1 • Studio Sound Engineering Master".to_owned(),
+                "🎵 STUDIO MASTER",
+                "\"Tumi ki pagol naki... amar moner kotha shune jao ekbar...\"".to_owned(),
                 "#a855f7",
                 "WAQAS",
             )
-        } else if v.title.contains("Vul Naki Prem") || v.channel.contains("G Series") {
+        } else if v.video_id == "XsNGS_bxzwg" || v.title.contains("NovaOS") {
             (
-                "● LIVE 1080p60 FHD • G Series Official Broadcast",
-                "🎬 BANGLA NATOK 2026 • SPECIAL DRAMA",
-                "Vul Naki Prem • Arosh Khan &amp; Tania Bristy".to_owned(),
-                [
-                    "• Directed by G Series Special Drama Productions",
-                    "• Romantic comedy drama set across old Dhaka",
-                    "• Original soundtrack by Autumnal Moon",
-                ],
-                "[ 🎭 AROSH KHAN ]".to_owned(),
-                "Lead Actor • G Series Bangla Drama".to_owned(),
-                "&quot;Ei shohore shobai bhalobasha khuje, kintu shotti prem ki emni pawa jaay?&quot;".to_owned(),
-                "#ef4444",
-                "G",
-            )
-        } else if v.title.contains("NovaOS") || v.channel.contains("NovaOS") {
-            (
-                "● LIVE 1080p60 HD • Pure Rust Systems Architecture",
-                "⚡ RUST KERNEL DEVELOPMENT",
-                "Building NovaOS 2.0: Writing an OS in Pure Rust".to_owned(),
-                [
-                    "• Monolithic zero-dependency x86_64 architecture",
-                    "• nova_uring async I/O rings &amp; memory safety",
-                    "• Pure Rust Aero Browser rendering engine",
-                ],
-                "[ 🦀 NOVAOS ARCHITECT ]".to_owned(),
-                "Lead Systems Engineer • NovaOS Systems Lab".to_owned(),
-                "&quot;In NovaOS 2.0, every single line of kernel, window manager and browser is pure Rust.&quot;".to_owned(),
+                "#0f172a",
+                "#2563eb",
+                "1080p60 HD • NOVAOS SYSTEMS LAB",
+                "RUST KERNEL ARCHITECTURE",
+                "⚡ BUILDING NOVAOS 2.0 FROM SCRATCH",
+                "WRITING AN OPERATING SYSTEM IN PURE RUST".to_owned(),
+                "Zero C, zero inline ASM crates, monolithic microkernel & nova_uring".to_owned(),
+                "🦀 SYSTEMS ENGINEERING",
+                "\"Every single line of NovaOS, window manager and Aero browser is pure Rust.\"".to_owned(),
                 "#ff5500",
                 "NOVA",
             )
-        } else if v.title.contains("Parliament") || (v.channel.contains("ATN") && v.title.contains("Mugdho")) {
+        } else if v.video_id == "rel_marriage" || v.title.contains("Biyer Purbe") {
             (
-                "● LIVE 1080p60 HD • ATN News National Broadcast",
-                "📺 NATIONAL PARLIAMENT REPORT",
-                "Mugdho Puro Sangsad: Special Parliamentary Session".to_owned(),
-                [
-                    "• Historic national assembly debate &amp; reform bills",
-                    "• Prime time political analysis &amp; floor speeches",
-                    "• Broadcast live from Jatiya Sangsad Bhaban",
-                ],
-                "[ 📡 ATN NEWS PRIME ]".to_owned(),
-                "Senior Parliamentary Correspondent • ATN".to_owned(),
-                "&quot;Jatiya Sangsade shokol duler shodoshyoder uposthitite guruttopurno bil pass holo.&quot;".to_owned(),
-                "#dc2626",
-                "ATN",
-            )
-        } else if v.title.contains("Mashrafe") {
-            (
-                "● LIVE 1080p60 HD • Sports Exclusive Interview",
-                "🏏 BANGLADESH CRICKET SPECIAL",
-                "Dirghodin Por Dekha Mileche • Mashrafe Mortaza".to_owned(),
-                [
-                    "• In-depth interview on Bangladesh cricket journey",
-                    "• Career reflections, leadership &amp; youth inspiration",
-                    "• Khabar Protidin Special Sports Presentation",
-                ],
-                "[ 🏆 MASHRAFE MORTAZA ]".to_owned(),
-                "Former Captain • Bangladesh National Cricket Team".to_owned(),
-                "&quot;Desher hoye math-e namar je onubhuti, tar shathe kono kichur tulona hoy na.&quot;".to_owned(),
-                "#16a34a",
-                "KP",
-            )
-        } else if v.title.contains("Barita") {
-            (
-                "● LIVE 1080p60 HD • Investigative Report • ATN News",
-                "📰 SPECIAL INVESTIGATION",
-                "Barita Aji Chere Dite Hobe • Exclusive Report".to_owned(),
-                [
-                    "• Special investigative journalism on urban housing",
-                    "• Ground realities &amp; public safety inspection",
-                    "• Comprehensive reporting by ATN News Team",
-                ],
-                "[ 🎙 INVESTIGATIVE DESK ]".to_owned(),
-                "Special Investigation Unit • ATN News".to_owned(),
-                "&quot;Ghotona sthol theke amader bishes protibedok janacchen bishes tothyo.&quot;".to_owned(),
-                "#dc2626",
-                "ATN",
-            )
-        } else if v.title.contains("Biyer Purbe") || v.video_id == "rel_marriage" {
-            (
-                "● LIVE 1080p60 HD • Bayyinah Islamic Wisdom • NAK HD",
-                "📖 ISLAMIC COUNSELING &amp; WISDOM",
-                "Biyer Purbe Kichu Proyojonio Poramosho • Nouman Ali Khan".to_owned(),
-                [
-                    "• Foundations of a blissful and resilient marriage",
-                    "• Emotional maturity, realistic expectations &amp; empathy",
-                    "• Quranic guidance for youth embarking on matrimony",
-                ],
-                "[ 🎙 DR. NOUMAN ALI KHAN ]".to_owned(),
-                "Speaker &amp; Founder • Bayyinah Institute".to_owned(),
-                "&quot;Marriage requires immense patience, emotional maturity, and mutual respect every single day.&quot;".to_owned(),
+                "#022c22",
+                "#059669",
+                "1080p60 HD • BAYYINAH BANGLA",
+                "BANGLA WAZ",
+                "📖 ISLAMIC PRE-MARITAL COUNSELING",
+                "BIYER PURBE KICHU PROYOJONIO PORAMOSHO".to_owned(),
+                "Dr. Nouman Ali Khan • Advice for Muslim Youth".to_owned(),
+                "💍 MATRIMONIAL GUIDANCE",
+                "\"Marriage requires immense patience, emotional maturity and mutual respect.\"".to_owned(),
                 "#059669",
                 "NAK",
             )
         } else {
             (
-                "● LIVE 1080p60 HD • Spektrum Media Official Stream • NAK HD",
-                "📖 BAYYINAH LECTURE SERIES",
+                "#022c22",
+                "#059669",
+                "1080p60 HD • BAYYINAH AUDITORIUM",
+                "AL QURAN & HIDAYAT",
+                "🕌 BAYYINAH LECTURE SERIES",
                 v.title.clone(),
-                [
-                    "• Building spiritual resilience in modern times",
-                    "• Overcoming toxic digital distractions",
-                    "• Achieving balance: Faith, Education &amp; Moral Character",
-                ],
-                "[ 🎙 DR. NOUMAN ALI KHAN ]".to_owned(),
-                "Speaker &amp; Founder • Bayyinah Institute".to_owned(),
-                "&quot;Our purpose in life is building character, spiritual resilience and moral clarity.&quot;".to_owned(),
+                "Dr. Nouman Ali Khan • Advice for Muslim Youth: Purpose & Identity".to_owned(),
+                "📖 SPIRITUAL WISDOM",
+                "\"Our true strength is building moral clarity, patience and spiritual resilience.\"".to_owned(),
                 "#cc0000",
                 "NAK",
             )
@@ -888,12 +826,14 @@ body {{
 .topbar {{
     background-color: #ffffff;
     border-bottom: 1px solid #e5e5e5;
-    padding: 10px 18px;
+    padding: 8px 24px;
     display: block;
+    width: 100%;
+    box-sizing: border-box;
 }}
 .hamburger {{
     display: inline-block;
-    font-size: 18px;
+    font-size: 20px;
     color: #0f0f0f;
     width: 28px;
     cursor: pointer;
@@ -901,10 +841,10 @@ body {{
 }}
 .logo {{
     display: inline-block;
-    font-size: 18px;
+    font-size: 19px;
     font-weight: bold;
     color: #0f0f0f;
-    width: 130px;
+    width: 140px;
     cursor: pointer;
     vertical-align: middle;
 }}
@@ -915,18 +855,18 @@ body {{
 }}
 .search-container {{
     display: inline-block;
-    width: 540px;
-    margin-left: 20px;
+    width: 580px;
+    margin-left: 12%;
     vertical-align: middle;
 }}
 .search-pill {{
     background-color: #ffffff;
     border-right: none;
     border-radius: 20px 0 0 20px;
-    padding: 8px 16px;
-    width: 380px;
+    padding: 9px 18px;
+    width: 440px;
     color: #0f0f0f;
-    font-size: 13px;
+    font-size: 14px;
     display: inline-block;
     vertical-align: middle;
 }}
@@ -934,11 +874,11 @@ body {{
     background-color: #f8f8f8;
     border: 1px solid #cccccc;
     border-radius: 0 20px 20px 0;
-    width: 56px;
-    padding: 8px 0;
+    width: 60px;
+    padding: 9px 0;
     text-align: center;
     color: #0f0f0f;
-    font-size: 14px;
+    font-size: 15px;
     display: inline-block;
     vertical-align: middle;
     cursor: pointer;
@@ -947,13 +887,14 @@ body {{
     background-color: #f2f2f2;
     border: 1px solid #e5e5e5;
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     display: inline-block;
-    margin-left: 10px;
+    margin-left: 12px;
     text-align: center;
+    line-height: 38px;
     color: #0f0f0f;
-    font-size: 14px;
+    font-size: 15px;
     vertical-align: middle;
     cursor: pointer;
 }}
@@ -964,17 +905,18 @@ body {{
     color: #065fd4;
     background-color: #ffffff;
     border-radius: 18px;
-    padding: 7px 16px;
+    padding: 8px 18px;
     font-size: 13px;
     font-weight: bold;
     margin-top: 2px;
-    vertical-align: middle;
+    margin-right: 16px;
+    cursor: pointer;
 }}
 .sugg-dropdown {{
     position: absolute;
-    top: 50px;
-    left: 218px;
-    width: 440px;
+    top: 52px;
+    left: 260px;
+    width: 460px;
     background-color: #ffffff;
     border: 1px solid #e5e5e5;
     border-radius: 12px;
@@ -998,10 +940,11 @@ body {{
 }}
 .layout-row {{
     display: block;
+    width: 100%;
 }}
 .sidebar {{
     display: inline-block;
-    width: 170px;
+    width: 17%;
     background-color: #ffffff;
     border-right: 1px solid #e5e5e5;
     padding-top: 12px;
@@ -1031,27 +974,28 @@ body {{
 }}
 .content-area {{
     display: inline-block;
-    width: 790px;
+    width: 82%;
     vertical-align: top;
-    padding: 36px 20px;
+    padding: 36px 24px;
+    box-sizing: border-box;
 }}
 .welcome-card {{
     background-color: #f9f9f9;
     border: 1px solid #e5e5e5;
     border-radius: 16px;
-    padding: 38px 24px;
+    padding: 42px 28px;
     text-align: center;
-    max-width: 520px;
+    max-width: 580px;
     margin: 16px auto 26px auto;
 }}
 .welcome-title {{
-    font-size: 21px;
+    font-size: 22px;
     font-weight: bold;
     color: #0f0f0f;
     margin-bottom: 10px;
 }}
 .welcome-sub {{
-    font-size: 13px;
+    font-size: 14px;
     color: #606060;
     line-height: 1.5;
 }}
@@ -1064,9 +1008,9 @@ body {{
     background-color: #f2f2f2;
     border: 1px solid #e5e5e5;
     color: #0f0f0f;
-    padding: 7px 16px;
-    border-radius: 16px;
-    font-size: 12px;
+    padding: 8px 18px;
+    border-radius: 18px;
+    font-size: 13px;
     margin: 6px;
     cursor: pointer;
 }}
@@ -1169,10 +1113,12 @@ body {{
             cards.push_str(&format!(
                 "<div class=\"result-card\">
                     <div class=\"thumb-widescreen\" style=\"background-color:{}; border:1px solid {};\">
-                        <div class=\"thumb-tag\" style=\"background-color:{}; color:{};\">{}</div>
+                        <div class=\"thumb-top\">
+                            <span class=\"thumb-tag\" style=\"background-color:{}; color:{};\">{}</span>
+                            <span class=\"dur-badge\">{}</span>
+                        </div>
                         <div class=\"thumb-headline\">{}</div>
                         <div class=\"thumb-subtext\">{}</div>
-                        <div class=\"dur-badge\">{}</div>
                     </div>
                     <div class=\"result-info\">
                         <div class=\"res-title\">{}</div>
@@ -1181,7 +1127,7 @@ body {{
                         <div class=\"res-desc\">{}</div>
                     </div>
                 </div>",
-                bg_color, border_color, badge_bg, badge_color, tag, headline, subtext, v.duration,
+                bg_color, border_color, badge_bg, badge_color, tag, v.duration, headline, subtext,
                 v.title, v.views, v.published, avatar_bg, avatar_text, v.channel, v.description
             ));
         }
@@ -1202,36 +1148,39 @@ body {{
 .topbar {{
     background-color: #ffffff;
     border-bottom: 1px solid #e5e5e5;
-    padding: 10px 18px;
+    padding: 8px 24px;
     display: block;
+    width: 100%;
+    box-sizing: border-box;
 }}
-.hamburger {{ display: inline-block; font-size: 18px; color: #0f0f0f; width: 28px; cursor: pointer; vertical-align: middle; }}
-.logo {{ display: inline-block; font-size: 18px; font-weight: bold; color: #0f0f0f; width: 130px; cursor: pointer; vertical-align: middle; }}
+.hamburger {{ display: inline-block; font-size: 20px; color: #0f0f0f; width: 28px; cursor: pointer; vertical-align: middle; }}
+.logo {{ display: inline-block; font-size: 19px; font-weight: bold; color: #0f0f0f; width: 140px; cursor: pointer; vertical-align: middle; }}
 .logo-badge {{ font-size: 10px; color: #606060; margin-left: 2px; }}
-.search-container {{ display: inline-block; width: 540px; margin-left: 20px; vertical-align: middle; }}
-.search-pill {{ background-color: #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
-.search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 56px; padding: 8px 0; text-align: center; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; cursor: pointer; }}
-.mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 36px; height: 36px; display: inline-block; margin-left: 10px; text-align: center; color: #0f0f0f; font-size: 14px; vertical-align: middle; cursor: pointer; }}
-.signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 7px 16px; font-size: 13px; font-weight: bold; margin-top: 2px; vertical-align: middle; }}
-.layout-row {{ display: block; }}
-.sidebar {{ display: inline-block; width: 170px; background-color: #ffffff; border-right: 1px solid #e5e5e5; padding-top: 12px; vertical-align: top; }}
+.search-container {{ display: inline-block; width: 580px; margin-left: 12%; vertical-align: middle; }}
+.search-pill {{ background-color: #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 9px 18px; width: 440px; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; }}
+.search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 60px; padding: 9px 0; text-align: center; color: #0f0f0f; font-size: 15px; display: inline-block; vertical-align: middle; cursor: pointer; }}
+.mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 38px; height: 38px; display: inline-block; margin-left: 12px; text-align: center; line-height: 38px; color: #0f0f0f; font-size: 15px; vertical-align: middle; cursor: pointer; }}
+.signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 8px 18px; font-size: 13px; font-weight: bold; margin-top: 2px; margin-right: 16px; cursor: pointer; }}
+.layout-row {{ display: block; width: 100%; }}
+.sidebar {{ display: inline-block; width: 17%; background-color: #ffffff; border-right: 1px solid #e5e5e5; padding-top: 12px; vertical-align: top; }}
 .side-item {{ padding: 10px 18px; font-size: 13px; color: #0f0f0f; border-radius: 10px; margin: 2px 10px; cursor: pointer; }}
 .side-active {{ background-color: #f2f2f2; font-weight: bold; }}
 .side-divider {{ border-top: 1px solid #e5e5e5; margin: 10px 14px; }}
-.content-area {{ display: inline-block; width: 790px; vertical-align: top; padding: 14px 18px; }}
-.result-card {{ display: block; margin-bottom: 22px; cursor: pointer; }}
-.thumb-widescreen {{ display: inline-block; width: 280px; height: 135px; border-radius: 10px; vertical-align: top; position: relative; padding: 6px; box-sizing: border-box; }}
-.thumb-tag {{ font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 6px; display: inline-block; }}
-.thumb-headline {{ color: #ffffff; font-size: 13px; font-weight: bold; padding-top: 16px; text-align: center; line-height: 1.3; }}
-.thumb-subtext {{ color: #e2e8f0; font-size: 10px; text-align: center; margin-top: 6px; }}
-.dur-badge {{ background-color: rgba(0, 0, 0, 0.85); color: #ffffff; border-radius: 4px; padding: 2px 5px; font-size: 10px; font-weight: bold; float: right; margin: 4px; }}
-.result-info {{ display: inline-block; width: 470px; padding-left: 16px; vertical-align: top; }}
-.res-title {{ font-size: 15px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 6px; }}
+.content-area {{ display: inline-block; width: 82%; vertical-align: top; padding: 16px 24px; box-sizing: border-box; }}
+.result-card {{ display: block; margin-bottom: 24px; cursor: pointer; }}
+.thumb-widescreen {{ display: inline-block; width: 320px; height: 180px; border-radius: 12px; vertical-align: top; padding: 10px 12px; box-sizing: border-box; }}
+.thumb-top {{ display: block; width: 100%; }}
+.thumb-tag {{ font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 6px; display: inline-block; }}
+.dur-badge {{ background-color: rgba(0, 0, 0, 0.85); color: #ffffff; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: bold; float: right; display: inline-block; }}
+.thumb-headline {{ color: #ffffff; font-size: 15px; font-weight: bold; text-align: center; line-height: 1.4; margin-top: 32px; }}
+.thumb-subtext {{ color: #cbd5e1; font-size: 11px; text-align: center; margin-top: 8px; }}
+.result-info {{ display: inline-block; width: 56%; padding-left: 18px; vertical-align: top; }}
+.res-title {{ font-size: 16px; font-weight: bold; color: #0f0f0f; line-height: 1.35; margin-bottom: 6px; }}
 .res-meta {{ font-size: 12px; color: #606060; margin-bottom: 6px; }}
 .res-channel {{ font-size: 12px; color: #606060; margin-bottom: 8px; }}
-.ch-avatar {{ border-radius: 50%; padding: 2px 6px; margin-right: 4px; font-weight: bold; font-size: 10px; }}
+.ch-avatar {{ border-radius: 50%; padding: 3px 7px; margin-right: 6px; font-weight: bold; font-size: 10px; }}
 .verified {{ color: #606060; font-size: 11px; }}
-.res-desc {{ font-size: 11px; color: #606060; line-height: 1.4; }}
+.res-desc {{ font-size: 12px; color: #606060; line-height: 1.45; }}
 </style>
 </head>
 <body>
@@ -1270,7 +1219,7 @@ body {{
         )
     }
 
-    /// Builds the authentic Cinema Player watch page matching Image 4 in White Mode (Light Theme).
+    /// Builds the authentic Cinema Player watch page matching Image 3 in White Mode.
     #[cfg(feature = "std")]
     pub fn build_youtube_watch_html(
         video: &YouTubeVideo,
@@ -1284,7 +1233,7 @@ body {{
         is_focused: bool,
         cursor_visible: bool,
     ) -> String {
-        let (hud_badge, slide_tag, slide_main, bullets, speaker_title, speaker_sub, cc_subtitle, avatar_bg, avatar_text) =
+        let (stage_bg, stage_border, hud_tag, watermark, backdrop, headline, sub, chyron_badge, chyron_text, avatar_bg, avatar_text) =
             Self::get_player_stage_details(video);
 
         let total_sec = Self::parse_duration_to_sec(&video.duration);
@@ -1307,12 +1256,6 @@ body {{
             "SPECTRUM: ▂▂▂▂▂▂▂▂▂▂▂ PAUSED"
         };
 
-        let play_badge = if is_playing {
-            let dot = if (anim_frame % 2) == 0 { "●" } else { "○" };
-            format!("<span style=\"color:#22c55e; font-weight:bold;\">{} LIVE STREAM ACTIVE</span>", dot)
-        } else {
-            "<span style=\"color:#f59e0b; font-weight:bold;\">⏸ PAUSED</span>".to_owned()
-        };
         let play_btn = if is_playing { "⏸ Pause" } else { "▶ Play" };
         let sub_btn = if is_subscribed { "Subscribed ✓" } else { "Subscribe" };
         let sub_bg = if is_subscribed { "#f2f2f2" } else { "#cc0000" };
@@ -1337,13 +1280,13 @@ body {{
 
         let mut rel_cards = String::new();
         for r in related {
-            let (rbg, rborder, _, _, rtag, _, _, _, _) = Self::get_video_thumbnail_details(r);
+            let (rbg, rborder, _, _, rtag, rhead, _, _, _) = Self::get_video_thumbnail_details(r);
             rel_cards.push_str(&format!(
                 "<div class=\"rel-item\">
                     <div class=\"rel-thumb\" style=\"background-color:{}; border:1px solid {};\">
                         <div class=\"dur-badge\">{}</div>
                         <div style=\"color:#ffffff; font-size:9px; font-weight:bold; padding:4px 6px;\">{}</div>
-                        <div style=\"color:#e2e8f0; font-size:11px; font-weight:bold; text-align:center; padding-top:6px;\">▶ HD</div>
+                        <div style=\"color:#e2e8f0; font-size:11px; font-weight:bold; text-align:center; padding-top:10px;\">▶ HD</div>
                     </div>
                     <div class=\"rel-info\">
                         <div class=\"rel-title\">{}</div>
@@ -1371,105 +1314,64 @@ body {{
 .topbar {{
     background-color: #ffffff;
     border-bottom: 1px solid #e5e5e5;
-    padding: 10px 18px;
+    padding: 8px 24px;
     display: block;
+    width: 100%;
+    box-sizing: border-box;
 }}
-.hamburger {{ display: inline-block; font-size: 18px; color: #0f0f0f; width: 28px; cursor: pointer; vertical-align: middle; }}
-.logo {{ display: inline-block; font-size: 18px; font-weight: bold; color: #0f0f0f; width: 130px; cursor: pointer; vertical-align: middle; }}
+.hamburger {{ display: inline-block; font-size: 20px; color: #0f0f0f; width: 28px; cursor: pointer; vertical-align: middle; }}
+.logo {{ display: inline-block; font-size: 19px; font-weight: bold; color: #0f0f0f; width: 140px; cursor: pointer; vertical-align: middle; }}
 .logo-badge {{ font-size: 10px; color: #606060; margin-left: 2px; }}
-.search-container {{ display: inline-block; width: 540px; margin-left: 20px; vertical-align: middle; }}
-.search-pill {{ background-color: #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
-.search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 56px; padding: 8px 0; text-align: center; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; cursor: pointer; }}
-.mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 36px; height: 36px; display: inline-block; margin-left: 10px; text-align: center; color: #0f0f0f; font-size: 14px; vertical-align: middle; cursor: pointer; }}
-.signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 7px 16px; font-size: 13px; font-weight: bold; margin-top: 2px; vertical-align: middle; }}
-.watch-container {{ padding: 14px 18px; display: block; }}
-.player-column {{ display: inline-block; width: 610px; vertical-align: top; }}
+.search-container {{ display: inline-block; width: 580px; margin-left: 12%; vertical-align: middle; }}
+.search-pill {{ background-color: #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 9px 18px; width: 440px; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; }}
+.search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 60px; padding: 9px 0; text-align: center; color: #0f0f0f; font-size: 15px; display: inline-block; vertical-align: middle; cursor: pointer; }}
+.mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 38px; height: 38px; display: inline-block; margin-left: 12px; text-align: center; line-height: 38px; color: #0f0f0f; font-size: 15px; vertical-align: middle; cursor: pointer; }}
+.signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 8px 18px; font-size: 13px; font-weight: bold; margin-top: 2px; margin-right: 16px; cursor: pointer; }}
+.watch-container {{ padding: 16px 24px; display: block; width: 100%; box-sizing: border-box; }}
+.player-column {{ display: inline-block; width: 68%; vertical-align: top; }}
 .cinema-player {{
-    background-color: #0b0f19;
+    background-color: #000000;
     border-radius: 12px;
     border: 1px solid #1e293b;
     display: block;
+    width: 100%;
 }}
-.player-hud-top {{
-    background-color: #0f172a;
-    color: #94a3b8;
-    font-size: 11px;
-    padding: 6px 14px;
+.video-broadcast-frame {{
+    height: 380px;
     border-radius: 12px 12px 0 0;
-}}
-.player-stage {{
-    padding: 8px 10px;
+    position: relative;
+    padding: 14px 18px;
+    box-sizing: border-box;
     display: block;
 }}
-.stage-slide {{
-    display: inline-block;
-    width: 320px;
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 8px 10px;
-    vertical-align: top;
-}}
-.slide-tag {{
-    color: #38bdf8;
-    font-size: 10px;
-    font-weight: bold;
-    margin-bottom: 4px;
-}}
-.slide-main {{
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 6px;
-}}
-.slide-bullets {{
-    color: #cbd5e1;
-    font-size: 11px;
-    line-height: 1.5;
-}}
-.stage-speaker {{
-    display: inline-block;
-    width: 220px;
-    background-color: #18181b;
-    border: 1px solid #27272a;
-    border-radius: 8px;
-    padding: 8px 10px;
-    vertical-align: top;
-    margin-left: 6px;
-}}
-.speaker-title {{
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 4px;
-}}
-.speaker-sub {{
-    color: #a1a1aa;
-    font-size: 10px;
-    margin-bottom: 6px;
-}}
-.audio-spectrum {{
-    color: #38bdf8;
-    font-size: 11px;
-    margin-bottom: 4px;
-}}
-.stage-state {{
-    font-size: 11px;
-    margin-top: 4px;
-}}
-.stage-cc {{
-    text-align: center;
-    margin-top: 8px;
-    margin-bottom: 6px;
-}}
-.cc-pill {{
-    background-color: #1e293b;
-    color: #f8fafc;
-    border: 1px solid #334155;
+.broadcast-top-bar {{ display: block; margin-bottom: 24px; }}
+.live-pill {{ background-color: #dc2626; color: #ffffff; border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: bold; margin-right: 10px; }}
+.hud-stream-tag {{ color: #f8fafc; font-size: 12px; font-weight: bold; }}
+.network-watermark {{ float: right; color: #94a3b8; font-size: 11px; font-weight: bold; }}
+.broadcast-main-scene {{ text-align: center; padding-top: 40px; display: block; }}
+.scene-backdrop {{ font-size: 22px; color: #38bdf8; font-weight: bold; margin-bottom: 8px; }}
+.scene-headline {{ font-size: 20px; color: #ffffff; font-weight: bold; line-height: 1.35; margin-bottom: 6px; }}
+.scene-sub {{ font-size: 13px; color: #cbd5e1; }}
+.broadcast-lower-third {{
+    position: absolute;
+    bottom: 38px;
+    left: 18px;
+    right: 18px;
+    background-color: rgba(15, 23, 42, 0.92);
+    border-left: 4px solid #ef4444;
     border-radius: 6px;
-    padding: 4px 12px;
+    padding: 8px 14px;
+    display: block;
+}}
+.chyron-badge {{ color: #ef4444; font-size: 10px; font-weight: bold; margin-bottom: 2px; }}
+.chyron-text {{ color: #ffffff; font-size: 13px; font-weight: bold; line-height: 1.3; }}
+.broadcast-spectrum-bar {{
+    position: absolute;
+    bottom: 10px;
+    left: 18px;
+    right: 18px;
     font-size: 11px;
-    display: inline-block;
+    color: #38bdf8;
 }}
 .timeline-bar {{
     background-color: #333333;
@@ -1492,40 +1394,41 @@ body {{
 }}
 .player-controls {{
     background-color: #0f0f0f;
-    padding: 8px 14px;
+    padding: 8px 16px;
     font-size: 12px;
     color: #f1f1f1;
     border-radius: 0 0 12px 12px;
+    display: block;
 }}
-.ctrl-item {{ display: inline-block; margin-right: 12px; cursor: pointer; }}
-.float-r {{ float: right; margin-left: 10px; margin-right: 0; }}
+.ctrl-item {{ display: inline-block; margin-right: 14px; cursor: pointer; }}
+.float-r {{ float: right; margin-left: 12px; margin-right: 0; }}
 .shield-badge {{ display: inline-block; color: #ff5500; font-weight: bold; font-size: 11px; margin-left: 8px; }}
-.vid-heading {{ font-size: 17px; font-weight: bold; color: #0f0f0f; margin-top: 14px; line-height: 1.3; }}
-.channel-row {{ margin-top: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e5e5; display: block; }}
+.vid-heading {{ font-size: 18px; font-weight: bold; color: #0f0f0f; margin-top: 14px; line-height: 1.35; }}
+.channel-row {{ margin-top: 14px; padding-bottom: 14px; border-bottom: 1px solid #e5e5e5; display: block; }}
 .ch-avatar-big {{
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: inline-block;
     text-align: center;
-    line-height: 36px;
+    line-height: 40px;
     font-weight: bold;
-    font-size: 11px;
+    font-size: 12px;
     vertical-align: middle;
 }}
-.ch-details {{ display: inline-block; vertical-align: middle; margin-left: 10px; width: 170px; }}
-.ch-name {{ font-size: 13px; font-weight: bold; color: #0f0f0f; }}
-.ch-subs {{ font-size: 11px; color: #606060; }}
+.ch-details {{ display: inline-block; vertical-align: middle; margin-left: 12px; width: 220px; }}
+.ch-name {{ font-size: 14px; font-weight: bold; color: #0f0f0f; }}
+.ch-subs {{ font-size: 12px; color: #606060; }}
 .sub-pill {{
     display: inline-block;
     background-color: {};
     color: {};
     font-weight: bold;
-    padding: 7px 16px;
+    padding: 8px 18px;
     border-radius: 18px;
-    font-size: 12px;
+    font-size: 13px;
     vertical-align: middle;
-    margin-left: 8px;
+    margin-left: 12px;
     border: 1px solid #cccccc;
     cursor: pointer;
 }}
@@ -1535,35 +1438,35 @@ body {{
     background-color: #f2f2f2;
     border: 1px solid #e5e5e5;
     border-radius: 18px;
-    padding: 6px 12px;
-    font-size: 11px;
+    padding: 7px 14px;
+    font-size: 12px;
     color: #0f0f0f;
-    margin-left: 4px;
+    margin-left: 6px;
     cursor: pointer;
 }}
 .desc-box {{
     background-color: #f2f2f2;
     border-radius: 12px;
-    padding: 12px 16px;
-    margin-top: 12px;
-    font-size: 12px;
+    padding: 14px 18px;
+    margin-top: 14px;
+    font-size: 13px;
     color: #0f0f0f;
     line-height: 1.5;
 }}
 .related-column {{
     display: inline-block;
-    width: 330px;
+    width: 30%;
     vertical-align: top;
-    margin-left: 18px;
+    margin-left: 1%;
 }}
-.rel-header {{ font-size: 14px; font-weight: bold; color: #0f0f0f; margin-bottom: 12px; }}
+.rel-header {{ font-size: 15px; font-weight: bold; color: #0f0f0f; margin-bottom: 12px; }}
 .rel-item {{ display: block; margin-bottom: 14px; cursor: pointer; }}
-.rel-thumb {{ display: inline-block; width: 120px; height: 68px; border-radius: 8px; vertical-align: top; position: relative; }}
+.rel-thumb {{ display: inline-block; width: 140px; height: 80px; border-radius: 8px; vertical-align: top; position: relative; }}
 .dur-badge {{ background-color: rgba(0, 0, 0, 0.85); color: #ffffff; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: bold; float: right; margin: 4px; }}
-.rel-info {{ display: inline-block; width: 185px; padding-left: 10px; vertical-align: top; }}
-.rel-title {{ font-size: 12px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 4px; }}
+.rel-info {{ display: inline-block; width: 55%; padding-left: 10px; vertical-align: top; }}
+.rel-title {{ font-size: 13px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 4px; }}
 .rel-channel {{ font-size: 11px; color: #606060; margin-bottom: 2px; }}
-.rel-meta {{ font-size: 10px; color: #606060; }}
+.rel-meta {{ font-size: 11px; color: #606060; }}
 </style>
 </head>
 <body>
@@ -1581,27 +1484,23 @@ body {{
 <div class=\"watch-container\">
     <div class=\"player-column\">
         <div class=\"cinema-player\">
-            <div class=\"player-hud-top\">
-                <span style=\"color:#22c55e; font-weight:bold;\">{}</span> • Aero Cinema Stream Engine
-            </div>
-            <div class=\"player-stage\">
-                <div class=\"stage-slide\">
-                    <div class=\"slide-tag\">{}</div>
-                    <div class=\"slide-main\">{}</div>
-                    <div class=\"slide-bullets\">
-                        {}<br>
-                        {}<br>
-                        {}
-                    </div>
+            <div class=\"video-broadcast-frame\" style=\"background-color:{}; border:1px solid {};\">
+                <div class=\"broadcast-top-bar\">
+                    <span class=\"live-pill\">🔴 LIVE</span>
+                    <span class=\"hud-stream-tag\">{}</span>
+                    <span class=\"network-watermark\">{}</span>
                 </div>
-                <div class=\"stage-speaker\">
-                    <div class=\"speaker-title\">{}</div>
-                    <div class=\"speaker-sub\">{}</div>
-                    <div class=\"audio-spectrum\">{}</div>
-                    <div class=\"stage-state\">{}</div>
+                <div class=\"broadcast-main-scene\">
+                    <div class=\"scene-backdrop\">{}</div>
+                    <div class=\"scene-headline\">{}</div>
+                    <div class=\"scene-sub\">{}</div>
                 </div>
-                <div class=\"stage-cc\">
-                    <span class=\"cc-pill\">[ CC: {} ]</span>
+                <div class=\"broadcast-lower-third\">
+                    <div class=\"chyron-badge\">{}</div>
+                    <div class=\"chyron-text\">{}</div>
+                </div>
+                <div class=\"broadcast-spectrum-bar\">
+                    {}
                 </div>
             </div>
             <div class=\"timeline-bar\">
@@ -1614,7 +1513,6 @@ body {{
                 <div class=\"ctrl-item\">⏭</div>
                 <div class=\"ctrl-item\">🔊 100%</div>
                 <div class=\"ctrl-item\">{} / {}</div>
-                <div class=\"shield-badge\">🛡️ Brave Shields: 0 Video Ads</div>
                 <div class=\"ctrl-item float-r\">⛶ Fullscreen</div>
                 <div class=\"ctrl-item float-r\">⚙ 1080p HD</div>
                 <div class=\"ctrl-item float-r\">CC</div>
@@ -1656,17 +1554,16 @@ body {{
             sub_text_color,
             search_border,
             display_input,
-            hud_badge,
-            slide_tag,
-            slide_main,
-            bullets[0],
-            bullets[1],
-            bullets[2],
-            speaker_title,
-            speaker_sub,
+            stage_bg,
+            stage_border,
+            hud_tag,
+            watermark,
+            backdrop,
+            headline,
+            sub,
+            chyron_badge,
+            chyron_text,
             spectrum_str,
-            play_badge,
-            cc_subtitle,
             timeline_width,
             play_btn,
             time_str,
@@ -1684,7 +1581,7 @@ body {{
         )
     }
 
-    /// Builds the rich Home Feed matching Image 5 in White Mode.
+    /// Builds the rich Home Feed matching Image 1 in White Mode.
     #[cfg(feature = "std")]
     pub fn build_youtube_feed_html(
         category: &str,
@@ -1710,36 +1607,80 @@ body {{
             ("1px solid #cccccc", text)
         };
 
-        let mut cards = String::new();
-        for v in videos {
-            let title_display = if v.title.chars().count() > 28 {
-                let s: String = v.title.chars().take(26).collect();
-                format!("{}...", s)
-            } else {
-                v.title.clone()
-            };
+        // Split videos into Row 1 (first 3) and Row 2 (next 3)
+        let row1_videos = if videos.len() >= 3 { &videos[0..3] } else { videos };
+        let row2_videos = if videos.len() >= 6 { &videos[3..6] } else if videos.len() > 3 { &videos[3..] } else { &[] };
+
+        let get_feed_card_lines = |vid: &str| -> (&'static str, &'static str) {
+            match vid {
+                "yt_humble" => ("Chupchap Shobaike", "Chere Dite Shikhun"),
+                "yt_mashrafe" => ("Mashrafe Bin Mortaza", "Deshe Ferar Akuti"),
+                "yt_noman2" => ("Asokti: Nofs Niyontron", "Dr. Nouman Ali Khan"),
+                "yt_barsha" => ("Barita Aji Chere Dite", "Hobe | Investigation"),
+                "yt_parliament" => ("Mugdho Puro Sangsad", "Historic Floor Debate"),
+                _ => ("Muslim Torunder", "Uddesshe Kichu Kotha"),
+            }
+        };
+
+        let mut row1_html = String::new();
+        for v in row1_videos {
+            let (line1, line2) = get_feed_card_lines(&v.video_id);
             let (bg_color, border_color, badge_bg, badge_color, tag, headline, subtext, avatar_bg, avatar_text) =
                 Self::get_video_thumbnail_details(v);
 
-            cards.push_str(&format!(
+            row1_html.push_str(&format!(
                 "<div class=\"grid-card\">
                     <div class=\"card-thumb\" style=\"background-color:{}; border:1px solid {};\">
-                        <div class=\"thumb-tag\" style=\"background-color:{}; color:{};\">{}</div>
+                        <div class=\"thumb-top\">
+                            <span class=\"thumb-tag\" style=\"background-color:{}; color:{};\">{}</span>
+                            <span class=\"dur-badge\">{}</span>
+                        </div>
                         <div class=\"thumb-headline\">{}</div>
                         <div class=\"thumb-subtext\">{}</div>
-                        <div class=\"dur-badge\">{}</div>
                     </div>
                     <div class=\"card-body\">
                         <div class=\"card-avatar\" style=\"background-color:{}; color:#ffffff;\">{}</div>
                         <div class=\"card-text\">
                             <div class=\"card-title\">{}</div>
+                            <div class=\"card-title-sub\">{}</div>
                             <div class=\"card-channel\">{} ✔</div>
                             <div class=\"card-meta\">{} • {}</div>
                         </div>
                     </div>
                 </div>",
-                bg_color, border_color, badge_bg, badge_color, tag, headline, subtext, v.duration,
-                avatar_bg, avatar_text, title_display, v.channel, v.views, v.published
+                bg_color, border_color, badge_bg, badge_color, tag, v.duration, headline, subtext,
+                avatar_bg, avatar_text, line1, line2, v.channel, v.views, v.published
+            ));
+        }
+
+        let mut row2_html = String::new();
+        for v in row2_videos {
+            let (line1, line2) = get_feed_card_lines(&v.video_id);
+            let (bg_color, border_color, badge_bg, badge_color, tag, headline, subtext, avatar_bg, avatar_text) =
+                Self::get_video_thumbnail_details(v);
+
+            row2_html.push_str(&format!(
+                "<div class=\"grid-card\">
+                    <div class=\"card-thumb\" style=\"background-color:{}; border:1px solid {};\">
+                        <div class=\"thumb-top\">
+                            <span class=\"thumb-tag\" style=\"background-color:{}; color:{};\">{}</span>
+                            <span class=\"dur-badge\">{}</span>
+                        </div>
+                        <div class=\"thumb-headline\">{}</div>
+                        <div class=\"thumb-subtext\">{}</div>
+                    </div>
+                    <div class=\"card-body\">
+                        <div class=\"card-avatar\" style=\"background-color:{}; color:#ffffff;\">{}</div>
+                        <div class=\"card-text\">
+                            <div class=\"card-title\">{}</div>
+                            <div class=\"card-title-sub\">{}</div>
+                            <div class=\"card-channel\">{} ✔</div>
+                            <div class=\"card-meta\">{} • {}</div>
+                        </div>
+                    </div>
+                </div>",
+                bg_color, border_color, badge_bg, badge_color, tag, v.duration, headline, subtext,
+                avatar_bg, avatar_text, line1, line2, v.channel, v.views, v.published
             ));
         }
 
@@ -1759,72 +1700,96 @@ body {{
 .topbar {{
     background-color: #ffffff;
     border-bottom: 1px solid #e5e5e5;
-    padding: 10px 18px;
+    padding: 8px 24px;
     display: block;
+    width: 100%;
+    box-sizing: border-box;
 }}
-.hamburger {{ display: inline-block; font-size: 18px; color: #0f0f0f; width: 28px; cursor: pointer; vertical-align: middle; }}
-.logo {{ display: inline-block; font-size: 18px; font-weight: bold; color: #0f0f0f; width: 130px; cursor: pointer; vertical-align: middle; }}
+.hamburger {{ display: inline-block; font-size: 20px; color: #0f0f0f; width: 28px; cursor: pointer; vertical-align: middle; }}
+.logo {{ display: inline-block; font-size: 19px; font-weight: bold; color: #0f0f0f; width: 140px; cursor: pointer; vertical-align: middle; }}
 .logo-badge {{ font-size: 10px; color: #606060; margin-left: 2px; }}
-.search-container {{ display: inline-block; width: 540px; margin-left: 20px; vertical-align: middle; }}
-.search-pill {{ background-color: #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
-.search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 56px; padding: 8px 0; text-align: center; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; cursor: pointer; }}
-.mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 36px; height: 36px; display: inline-block; margin-left: 10px; text-align: center; color: #0f0f0f; font-size: 14px; vertical-align: middle; cursor: pointer; }}
-.signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 7px 16px; font-size: 13px; font-weight: bold; margin-top: 2px; vertical-align: middle; }}
-.layout-row {{ display: block; }}
-.sidebar {{ display: inline-block; width: 170px; background-color: #ffffff; border-right: 1px solid #e5e5e5; padding-top: 12px; vertical-align: top; }}
+.search-container {{ display: inline-block; width: 580px; margin-left: 12%; vertical-align: middle; }}
+.search-pill {{ background-color: #ffffff; border-right: none; border-radius: 20px 0 0 20px; padding: 9px 18px; width: 440px; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; }}
+.search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 60px; padding: 9px 0; text-align: center; color: #0f0f0f; font-size: 15px; display: inline-block; vertical-align: middle; cursor: pointer; }}
+.mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 38px; height: 38px; display: inline-block; margin-left: 12px; text-align: center; line-height: 38px; color: #0f0f0f; font-size: 15px; vertical-align: middle; cursor: pointer; }}
+.signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 8px 18px; font-size: 13px; font-weight: bold; margin-top: 2px; margin-right: 16px; cursor: pointer; }}
+.layout-row {{ display: block; width: 100%; }}
+.sidebar {{ display: inline-block; width: 17%; background-color: #ffffff; border-right: 1px solid #e5e5e5; padding-top: 12px; vertical-align: top; }}
 .side-item {{ padding: 10px 18px; font-size: 13px; color: #0f0f0f; border-radius: 10px; margin: 2px 10px; cursor: pointer; }}
 .side-active {{ background-color: #f2f2f2; font-weight: bold; }}
 .side-divider {{ border-top: 1px solid #e5e5e5; margin: 10px 14px; }}
-.content-area {{ display: inline-block; width: 790px; vertical-align: top; padding: 14px 18px; }}
-.chips-bar {{ margin-bottom: 18px; display: block; }}
+.content-area {{ display: inline-block; width: 82%; vertical-align: top; padding: 16px 1%; box-sizing: border-box; }}
+.chips-bar {{ margin-bottom: 20px; display: block; width: 100%; }}
 .chip {{
     display: inline-block;
     background-color: #f2f2f2;
     border: 1px solid #e5e5e5;
     color: #0f0f0f;
-    padding: 6px 14px;
+    padding: 7px 16px;
     border-radius: 16px;
-    font-size: 12px;
+    font-size: 13px;
     margin-right: 6px;
     margin-bottom: 6px;
     cursor: pointer;
 }}
 .chip-active {{ background-color: #0f0f0f; color: #ffffff; font-weight: bold; }}
+.grid-row {{ display: block; width: 100%; margin-bottom: 16px; }}
 .grid-card {{
     display: inline-block;
-    width: 240px;
-    margin: 6px 8px 20px 8px;
+    width: 31%;
+    margin: 6px 1% 20px 1%;
     vertical-align: top;
     cursor: pointer;
 }}
 .card-thumb {{
-    border-radius: 10px;
-    height: 135px;
-    position: relative;
-    padding: 6px;
+    border-radius: 12px;
+    height: 180px;
+    padding: 10px 12px;
     box-sizing: border-box;
     display: block;
 }}
-.thumb-tag {{ font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 6px; display: inline-block; }}
-.thumb-headline {{ color: #ffffff; font-size: 13px; font-weight: bold; padding-top: 16px; text-align: center; line-height: 1.3; }}
-.thumb-subtext {{ color: #e2e8f0; font-size: 10px; text-align: center; margin-top: 6px; }}
-.dur-badge {{ background-color: rgba(0, 0, 0, 0.85); color: #ffffff; border-radius: 4px; padding: 2px 5px; font-size: 10px; font-weight: bold; float: right; margin: 4px; }}
+.thumb-top {{ display: block; width: 100%; }}
+.thumb-tag {{ font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 6px; display: inline-block; }}
+.dur-badge {{ background-color: rgba(0, 0, 0, 0.85); color: #ffffff; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: bold; float: right; display: inline-block; }}
+.thumb-headline {{ color: #ffffff; font-size: 15px; font-weight: bold; text-align: center; line-height: 1.4; margin-top: 32px; }}
+.thumb-subtext {{ color: #cbd5e1; font-size: 11px; text-align: center; margin-top: 8px; }}
 .card-body {{ margin-top: 10px; display: block; }}
 .card-avatar {{
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: inline-block;
     text-align: center;
-    line-height: 32px;
-    font-size: 10px;
+    line-height: 36px;
+    font-size: 11px;
     font-weight: bold;
     vertical-align: top;
+    margin-right: 12px;
 }}
-.card-text {{ display: inline-block; width: 200px; padding-left: 8px; vertical-align: top; }}
-.card-title {{ font-size: 13px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 4px; }}
-.card-channel {{ font-size: 11px; color: #606060; margin-bottom: 2px; }}
-.card-meta {{ font-size: 10px; color: #606060; }}
+.card-text {{ display: inline-block; width: 75%; vertical-align: top; }}
+.card-title {{ font-size: 14px; font-weight: bold; color: #0f0f0f; line-height: 1.25; margin-bottom: 2px; }}
+.card-title-sub {{ font-size: 14px; font-weight: bold; color: #0f0f0f; line-height: 1.25; margin-bottom: 6px; }}
+.card-channel {{ font-size: 12px; color: #606060; margin-bottom: 2px; }}
+.card-meta {{ font-size: 11px; color: #606060; }}
+.shorts-section {{ margin-top: 10px; margin-bottom: 26px; display: block; width: 100%; border-top: 1px solid #e5e5e5; padding-top: 18px; }}
+.shorts-header {{ font-size: 17px; font-weight: bold; color: #0f0f0f; margin-bottom: 14px; margin-left: 1%; }}
+.shorts-grid {{ display: block; width: 100%; }}
+.short-card {{
+    display: inline-block;
+    width: 23%;
+    height: 250px;
+    border-radius: 12px;
+    margin: 4px 1%;
+    padding: 10px;
+    box-sizing: border-box;
+    vertical-align: top;
+    position: relative;
+    cursor: pointer;
+}}
+.short-badge {{ background-color: rgba(0,0,0,0.8); color: #ffffff; border-radius: 4px; padding: 2px 6px; font-size: 10px; font-weight: bold; display: inline-block; }}
+.short-center {{ color: #ffffff; font-size: 14px; font-weight: bold; text-align: center; padding-top: 60px; line-height: 1.3; }}
+.short-title {{ color: #ffffff; font-size: 12px; font-weight: bold; position: absolute; bottom: 28px; left: 10px; right: 10px; line-height: 1.3; }}
+.short-views {{ color: #cbd5e1; font-size: 10px; position: absolute; bottom: 10px; left: 10px; }}
 </style>
 </head>
 <body>
@@ -1856,6 +1821,7 @@ body {{
     <div class=\"content-area\">
         <div class=\"chips-bar\">
             <div class=\"chip chip-active\">All</div>
+            <div class=\"chip\">Nouman Ali Khan</div>
             <div class=\"chip\">News</div>
             <div class=\"chip\">Podcasts</div>
             <div class=\"chip\">Music</div>
@@ -1865,14 +1831,48 @@ body {{
             <div class=\"chip\">Coding</div>
         </div>
 
-        <div class=\"grid-feed\">
+        <div class=\"grid-row\">
+            {}
+        </div>
+
+        <div class=\"shorts-section\">
+            <div class=\"shorts-header\"><span style=\"color:#ff0000; font-size:18px;\">⚡</span> <b>Shorts</b></div>
+            <div class=\"shorts-grid\">
+                <div class=\"short-card\" style=\"background-color:#1e293b; border:1px solid #334155;\">
+                    <div class=\"short-badge\">NEW</div>
+                    <div class=\"short-center\">📚 STUDY HACK</div>
+                    <div class=\"short-title\">Habits of Toppers • Exam Routine</div>
+                    <div class=\"short-views\">3.4M views</div>
+                </div>
+                <div class=\"short-card\" style=\"background-color:#4c0519; border:1px solid #881337;\">
+                    <div class=\"short-badge\">VIRAL</div>
+                    <div class=\"short-center\">✨ BEAUTY WITH BRAIN</div>
+                    <div class=\"short-title\">Perfect example of Beauty with brain</div>
+                    <div class=\"short-views\">18M views</div>
+                </div>
+                <div class=\"short-card\" style=\"background-color:#713f12; border:1px solid #a16207;\">
+                    <div class=\"short-badge\">FUNNY</div>
+                    <div class=\"short-center\">🐯 TIGER COSTUME</div>
+                    <div class=\"short-title\">Backyard comedy adventure</div>
+                    <div class=\"short-views\">246K views</div>
+                </div>
+                <div class=\"short-card\" style=\"background-color:#064e3b; border:1px solid #047857;\">
+                    <div class=\"short-badge\">HOLY</div>
+                    <div class=\"short-center\">🕌 MASJID NABAWI</div>
+                    <div class=\"short-title\">Rain blessing at the Prophet Mosque</div>
+                    <div class=\"short-views\">1.2M views</div>
+                </div>
+            </div>
+        </div>
+
+        <div class=\"grid-row\">
             {}
         </div>
     </div>
 </div>
 </body>
 </html>",
-            search_border, display_input, cards
+            search_border, display_input, row1_html, row2_html
         )
     }
 
@@ -1893,9 +1893,9 @@ body {{
         // 1. Watch page: /watch?v=...
         if trimmed.contains("/watch") || trimmed.contains("watch?v=") {
             let vid = if let Some(v_part) = trimmed.split("v=").nth(1) {
-                v_part.split('&').next().unwrap_or("4NlKj7Saogc")
+                v_part.split('&').next().unwrap_or("yt_parliament")
             } else {
-                "4NlKj7Saogc"
+                "yt_parliament"
             };
             let video = Self::get_video_by_id(vid);
             let related = Self::get_related_videos_for(vid);
@@ -1943,16 +1943,15 @@ body {{
         }
 
         // 4. Clean Landing Page (Image 1 & 2): default or clean=true
-        let raw_q = if !query_input.is_empty() {
+        let q_input = if !query_input.is_empty() {
             query_input
         } else if trimmed.contains("q=") {
             trimmed.split("q=").nth(1).unwrap_or("").split('&').next().unwrap_or("")
         } else {
             ""
         };
-        let q_input = raw_q.replace('+', " ");
         let sugg_open = trimmed.contains("sugg=true") || is_focused;
-        let html = Self::build_youtube_clean_home_html(&q_input, sugg_open, is_focused, cursor_visible);
+        let html = Self::build_youtube_clean_home_html(q_input, sugg_open, is_focused, cursor_visible);
         ("YouTube".to_owned(), html)
     }
 

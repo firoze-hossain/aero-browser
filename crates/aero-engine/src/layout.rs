@@ -127,6 +127,14 @@ impl<'a> LayoutBox<'a> {
         }
     }
 
+    /// Recursively translates this box and all its children along the X axis.
+    pub fn translate_x(&mut self, dx: f32) {
+        self.dimensions.content.x += dx;
+        for child in &mut self.children {
+            child.translate_x(dx);
+        }
+    }
+
     /// Recursively computes layout geometry based on the containing block dimensions.
     pub fn layout(&mut self, containing_block: Dimensions) {
         match self.box_type {
@@ -200,10 +208,22 @@ impl<'a> LayoutBox<'a> {
             .unwrap_or(&zero).to_px();
         let margin_left = style.and_then(|s| s.value("margin-left"))
             .or_else(|| style.and_then(|s| s.value("margin")))
-            .unwrap_or(&zero).to_px();
+            .map(|v| match v {
+                Value::Length(pct, crate::css::Unit::Percent) => {
+                    containing_block.content.width * (*pct / 100.0)
+                }
+                _ => v.to_px(),
+            })
+            .unwrap_or(0.0);
         let margin_right = style.and_then(|s| s.value("margin-right"))
             .or_else(|| style.and_then(|s| s.value("margin")))
-            .unwrap_or(&zero).to_px();
+            .map(|v| match v {
+                Value::Length(pct, crate::css::Unit::Percent) => {
+                    containing_block.content.width * (*pct / 100.0)
+                }
+                _ => v.to_px(),
+            })
+            .unwrap_or(0.0);
         self.dimensions.margin = EdgeSizes {
             top: margin_top,
             bottom: margin_bottom,
@@ -229,13 +249,31 @@ impl<'a> LayoutBox<'a> {
             }
         }
 
+        let is_border_box = style.map_or(true, |s| {
+            s.lookup("box-sizing", "border-box") == Value::Keyword("border-box".to_owned())
+        });
+        let total_non_content = if is_border_box {
+            self.dimensions.padding.left + self.dimensions.padding.right
+                + self.dimensions.border.left + self.dimensions.border.right
+        } else {
+            0.0
+        };
+
         let mut explicit_width = 0.0f32;
         if let Some(s) = style {
             if let Some(w) = s.value("width") {
-                explicit_width = w.to_px();
+                explicit_width = match w {
+                    Value::Length(pct, crate::css::Unit::Percent) => {
+                        ((containing_block.content.width * (*pct / 100.0)) - total_non_content).max(0.0)
+                    }
+                    _ => (w.to_px() - total_non_content).max(0.0),
+                };
             }
             if let Some(h) = s.value("height") {
-                let eh = h.to_px();
+                let eh = (h.to_px() - if is_border_box {
+                    self.dimensions.padding.top + self.dimensions.padding.bottom
+                        + self.dimensions.border.top + self.dimensions.border.bottom
+                } else { 0.0 }).max(0.0);
                 if eh > 0.0 {
                     self.dimensions.content.height = eh;
                 }
@@ -271,6 +309,12 @@ impl<'a> LayoutBox<'a> {
         let mut max_row_h: f32 = 20.0;
         let mut max_w: f32 = 0.0;
 
+        let container_right = if explicit_width > 0.0 {
+            self.dimensions.content.x + explicit_width
+        } else {
+            containing_block.content.x + containing_block.content.width
+        };
+
         for child in &mut self.children {
             let mut child_cb = self.dimensions;
             child_cb.content.x = cur_x;
@@ -280,7 +324,7 @@ impl<'a> LayoutBox<'a> {
             let mb = child.dimensions.margin_box();
             max_row_h = max_row_h.max(mb.height);
 
-            if cur_x + mb.width > containing_block.content.x + containing_block.content.width && cur_x > self.dimensions.content.x {
+            if cur_x + mb.width > container_right && cur_x > self.dimensions.content.x {
                 cur_x = self.dimensions.content.x;
                 cur_y += max_row_h;
                 max_row_h = mb.height;
@@ -292,8 +336,14 @@ impl<'a> LayoutBox<'a> {
             max_w = max_w.max(cur_x - self.dimensions.content.x);
         }
 
-        self.dimensions.content.width = max_w.max(60.0);
-        self.dimensions.content.height = (cur_y + max_row_h - self.dimensions.content.y).max(24.0);
+        if explicit_width > 0.0 {
+            self.dimensions.content.width = explicit_width;
+        } else {
+            self.dimensions.content.width = max_w.max(20.0);
+        }
+        if self.dimensions.content.height == 0.0 {
+            self.dimensions.content.height = (cur_y + max_row_h - self.dimensions.content.y).max(20.0);
+        }
     }
 
     fn calculate_block_width(&mut self, containing_block: Dimensions) {
@@ -420,9 +470,31 @@ impl<'a> LayoutBox<'a> {
     fn layout_block_children(&mut self) {
         let mut cur_y = self.dimensions.content.y;
         let mut cur_x = self.dimensions.content.x;
+        let mut right_cur_x = self.dimensions.content.x + self.dimensions.content.width;
         let mut row_h: f32 = 0.0;
 
         for child in &mut self.children {
+            let is_float_right = child.get_styled_node().map_or(false, |s| {
+                s.lookup("float", "none") == Value::Keyword("right".to_owned())
+            });
+
+            if is_float_right {
+                let mut child_cb = self.dimensions;
+                child_cb.content.x = self.dimensions.content.x;
+                child_cb.content.y = cur_y;
+                child.layout(child_cb);
+
+                let mb = child.dimensions.margin_box();
+                let right_x = right_cur_x - mb.width - child.dimensions.margin.right;
+                let delta_x = right_x - (child.dimensions.content.x - child.dimensions.padding.left - child.dimensions.border.left - child.dimensions.margin.left);
+                if delta_x > 0.0 {
+                    child.translate_x(delta_x);
+                }
+                right_cur_x = right_x - child.dimensions.margin.left;
+                row_h = row_h.max(mb.height);
+                continue;
+            }
+
             let is_inline_flow = matches!(child.box_type, BoxType::InlineNode(_));
 
             if is_inline_flow {
@@ -439,6 +511,7 @@ impl<'a> LayoutBox<'a> {
                     // Wrap to next row
                     cur_x = self.dimensions.content.x;
                     cur_y += row_h;
+                    right_cur_x = self.dimensions.content.x + self.dimensions.content.width;
                     row_h = mb.height;
                     let mut child_cb = self.dimensions;
                     child_cb.content.x = cur_x;
@@ -450,6 +523,7 @@ impl<'a> LayoutBox<'a> {
                 // Block child: end current inline row if any, stack vertically
                 if row_h > 0.0 {
                     cur_y += row_h + 8.0;
+                    right_cur_x = self.dimensions.content.x + self.dimensions.content.width;
                     row_h = 0.0;
                     cur_x = self.dimensions.content.x;
                 }

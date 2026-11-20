@@ -174,24 +174,39 @@ mod tests {
     fn test_youtube_video_thematic_metadata_and_cinema_stage() {
         let v_vlad = Tab::get_video_by_id("bY1cozLiK14");
         assert!(v_vlad.title.contains("Vlad and Niki"));
-        let (hud, tag, main, _bullets, speaker, _, _, _, _) = Tab::get_player_stage_details(&v_vlad);
+        let (_, _, hud, _, tag, main, _, _, _, _, speaker) = Tab::get_player_stage_details(&v_vlad);
         assert!(hud.contains("4K UHD"));
-        assert!(tag.contains("KIDS ADVENTURE"));
-        assert!(main.contains("Ice Cream Truck"));
+        assert!(tag.contains("ICE CREAM"));
+        assert!(main.contains("VLAD"));
         assert!(speaker.contains("VLAD"));
 
         let v_waqas = Tab::get_video_by_id("pagi23");
         assert!(v_waqas.title.contains("Pagol Naki"));
-        let (_, tag_w, main_w, _, speaker_w, _, _, _, _) = Tab::get_player_stage_details(&v_waqas);
-        assert!(tag_w.contains("OFFICIAL ACOUSTIC"));
-        assert!(main_w.contains("Pagol Naki"));
+        let (_, _, hud_w, _, tag_w, main_w, _, _, _, _, speaker_w) = Tab::get_player_stage_details(&v_waqas);
+        assert!(hud_w.contains("1080p"));
+        assert!(tag_w.contains("STUDIO"));
+        assert!(main_w.contains("PAGOL NAKI"));
         assert!(speaker_w.contains("WAQAS"));
 
-        let v_natok = Tab::get_video_by_id("LWzPB04DhCg");
-        assert!(v_natok.title.contains("Vul Naki Prem"));
-        let (_, tag_n, main_n, _, speaker_n, _, _, _, _) = Tab::get_player_stage_details(&v_natok);
-        assert!(tag_n.contains("BANGLA NATOK"));
-        assert!(main_n.contains("Vul Naki Prem"));
-        assert!(speaker_n.contains("AROSH KHAN"));
+        let v_parliament = Tab::get_video_by_id("yt_parliament");
+        assert!(v_parliament.title.contains("Parliament"));
+        let (_, _, hud_p, _, tag_p, main_p, _, _, _, _, speaker_p) = Tab::get_player_stage_details(&v_parliament);
+        assert!(hud_p.contains("1080p60"));
+        assert!(tag_p.contains("PARLIAMENT"));
+        assert!(main_p.contains("MUGDHO PURO SANGSAD"));
+        assert!(speaker_p.contains("ATN"));
+    }
+
+    #[test]
+    fn test_print_feed_layout_cards() {
+        let (_title, html) = Tab::build_youtube_page_html("https://www.youtube.com?feed=true", "", false, false, true, false, 4300, 134, 0);
+        let mut surface = vec![0u32; 1024 * 768];
+        let (_height, dl) = aero_engine::render_html_to_surface(&html, &mut surface, 1024, 768, 0.0);
+        for (i, item) in dl.items.iter().enumerate() {
+            let s = format!("{:?}", item);
+            if s.contains("Chupchap") || s.contains("Motiversity") || s.contains("MB") {
+                println!("Item #{}: {:?}", i, item);
+            }
+        }
     }
 }
