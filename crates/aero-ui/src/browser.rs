@@ -281,6 +281,238 @@ impl AeroBrowser {
                         }
                     }
                 }
+
+                // YouTube Interactive Navigation & Click Handling (Images 1-5)
+                if active_url.contains("youtube.com") || active_url.contains("youtube") {
+                    let vy = y - TOTAL_CHROME_HEIGHT;
+                    let vx = x;
+
+                    // 1. YouTube Top Bar (vy: 0..52)
+                    if vy >= 0 && vy <= 52 {
+                        if vx >= 10 && vx <= 220 {
+                            // Logo or hamburger -> Home Feed (Image 5)
+                            self.navigate("https://www.youtube.com?feed=true");
+                            return true;
+                        } else if vx >= 230 && vx <= 640 {
+                            // Search box -> open suggestions / focus search
+                            if !active_url.contains("search_query") && !active_url.contains("watch") && !active_url.contains("feed") {
+                                self.navigate("https://www.youtube.com?sugg=true");
+                            } else {
+                                self.omnibox_focused = true;
+                                self.omnibox_text = "naki in bangla".to_owned();
+                            }
+                            return true;
+                        } else if vx > 640 && vx <= 740 {
+                            // Search button [Q] or mic [🎙] -> run search (Image 3)
+                            self.navigate("https://www.youtube.com/results?search_query=naki+in+bangla");
+                            return true;
+                        } else if vx >= 800 {
+                            // Sign in pill
+                            return true;
+                        }
+                    }
+
+                    // 2. Left Sidebar (vx: 0..200, vy: 53..600)
+                    if vx >= 0 && vx <= 200 && vy >= 53 {
+                        if vy >= 53 && vy <= 95 {
+                            // Home -> Feed (Image 5)
+                            self.navigate("https://www.youtube.com?feed=true");
+                            return true;
+                        } else if vy > 95 && vy <= 135 {
+                            // Shorts
+                            self.navigate("https://www.youtube.com/results?search_query=shorts");
+                            return true;
+                        } else if vy > 135 && vy <= 175 {
+                            // Subscriptions
+                            self.navigate("https://www.youtube.com/results?search_query=subscriptions");
+                            return true;
+                        } else if vy > 175 && vy <= 265 {
+                            // You / History -> Clean Start Page (Image 1)
+                            self.navigate("https://www.youtube.com?clean=true");
+                            return true;
+                        } else if vy > 330 && vy <= 370 {
+                            // Music
+                            self.navigate("https://www.youtube.com/results?search_query=music");
+                            return true;
+                        } else if vy > 370 && vy <= 410 {
+                            // Gaming
+                            self.navigate("https://www.youtube.com/results?search_query=gaming");
+                            return true;
+                        } else if vy > 410 && vy <= 450 {
+                            // News
+                            self.navigate("https://www.youtube.com/results?search_query=news");
+                            return true;
+                        } else if vy > 450 && vy <= 490 {
+                            // Podcasts
+                            self.navigate("https://www.youtube.com/results?search_query=podcasts");
+                            return true;
+                        }
+                    }
+
+                    // 3. Main Content Views (vx > 200)
+                    // 3A. Watch Page: watch?v=... (Image 4)
+                    if active_url.contains("watch?v=") {
+                        if vx >= 20 && vx <= 700 {
+                            // Cinema player screen / controls (vy: 55..450)
+                            if vy >= 55 && vy <= 450 {
+                                let next_url = if active_url.contains("playing=false") {
+                                    active_url.replace("playing=false", "playing=true")
+                                } else if active_url.contains("playing=true") {
+                                    active_url.replace("playing=true", "playing=false")
+                                } else {
+                                    format!("{}&playing=false", active_url)
+                                };
+                                self.navigate(&next_url);
+                                return true;
+                            } else if vy >= 490 && vy <= 560 && vx >= 260 && vx <= 420 {
+                                // Subscribe pill toggle
+                                let next_url = if active_url.contains("sub=true") {
+                                    active_url.replace("sub=true", "sub=false")
+                                } else {
+                                    format!("{}&sub=true", active_url)
+                                };
+                                self.navigate(&next_url);
+                                return true;
+                            }
+                        } else if vx >= 710 {
+                            // Up Next related column
+                            if vy >= 80 && vy <= 170 {
+                                self.navigate("https://www.youtube.com/watch?v=rel_hajj");
+                                return true;
+                            } else if vy > 170 && vy <= 260 {
+                                self.navigate("https://www.youtube.com/watch?v=rel_sirah");
+                                return true;
+                            } else if vy > 260 && vy <= 350 {
+                                self.navigate("https://www.youtube.com/watch?v=rel_marriage");
+                                return true;
+                            } else if vy > 350 && vy <= 440 {
+                                self.navigate("https://www.youtube.com/watch?v=rel_destroy");
+                                return true;
+                            } else if vy > 440 && vy <= 530 {
+                                self.navigate("https://www.youtube.com/watch?v=rel_humble");
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+
+                    // 3B. Search Results Page: search_query=... (Image 3)
+                    if active_url.contains("search_query=") || active_url.contains("?q=") {
+                        if vx >= 200 {
+                            if vy >= 55 && vy <= 200 {
+                                self.navigate("https://www.youtube.com/watch?v=bY1cozLiK14");
+                                return true;
+                            } else if vy > 200 && vy <= 350 {
+                                // Card 2 -> Muslim Youth Advice watch page (Image 4)
+                                self.navigate("https://www.youtube.com/watch?v=4NlKj7Saogc");
+                                return true;
+                            } else if vy > 350 && vy <= 500 {
+                                self.navigate("https://www.youtube.com/watch?v=pagi23");
+                                return true;
+                            } else if vy > 500 && vy <= 650 {
+                                self.navigate("https://www.youtube.com/watch?v=LWzPB04DhCg");
+                                return true;
+                            } else if vy > 650 && vy <= 800 {
+                                self.navigate("https://www.youtube.com/watch?v=XsNGS_bxzwg");
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+
+                    // 3C. Home Feed: feed=true (Image 5)
+                    if active_url.contains("feed=true") || active_url.ends_with("/feed") {
+                        if vx >= 200 {
+                            // Filter chips (vy: 55..100)
+                            if vy >= 55 && vy <= 100 {
+                                if vx >= 200 && vx <= 260 {
+                                    self.navigate("https://www.youtube.com?feed=true");
+                                    return true;
+                                } else if vx > 260 && vx <= 340 {
+                                    self.navigate("https://www.youtube.com/results?search_query=news");
+                                    return true;
+                                } else if vx > 340 && vx <= 440 {
+                                    self.navigate("https://www.youtube.com/results?search_query=podcasts");
+                                    return true;
+                                } else if vx > 440 && vx <= 530 {
+                                    self.navigate("https://www.youtube.com/results?search_query=music");
+                                    return true;
+                                } else if vx > 530 && vx <= 625 {
+                                    self.navigate("https://www.youtube.com/results?search_query=gaming");
+                                    return true;
+                                } else if vx > 625 && vx <= 705 {
+                                    self.navigate("https://www.youtube.com/results?search_query=live");
+                                    return true;
+                                } else if vx > 705 && vx <= 800 {
+                                    self.navigate("https://www.youtube.com/results?search_query=naki+in+bangla");
+                                    return true;
+                                } else if vx > 800 && vx <= 900 {
+                                    self.navigate("https://www.youtube.com/results?search_query=rust+programming");
+                                    return true;
+                                }
+                            }
+
+                            // 3-Column Video Cards Grid (vy: 105..700)
+                            if vy >= 105 && vy <= 380 {
+                                if vx >= 210 && vx <= 470 {
+                                    self.navigate("https://www.youtube.com/watch?v=yt_noman2");
+                                    return true;
+                                } else if vx > 470 && vx <= 740 {
+                                    self.navigate("https://www.youtube.com/watch?v=yt_parliament");
+                                    return true;
+                                } else if vx > 740 && vx <= 1010 {
+                                    self.navigate("https://www.youtube.com/watch?v=yt_humble");
+                                    return true;
+                                }
+                            } else if vy > 380 && vy <= 680 {
+                                if vx >= 210 && vx <= 470 {
+                                    self.navigate("https://www.youtube.com/watch?v=yt_barsha");
+                                    return true;
+                                } else if vx > 470 && vx <= 740 {
+                                    self.navigate("https://www.youtube.com/watch?v=yt_mashrafe");
+                                    return true;
+                                } else if vx > 740 && vx <= 1010 {
+                                    // Card 6 -> Watch Page (Image 4)
+                                    self.navigate("https://www.youtube.com/watch?v=4NlKj7Saogc");
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    }
+
+                    // 3D. Clean Landing Page (Image 1 & 2)
+                    if vx >= 200 {
+                        // Dropdown suggestion box (Image 2)
+                        if vy >= 55 && vy <= 180 && vx >= 240 && vx <= 760 {
+                            self.navigate("https://www.youtube.com/results?search_query=naki+in+bangla");
+                            return true;
+                        }
+
+                        // Welcome card (Image 1)
+                        if vy >= 140 && vy <= 240 && vx >= 260 && vx <= 780 {
+                            self.navigate("https://www.youtube.com?sugg=true");
+                            return true;
+                        }
+
+                        // Quick Pills
+                        if vy >= 240 && vy <= 350 {
+                            if vx >= 230 && vx <= 410 {
+                                self.navigate("https://www.youtube.com/results?search_query=naki+in+bangla");
+                                return true;
+                            } else if vx > 410 && vx <= 620 {
+                                self.navigate("https://www.youtube.com?feed=true");
+                                return true;
+                            } else if vx > 620 && vx <= 770 {
+                                self.navigate("https://www.youtube.com/results?search_query=music");
+                                return true;
+                            } else if vx > 770 {
+                                self.navigate("https://www.youtube.com/results?search_query=rust+programming");
+                                return true;
+                            }
+                        }
+                    }
+                }
                 false
             }
         }

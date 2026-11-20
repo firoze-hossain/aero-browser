@@ -21,6 +21,23 @@ const DEFAULT_WIDTH: usize = 1024;
 const DEFAULT_HEIGHT: usize = 720;
 const LINES_PER_CHUNK: usize = 16;
 
+fn save_ppm(path: &str, surface: &[u32], width: usize, height: usize) -> std::io::Result<()> {
+    use std::io::Write;
+    let mut f = std::fs::File::create(path)?;
+    write!(f, "P6\n{} {}\n255\n", width, height)?;
+    let mut bytes = Vec::with_capacity(width * height * 3);
+    for &p in surface {
+        let r = ((p >> 16) & 0xFF) as u8;
+        let g = ((p >> 8) & 0xFF) as u8;
+        let b = (p & 0xFF) as u8;
+        bytes.push(r);
+        bytes.push(g);
+        bytes.push(b);
+    }
+    f.write_all(&bytes)?;
+    Ok(())
+}
+
 fn print_banner() {
     println!("============================================================");
     println!("   AERO BROWSER v1.0.0 (Pure Rust Engine & UI)");
@@ -51,8 +68,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut initial_url = "about:newtab";
     let mut headless = false;
+    let mut screenshot_path: Option<String> = None;
 
-    for arg in args.iter().skip(1) {
+    let mut i = 1;
+    while i < args.len() {
+        let arg = &args[i];
         match arg.as_str() {
             "--help" | "-h" => {
                 print_help();
@@ -75,11 +95,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "--headless" => {
                 headless = true;
             }
+            "--screenshot" => {
+                if i + 1 < args.len() {
+                    i += 1;
+                    screenshot_path = Some(args[i].clone());
+                }
+            }
             url if !url.starts_with('-') => {
                 initial_url = url;
             }
             _ => {}
         }
+        i += 1;
     }
 
     print_banner();
@@ -88,6 +115,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if initial_url != "about:newtab" {
         println!("[Aero] Navigating initial tab to: {}", initial_url);
         browser.navigate(initial_url);
+    }
+
+    if let Some(ref path) = screenshot_path {
+        println!("[Aero] Taking screenshot of {} -> {}...", initial_url, path);
+        let mut surface = vec![0u32; DEFAULT_WIDTH * DEFAULT_HEIGHT];
+        browser.render(&mut surface, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        save_ppm(path, &surface, DEFAULT_WIDTH, DEFAULT_HEIGHT)?;
+        println!("[Aero] Screenshot saved successfully: {}", path);
+        return Ok(());
     }
 
     let has_display = env::var("DISPLAY").is_ok();
