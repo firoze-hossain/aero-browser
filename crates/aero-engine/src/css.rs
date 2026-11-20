@@ -403,10 +403,13 @@ impl CssParser {
                 self.next();
             }
 
-            self.consume_whitespace();
-            let val = self.parse_value();
+            let raw_val = self.parse_raw_value();
+            let val = Self::parse_value_from_str(&raw_val);
+            let lower_name = name.to_lowercase();
+
+            Self::expand_shorthands(&lower_name, &raw_val, &mut declarations);
             declarations.push(Declaration {
-                name: name.to_lowercase(),
+                name: lower_name,
                 value: val,
             });
 
@@ -416,6 +419,156 @@ impl CssParser {
             }
         }
         declarations
+    }
+
+    fn parse_raw_value(&mut self) -> String {
+        self.consume_whitespace();
+        let mut raw = String::new();
+        while let Some(c) = self.peek() {
+            if c == ';' || c == '}' || c == '!' {
+                break;
+            }
+            raw.push(c);
+            self.next();
+        }
+        raw.trim().to_owned()
+    }
+
+    pub fn parse_value_from_str(s: &str) -> Value {
+        if let Some(val) = Self::try_parse_length(s) {
+            return val;
+        }
+        if let Some(col) = Color::parse(s) {
+            return Value::ColorValue(col);
+        }
+        Value::Keyword(s.to_owned())
+    }
+
+    fn expand_shorthands(name: &str, raw_val: &str, declarations: &mut Vec<Declaration>) {
+        let parts: Vec<&str> = raw_val.split_whitespace().collect();
+        if parts.is_empty() {
+            return;
+        }
+
+        if name == "border"
+            || name == "border-top"
+            || name == "border-bottom"
+            || name == "border-left"
+            || name == "border-right"
+        {
+            let mut parsed_width = None;
+            let mut parsed_color = None;
+
+            for part in &parts {
+                if *part == "none" {
+                    parsed_width = Some(Value::Length(0.0, Unit::Px));
+                } else if let Some(len) = Self::try_parse_length(part) {
+                    parsed_width = Some(len);
+                } else if let Some(col) = Color::parse(part) {
+                    parsed_color = Some(Value::ColorValue(col));
+                }
+            }
+
+            let width_val = parsed_width.unwrap_or(Value::Length(1.0, Unit::Px));
+            let sides: &[&str] = match name {
+                "border" => &["border-top", "border-right", "border-bottom", "border-left"],
+                "border-top" => &["border-top"],
+                "border-right" => &["border-right"],
+                "border-bottom" => &["border-bottom"],
+                "border-left" => &["border-left"],
+                _ => &[],
+            };
+
+            for side in sides {
+                declarations.push(Declaration {
+                    name: format!("{}-width", side),
+                    value: width_val.clone(),
+                });
+                if let Some(ref col) = parsed_color {
+                    declarations.push(Declaration {
+                        name: format!("{}-color", side),
+                        value: col.clone(),
+                    });
+                }
+            }
+
+            if name == "border" {
+                declarations.push(Declaration {
+                    name: "border-width".to_owned(),
+                    value: width_val,
+                });
+                if let Some(col) = parsed_color {
+                    declarations.push(Declaration {
+                        name: "border-color".to_owned(),
+                        value: col,
+                    });
+                }
+            }
+        } else if name == "padding" || name == "margin" {
+            let mut lengths = Vec::new();
+            for part in &parts {
+                if *part == "auto" {
+                    lengths.push(Value::Length(0.0, Unit::Px));
+                } else if let Some(len) = Self::try_parse_length(part) {
+                    lengths.push(len);
+                }
+            }
+            if !lengths.is_empty() {
+                let (top, right, bottom, left) = match lengths.len() {
+                    1 => (lengths[0].clone(), lengths[0].clone(), lengths[0].clone(), lengths[0].clone()),
+                    2 => (lengths[0].clone(), lengths[1].clone(), lengths[0].clone(), lengths[1].clone()),
+                    3 => (lengths[0].clone(), lengths[1].clone(), lengths[2].clone(), lengths[1].clone()),
+                    _ => (lengths[0].clone(), lengths[1].clone(), lengths[2].clone(), lengths[3].clone()),
+                };
+                declarations.push(Declaration {
+                    name: format!("{}-top", name),
+                    value: top,
+                });
+                declarations.push(Declaration {
+                    name: format!("{}-right", name),
+                    value: right,
+                });
+                declarations.push(Declaration {
+                    name: format!("{}-bottom", name),
+                    value: bottom,
+                });
+                declarations.push(Declaration {
+                    name: format!("{}-left", name),
+                    value: left,
+                });
+            }
+        } else if name == "border-radius" {
+            let mut lengths = Vec::new();
+            for part in &parts {
+                if let Some(len) = Self::try_parse_length(part) {
+                    lengths.push(len);
+                }
+            }
+            if !lengths.is_empty() {
+                let (tl, tr, br, bl) = match lengths.len() {
+                    1 => (lengths[0].clone(), lengths[0].clone(), lengths[0].clone(), lengths[0].clone()),
+                    2 => (lengths[0].clone(), lengths[1].clone(), lengths[0].clone(), lengths[1].clone()),
+                    3 => (lengths[0].clone(), lengths[1].clone(), lengths[2].clone(), lengths[1].clone()),
+                    _ => (lengths[0].clone(), lengths[1].clone(), lengths[2].clone(), lengths[3].clone()),
+                };
+                declarations.push(Declaration {
+                    name: "border-top-left-radius".to_owned(),
+                    value: tl,
+                });
+                declarations.push(Declaration {
+                    name: "border-top-right-radius".to_owned(),
+                    value: tr,
+                });
+                declarations.push(Declaration {
+                    name: "border-bottom-right-radius".to_owned(),
+                    value: br,
+                });
+                declarations.push(Declaration {
+                    name: "border-bottom-left-radius".to_owned(),
+                    value: bl,
+                });
+            }
+        }
     }
 
     fn parse_identifier(&mut self) -> String {
@@ -459,22 +612,32 @@ impl CssParser {
     }
 
     fn try_parse_length(s: &str) -> Option<Value> {
-        if s.ends_with("px") {
-            let num = s[..s.len() - 2].trim().parse::<f32>().ok()?;
+        let trimmed = s.trim();
+        if trimmed.contains(' ') {
+            for part in trimmed.split_whitespace() {
+                if let Some(val) = Self::try_parse_length(part) {
+                    if val.to_px() > 0.0 {
+                        return Some(val);
+                    }
+                }
+            }
+        }
+        if trimmed.ends_with("px") {
+            let num = trimmed[..trimmed.len() - 2].trim().parse::<f32>().ok()?;
             Some(Value::Length(num, Unit::Px))
-        } else if s.ends_with("pt") {
-            let num = s[..s.len() - 2].trim().parse::<f32>().ok()?;
+        } else if trimmed.ends_with("pt") {
+            let num = trimmed[..trimmed.len() - 2].trim().parse::<f32>().ok()?;
             Some(Value::Length(num, Unit::Pt))
-        } else if s.ends_with("rem") {
-            let num = s[..s.len() - 3].trim().parse::<f32>().ok()?;
+        } else if trimmed.ends_with("rem") {
+            let num = trimmed[..trimmed.len() - 3].trim().parse::<f32>().ok()?;
             Some(Value::Length(num, Unit::Rem))
-        } else if s.ends_with("em") {
-            let num = s[..s.len() - 2].trim().parse::<f32>().ok()?;
+        } else if trimmed.ends_with("em") {
+            let num = trimmed[..trimmed.len() - 2].trim().parse::<f32>().ok()?;
             Some(Value::Length(num, Unit::Em))
-        } else if s.ends_with('%') {
-            let num = s[..s.len() - 1].trim().parse::<f32>().ok()?;
+        } else if trimmed.ends_with('%') {
+            let num = trimmed[..trimmed.len() - 1].trim().parse::<f32>().ok()?;
             Some(Value::Length(num, Unit::Percent))
-        } else if let Ok(num) = s.parse::<f32>() {
+        } else if let Ok(num) = trimmed.parse::<f32>() {
             Some(Value::Number(num))
         } else {
             None

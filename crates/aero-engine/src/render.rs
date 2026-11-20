@@ -26,9 +26,27 @@ pub enum DisplayItem {
     /// Solid filled rectangle.
     SolidColor { rect: Rect, color: Color },
     /// Rounded corner rectangle (e.g. buttons, card elements).
-    RoundedRect { rect: Rect, color: Color, radius: f32 },
+    RoundedRect {
+        rect: Rect,
+        color: Color,
+        tl: f32,
+        tr: f32,
+        br: f32,
+        bl: f32,
+    },
     /// Outlined border rectangle.
-    Border { rect: Rect, color: Color, width: f32, radius: f32 },
+    Border {
+        rect: Rect,
+        color: Color,
+        top: f32,
+        right: f32,
+        bottom: f32,
+        left: f32,
+        tl: f32,
+        tr: f32,
+        br: f32,
+        bl: f32,
+    },
     /// Rendered text run.
     TextRun {
         text: String,
@@ -73,21 +91,66 @@ impl DisplayList {
 
                     fill_rect(surface, surface_w, surface_h, rx, ry, rw, rh, *color);
                 }
-                DisplayItem::RoundedRect { rect, color, radius } => {
+                DisplayItem::RoundedRect { rect, color, tl, tr, br, bl } => {
                     let rx = (rect.x.round() as i32).max(0);
                     let ry = ((rect.y - scroll_y).round() as i32);
                     let rw = (rect.width.round() as i32).max(0);
                     let rh = (rect.height.round() as i32).max(0);
 
-                    fill_rounded_rect(surface, surface_w, surface_h, rx, ry, rw, rh, *radius as i32, *color);
+                    fill_rounded_rect(
+                        surface,
+                        surface_w,
+                        surface_h,
+                        rx,
+                        ry,
+                        rw,
+                        rh,
+                        *tl as i32,
+                        *tr as i32,
+                        *br as i32,
+                        *bl as i32,
+                        *color,
+                    );
                 }
-                DisplayItem::Border { rect, color, width, radius } => {
+                DisplayItem::Border { rect, color, top, right, bottom, left, tl, tr, br, bl } => {
                     let rx = (rect.x.round() as i32).max(0);
                     let ry = ((rect.y - scroll_y).round() as i32);
                     let rw = (rect.width.round() as i32).max(0);
                     let rh = (rect.height.round() as i32).max(0);
 
-                    draw_border(surface, surface_w, surface_h, rx, ry, rw, rh, *width as i32, *radius as i32, *color);
+                    if *tl > 0.0 || *tr > 0.0 || *br > 0.0 || *bl > 0.0 {
+                        draw_rounded_border(
+                            surface,
+                            surface_w,
+                            surface_h,
+                            rx,
+                            ry,
+                            rw,
+                            rh,
+                            *top as i32,
+                            *right as i32,
+                            *bottom as i32,
+                            *left as i32,
+                            *tl as i32,
+                            *tr as i32,
+                            *br as i32,
+                            *bl as i32,
+                            *color,
+                        );
+                    } else {
+                        if *top > 0.0 {
+                            fill_rect(surface, surface_w, surface_h, rx, ry, rw, *top as i32, *color);
+                        }
+                        if *bottom > 0.0 {
+                            fill_rect(surface, surface_w, surface_h, rx, ry + rh - (*bottom as i32), rw, *bottom as i32, *color);
+                        }
+                        if *left > 0.0 {
+                            fill_rect(surface, surface_w, surface_h, rx, ry, *left as i32, rh, *color);
+                        }
+                        if *right > 0.0 {
+                            fill_rect(surface, surface_w, surface_h, rx + rw - (*right as i32), ry, *right as i32, rh, *color);
+                        }
+                    }
                 }
                 DisplayItem::TextRun { text, x, y, color, font_size, bold } => {
                     let px = x.round() as i32;
@@ -128,17 +191,25 @@ fn render_layout_box(list: &mut DisplayList, layout_box: &LayoutBox) {
 fn render_background(list: &mut DisplayList, layout_box: &LayoutBox) {
     if let Some(styled) = layout_box.get_styled_node() {
         if let Some(bg_color) = styled.background_color() {
-            let radius = styled
+            let base_radius = styled
                 .value("border-radius")
                 .map(|v| v.to_px())
                 .unwrap_or(0.0);
 
+            let tl = styled.value("border-top-left-radius").map(|v| v.to_px()).unwrap_or(base_radius);
+            let tr = styled.value("border-top-right-radius").map(|v| v.to_px()).unwrap_or(base_radius);
+            let br = styled.value("border-bottom-right-radius").map(|v| v.to_px()).unwrap_or(base_radius);
+            let bl = styled.value("border-bottom-left-radius").map(|v| v.to_px()).unwrap_or(base_radius);
+
             let border_box = layout_box.dimensions.border_box();
-            if radius > 0.0 {
+            if tl > 0.0 || tr > 0.0 || br > 0.0 || bl > 0.0 {
                 list.push(DisplayItem::RoundedRect {
                     rect: border_box,
                     color: bg_color,
-                    radius,
+                    tl,
+                    tr,
+                    br,
+                    bl,
                 });
             } else {
                 list.push(DisplayItem::SolidColor {
@@ -152,23 +223,38 @@ fn render_background(list: &mut DisplayList, layout_box: &LayoutBox) {
 
 fn render_borders(list: &mut DisplayList, layout_box: &LayoutBox) {
     if let Some(styled) = layout_box.get_styled_node() {
-        let border_width = layout_box.dimensions.border.left;
-        if border_width > 0.0 {
+        let border = layout_box.dimensions.border;
+        if border.top > 0.0 || border.bottom > 0.0 || border.left > 0.0 || border.right > 0.0 {
             let border_color = styled
                 .value("border-color")
+                .or_else(|| styled.value("border-top-color"))
+                .or_else(|| styled.value("border-bottom-color"))
+                .or_else(|| styled.value("border-left-color"))
+                .or_else(|| styled.value("border-right-color"))
                 .and_then(|v| v.to_color())
                 .unwrap_or(Color::BORDER_COLOR);
 
-            let radius = styled
+            let base_radius = styled
                 .value("border-radius")
                 .map(|v| v.to_px())
                 .unwrap_or(0.0);
 
+            let tl = styled.value("border-top-left-radius").map(|v| v.to_px()).unwrap_or(base_radius);
+            let tr = styled.value("border-top-right-radius").map(|v| v.to_px()).unwrap_or(base_radius);
+            let br = styled.value("border-bottom-right-radius").map(|v| v.to_px()).unwrap_or(base_radius);
+            let bl = styled.value("border-bottom-left-radius").map(|v| v.to_px()).unwrap_or(base_radius);
+
             list.push(DisplayItem::Border {
                 rect: layout_box.dimensions.border_box(),
                 color: border_color,
-                width: border_width,
-                radius,
+                top: border.top,
+                right: border.right,
+                bottom: border.bottom,
+                left: border.left,
+                tl,
+                tr,
+                br,
+                bl,
             });
         }
     }
@@ -250,6 +336,31 @@ fn fill_rect(surface: &mut [u32], sw: usize, sh: usize, x: i32, y: i32, w: i32, 
     }
 }
 
+fn is_inside_rounded_corners(cx: i32, cy: i32, w: i32, h: i32, tl: i32, tr: i32, br: i32, bl: i32) -> bool {
+    if cx < 0 || cy < 0 || cx >= w || cy >= h {
+        return false;
+    }
+    if tl > 0 && cx < tl && cy < tl {
+        let dx = tl - cx - 1;
+        let dy = tl - cy - 1;
+        dx * dx + dy * dy <= tl * tl
+    } else if tr > 0 && cx >= w - tr && cy < tr {
+        let dx = cx - (w - tr);
+        let dy = tr - cy - 1;
+        dx * dx + dy * dy <= tr * tr
+    } else if bl > 0 && cx < bl && cy >= h - bl {
+        let dx = bl - cx - 1;
+        let dy = cy - (h - bl);
+        dx * dx + dy * dy <= bl * bl
+    } else if br > 0 && cx >= w - br && cy >= h - br {
+        let dx = cx - (w - br);
+        let dy = cy - (h - br);
+        dx * dx + dy * dy <= br * br
+    } else {
+        true
+    }
+}
+
 fn fill_rounded_rect(
     surface: &mut [u32],
     sw: usize,
@@ -258,15 +369,25 @@ fn fill_rounded_rect(
     y: i32,
     w: i32,
     h: i32,
-    r: i32,
+    tl: i32,
+    tr: i32,
+    br: i32,
+    bl: i32,
     color: Color,
 ) {
-    if r <= 0 {
+    if w <= 0 || h <= 0 {
+        return;
+    }
+    if tl <= 0 && tr <= 0 && br <= 0 && bl <= 0 {
         fill_rect(surface, sw, sh, x, y, w, h, color);
         return;
     }
 
-    let r_clamped = r.min(w / 2).min(h / 2);
+    let max_r = (w / 2).min(h / 2);
+    let tl = tl.min(max_r).max(0);
+    let tr = tr.min(max_r).max(0);
+    let br = br.min(max_r).max(0);
+    let bl = bl.min(max_r).max(0);
     let xrgb = color.to_xrgb();
 
     for cy in 0..h {
@@ -281,32 +402,78 @@ fn fill_rounded_rect(
                 continue;
             }
 
-            // Check corner radii
-            let in_top_left = cx < r_clamped && cy < r_clamped;
-            let in_top_right = cx >= w - r_clamped && cy < r_clamped;
-            let in_bottom_left = cx < r_clamped && cy >= h - r_clamped;
-            let in_bottom_right = cx >= w - r_clamped && cy >= h - r_clamped;
+            if is_inside_rounded_corners(cx, cy, w, h, tl, tr, br, bl) {
+                surface[py as usize * sw + px as usize] = xrgb;
+            }
+        }
+    }
+}
 
-            let mut inside = true;
-            if in_top_left {
-                let dx = r_clamped - cx - 1;
-                let dy = r_clamped - cy - 1;
-                inside = dx * dx + dy * dy <= r_clamped * r_clamped;
-            } else if in_top_right {
-                let dx = cx - (w - r_clamped);
-                let dy = r_clamped - cy - 1;
-                inside = dx * dx + dy * dy <= r_clamped * r_clamped;
-            } else if in_bottom_left {
-                let dx = r_clamped - cx - 1;
-                let dy = cy - (h - r_clamped);
-                inside = dx * dx + dy * dy <= r_clamped * r_clamped;
-            } else if in_bottom_right {
-                let dx = cx - (w - r_clamped);
-                let dy = cy - (h - r_clamped);
-                inside = dx * dx + dy * dy <= r_clamped * r_clamped;
+fn draw_rounded_border(
+    surface: &mut [u32],
+    sw: usize,
+    sh: usize,
+    x: i32,
+    y: i32,
+    w: i32,
+    h: i32,
+    b_top: i32,
+    b_right: i32,
+    b_bottom: i32,
+    b_left: i32,
+    tl: i32,
+    tr: i32,
+    br: i32,
+    bl: i32,
+    color: Color,
+) {
+    if w <= 0 || h <= 0 {
+        return;
+    }
+    if b_top <= 0 && b_right <= 0 && b_bottom <= 0 && b_left <= 0 {
+        return;
+    }
+
+    let max_r = (w / 2).min(h / 2);
+    let tl_out = tl.min(max_r).max(0);
+    let tr_out = tr.min(max_r).max(0);
+    let br_out = br.min(max_r).max(0);
+    let bl_out = bl.min(max_r).max(0);
+
+    let inner_w = (w - b_left - b_right).max(0);
+    let inner_h = (h - b_top - b_bottom).max(0);
+
+    let tl_in = (tl_out - b_top.max(b_left)).max(0);
+    let tr_in = (tr_out - b_top.max(b_right)).max(0);
+    let br_in = (br_out - b_bottom.max(b_right)).max(0);
+    let bl_in = (bl_out - b_bottom.max(b_left)).max(0);
+
+    let xrgb = color.to_xrgb();
+
+    for cy in 0..h {
+        let py = y + cy;
+        if py < 0 || py >= sh as i32 {
+            continue;
+        }
+        for cx in 0..w {
+            let px = x + cx;
+            if px < 0 || px >= sw as i32 {
+                continue;
             }
 
-            if inside {
+            if !is_inside_rounded_corners(cx, cy, w, h, tl_out, tr_out, br_out, bl_out) {
+                continue;
+            }
+
+            let in_inner = inner_w > 0
+                && inner_h > 0
+                && cx >= b_left
+                && cx < w - b_right
+                && cy >= b_top
+                && cy < h - b_bottom
+                && is_inside_rounded_corners(cx - b_left, cy - b_top, inner_w, inner_h, tl_in, tr_in, br_in, bl_in);
+
+            if !in_inner {
                 surface[py as usize * sw + px as usize] = xrgb;
             }
         }

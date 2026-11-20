@@ -475,7 +475,7 @@ impl Tab {
         results
     }
 
-    /// Builds the clean initial landing page matching Image 1 & 2.
+    /// Builds the clean initial landing page matching Image 1 & 2 in White Mode (Light Theme).
     #[cfg(feature = "std")]
     pub fn build_youtube_clean_home_html(query_input: &str, suggestions_open: bool) -> String {
         let display_input = if query_input.is_empty() {
@@ -492,159 +492,177 @@ impl Tab {
 <title>YouTube</title>
 <style>
 body {{
-    background-color: #0f0f0f;
-    color: #f1f1f1;
+    background-color: #ffffff;
+    color: #0f0f0f;
     font-family: sans-serif;
     margin: 0;
     padding: 0;
 }}
 .topbar {{
-    background-color: #0f0f0f;
-    border-bottom: 1px solid #272727;
-    height: 48px;
-    padding: 8px 18px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 10px 18px;
     display: block;
 }}
 .hamburger {{
     display: inline-block;
-    font-size: 20px;
-    color: #f1f1f1;
-    width: 32px;
+    font-size: 18px;
+    color: #0f0f0f;
+    width: 28px;
     cursor: pointer;
+    vertical-align: middle;
 }}
 .logo {{
     display: inline-block;
-    font-size: 19px;
+    font-size: 18px;
     font-weight: bold;
-    color: #ffffff;
-    width: 140px;
+    color: #0f0f0f;
+    width: 130px;
     cursor: pointer;
+    vertical-align: middle;
 }}
 .logo-badge {{
     font-size: 10px;
-    color: #aaaaaa;
+    color: #606060;
     margin-left: 2px;
 }}
 .search-container {{
     display: inline-block;
-    width: 520px;
-    margin-left: 40px;
-    position: relative;
+    width: 540px;
+    margin-left: 20px;
+    vertical-align: middle;
 }}
 .search-pill {{
-    background-color: #121212;
-    border: 1px solid #303030;
-    border-radius: 20px;
-    padding: 7px 18px;
-    width: 420px;
-    color: #f1f1f1;
-    font-size: 14px;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-right: none;
+    border-radius: 20px 0 0 20px;
+    padding: 8px 16px;
+    width: 380px;
+    color: #0f0f0f;
+    font-size: 13px;
     display: inline-block;
+    vertical-align: middle;
 }}
 .search-btn {{
-    background-color: #222222;
-    border: 1px solid #303030;
+    background-color: #f8f8f8;
+    border: 1px solid #cccccc;
     border-radius: 0 20px 20px 0;
-    padding: 7px 18px;
-    color: #f1f1f1;
+    width: 56px;
+    padding: 8px 0;
+    text-align: center;
+    color: #0f0f0f;
     font-size: 14px;
     display: inline-block;
-    margin-left: -5px;
+    vertical-align: middle;
+    cursor: pointer;
 }}
 .mic-btn {{
-    background-color: #181818;
+    background-color: #f2f2f2;
+    border: 1px solid #e5e5e5;
     border-radius: 50%;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     display: inline-block;
     margin-left: 10px;
     text-align: center;
-    color: #fff;
+    color: #0f0f0f;
     font-size: 14px;
-}}
-.sugg-box {{
-    background-color: #212121;
-    border: 1px solid #303030;
-    border-radius: 12px;
-    padding: 6px 12px;
-    width: 420px;
-    margin-top: 6px;
-    text-align: left;
-    display: {};
-}}
-.sugg-item {{
-    padding: 7px 10px;
-    font-size: 13px;
-    color: #f1f1f1;
-    border-bottom: 1px solid #2a2a2a;
+    vertical-align: middle;
+    cursor: pointer;
 }}
 .signin-btn {{
     display: inline-block;
     float: right;
-    border: 1px solid #3ea6ff;
-    color: #3ea6ff;
+    border: 1px solid #065fd4;
+    color: #065fd4;
+    background-color: #ffffff;
     border-radius: 18px;
-    padding: 6px 14px;
+    padding: 7px 16px;
     font-size: 13px;
     font-weight: bold;
     margin-top: 2px;
+    vertical-align: middle;
+}}
+.sugg-dropdown {{
+    display: {};
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 12px;
+    padding: 8px 14px;
+    width: 400px;
+    margin-left: 180px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+}}
+.sugg-item {{
+    padding: 6px 6px;
+    font-size: 13px;
+    color: #0f0f0f;
+    border-bottom: 1px solid #f2f2f2;
+}}
+.sugg-footer {{
+    padding: 6px 6px;
+    font-size: 10px;
+    color: #888888;
+    text-align: right;
 }}
 .layout-row {{
     display: block;
 }}
 .sidebar {{
     display: inline-block;
-    width: 190px;
-    background-color: #0f0f0f;
-    border-right: 1px solid #222222;
+    width: 170px;
+    background-color: #ffffff;
+    border-right: 1px solid #e5e5e5;
     padding-top: 12px;
     vertical-align: top;
 }}
 .side-item {{
     padding: 10px 18px;
     font-size: 13px;
-    color: #f1f1f1;
+    color: #0f0f0f;
     border-radius: 10px;
     margin: 2px 10px;
 }}
 .side-active {{
-    background-color: #272727;
+    background-color: #f2f2f2;
     font-weight: bold;
 }}
 .side-divider {{
-    border-top: 1px solid #222222;
+    border-top: 1px solid #e5e5e5;
     margin: 10px 14px;
 }}
 .signin-prompt {{
     padding: 12px 18px;
     font-size: 12px;
-    color: #aaaaaa;
+    color: #606060;
     line-height: 1.4;
 }}
 .content-area {{
     display: inline-block;
-    width: 780px;
+    width: 790px;
     vertical-align: top;
-    padding: 40px 20px;
+    padding: 36px 20px;
 }}
 .welcome-card {{
-    background-color: #1a1a1a;
-    border: 1px solid #272727;
+    background-color: #f9f9f9;
+    border: 1px solid #e5e5e5;
     border-radius: 16px;
     padding: 38px 24px;
     text-align: center;
     max-width: 520px;
-    margin: 20px auto 30px auto;
+    margin: 16px auto 26px auto;
 }}
 .welcome-title {{
     font-size: 21px;
     font-weight: bold;
-    color: #ffffff;
+    color: #0f0f0f;
     margin-bottom: 10px;
 }}
 .welcome-sub {{
     font-size: 13px;
-    color: #aaaaaa;
+    color: #606060;
     line-height: 1.5;
 }}
 .quick-pills {{
@@ -653,17 +671,17 @@ body {{
 }}
 .pill {{
     display: inline-block;
-    background-color: #272727;
-    border: 1px solid #383838;
-    color: #f1f1f1;
+    background-color: #f2f2f2;
+    border: 1px solid #e5e5e5;
+    color: #0f0f0f;
     padding: 7px 16px;
     border-radius: 16px;
     font-size: 12px;
     margin: 6px;
 }}
 .pill-active {{
-    background-color: #ffffff;
-    color: #0f0f0f;
+    background-color: #0f0f0f;
+    color: #ffffff;
     font-weight: bold;
 }}
 </style>
@@ -671,19 +689,21 @@ body {{
 <body>
 <div class=\"topbar\">
     <div class=\"hamburger\">≡</div>
-    <div class=\"logo\">[>] YouTube <span class=\"logo-badge\">BD</span></div>
+    <div class=\"logo\"><span style=\"color:#ff0000;\">▶</span> YouTube <span class=\"logo-badge\">BD</span></div>
     <div class=\"search-container\">
         <div class=\"search-pill\">{}</div>
-        <div class=\"search-btn\">[Q]</div>
-        <div class=\"mic-btn\">[🎙]</div>
-        <div class=\"sugg-box\">
-            <div class=\"sugg-item\">🔍 <b>naki in bangla</b></div>
-            <div class=\"sugg-item\">🔍 naki in bangla natok</div>
-            <div class=\"sugg-item\">🔍 naki in bangla song</div>
-            <div class=\"sugg-item\">🔍 naki in bangla waz</div>
-        </div>
+        <div class=\"search-btn\">🔍</div>
+        <div class=\"mic-btn\">🎙</div>
     </div>
-    <div class=\"signin-btn\">[👤 Sign in]</div>
+    <div class=\"signin-btn\">👤 Sign in</div>
+</div>
+
+<div class=\"sugg-dropdown\">
+    <div class=\"sugg-item\">🔍 <b>naki in bangla</b></div>
+    <div class=\"sugg-item\">🔍 naki in bangla natok</div>
+    <div class=\"sugg-item\">🔍 naki in bangla song</div>
+    <div class=\"sugg-item\">🔍 naki in bangla waz</div>
+    <div class=\"sugg-footer\">Report search predictions</div>
 </div>
 
 <div class=\"layout-row\">
@@ -695,7 +715,7 @@ body {{
         <div class=\"side-item\">[👤 You]</div>
         <div class=\"side-item\">[🕒 History]</div>
         <div class=\"side-divider\"></div>
-        <div class=\"signin-prompt\">Sign in to like videos,<br>comment, and subscribe.<br><span style=\"color:#3ea6ff; font-weight:bold;\">[Sign in]</span></div>
+        <div class=\"signin-prompt\">Sign in to like videos,<br>comment, and subscribe.<br><span style=\"color:#065fd4; font-weight:bold;\">Sign in</span></div>
         <div class=\"side-divider\"></div>
         <div class=\"side-item\">[🎵 Music]</div>
         <div class=\"side-item\">[🎮 Gaming]</div>
@@ -711,10 +731,10 @@ body {{
 
         <div class=\"quick-pills\">
             <div class=\"pill pill-active\">🔍 naki in bangla</div>
-            <div class=\"pill\">🔥 Explore Trending Feed</div>
-            <div class=\"pill\">🎵 Popular Music</div>
-            <div class=\"pill\">🎮 Gaming Live</div>
-            <div class=\"pill\">💻 Tech & Coding</div>
+            <div class=\"pill\">Explore Trending Feed</div>
+            <div class=\"pill\">Popular Music</div>
+            <div class=\"pill\">Gaming Live</div>
+            <div class=\"pill\">Tech &amp; Coding</div>
         </div>
     </div>
 </div>
@@ -724,7 +744,7 @@ body {{
         )
     }
 
-    /// Builds the authentic search results page matching Image 3.
+    /// Builds the authentic search results page matching Image 3 in White Mode.
     #[cfg(feature = "std")]
     pub fn build_youtube_search_results_html(query: &str, videos: &[YouTubeVideo]) -> String {
         let mut cards = String::new();
@@ -732,13 +752,14 @@ body {{
             cards.push_str(&format!(
                 "<div class=\"result-card\">
                     <div class=\"thumb-widescreen\">
+                        <div class=\"thumb-banner\">1080p HD VIDEO</div>
+                        <div class=\"thumb-scene\">▶ Play Video</div>
                         <div class=\"dur-badge\">{}</div>
-                        <div style=\"color:#ff0000; font-size:18px; font-weight:bold; padding-top:45px; text-align:center;\">[▶ Play]</div>
                     </div>
                     <div class=\"result-info\">
                         <div class=\"res-title\">{}</div>
                         <div class=\"res-meta\">{} • {}</div>
-                        <div class=\"res-channel\"><span class=\"ch-avatar\">[o]</span> {} <span class=\"verified\">✔</span></div>
+                        <div class=\"res-channel\"><span class=\"ch-avatar\">NAK</span> {} <span class=\"verified\">✔</span></div>
                         <div class=\"res-desc\">{}</div>
                     </div>
                 </div>",
@@ -753,53 +774,56 @@ body {{
 <title>{} - YouTube</title>
 <style>
 body {{
-    background-color: #0f0f0f;
-    color: #f1f1f1;
+    background-color: #ffffff;
+    color: #0f0f0f;
     font-family: sans-serif;
     margin: 0;
     padding: 0;
 }}
 .topbar {{
-    background-color: #0f0f0f;
-    border-bottom: 1px solid #272727;
-    height: 48px;
-    padding: 8px 18px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 10px 18px;
     display: block;
 }}
-.hamburger {{ display: inline-block; font-size: 20px; color: #f1f1f1; width: 32px; }}
-.logo {{ display: inline-block; font-size: 19px; font-weight: bold; color: #ffffff; width: 140px; }}
-.logo-badge {{ font-size: 10px; color: #aaaaaa; }}
-.search-container {{ display: inline-block; width: 520px; margin-left: 40px; }}
-.search-pill {{ background-color: #121212; border: 1px solid #303030; border-radius: 20px; padding: 7px 18px; width: 420px; color: #f1f1f1; font-size: 14px; display: inline-block; }}
-.search-btn {{ background-color: #222222; border: 1px solid #303030; border-radius: 0 20px 20px 0; padding: 7px 18px; color: #f1f1f1; font-size: 14px; display: inline-block; margin-left: -5px; }}
-.signin-btn {{ display: inline-block; float: right; border: 1px solid #3ea6ff; color: #3ea6ff; border-radius: 18px; padding: 6px 14px; font-size: 13px; font-weight: bold; margin-top: 2px; }}
+.hamburger {{ display: inline-block; font-size: 18px; color: #0f0f0f; width: 28px; cursor: pointer; vertical-align: middle; }}
+.logo {{ display: inline-block; font-size: 18px; font-weight: bold; color: #0f0f0f; width: 130px; cursor: pointer; vertical-align: middle; }}
+.logo-badge {{ font-size: 10px; color: #606060; margin-left: 2px; }}
+.search-container {{ display: inline-block; width: 540px; margin-left: 20px; vertical-align: middle; }}
+.search-pill {{ background-color: #ffffff; border: 1px solid #cccccc; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
+.search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 56px; padding: 8px 0; text-align: center; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; cursor: pointer; }}
+.mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 36px; height: 36px; display: inline-block; margin-left: 10px; text-align: center; color: #0f0f0f; font-size: 14px; vertical-align: middle; cursor: pointer; }}
+.signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 7px 16px; font-size: 13px; font-weight: bold; margin-top: 2px; vertical-align: middle; }}
 .layout-row {{ display: block; }}
-.sidebar {{ display: inline-block; width: 190px; background-color: #0f0f0f; border-right: 1px solid #222222; padding-top: 12px; vertical-align: top; }}
-.side-item {{ padding: 10px 18px; font-size: 13px; color: #f1f1f1; border-radius: 10px; margin: 2px 10px; }}
-.side-active {{ background-color: #272727; font-weight: bold; }}
-.side-divider {{ border-top: 1px solid #222222; margin: 10px 14px; }}
-.content-area {{ display: inline-block; width: 800px; vertical-align: top; padding: 20px 24px; }}
-.result-card {{ display: block; margin-bottom: 22px; }}
-.thumb-widescreen {{ display: inline-block; width: 300px; height: 140px; background-color: #1c1c1c; border-radius: 10px; vertical-align: top; position: relative; }}
+.sidebar {{ display: inline-block; width: 170px; background-color: #ffffff; border-right: 1px solid #e5e5e5; padding-top: 12px; vertical-align: top; }}
+.side-item {{ padding: 10px 18px; font-size: 13px; color: #0f0f0f; border-radius: 10px; margin: 2px 10px; }}
+.side-active {{ background-color: #f2f2f2; font-weight: bold; }}
+.side-divider {{ border-top: 1px solid #e5e5e5; margin: 10px 14px; }}
+.content-area {{ display: inline-block; width: 790px; vertical-align: top; padding: 14px 18px; }}
+.result-card {{ display: block; margin-bottom: 22px; cursor: pointer; }}
+.thumb-widescreen {{ display: inline-block; width: 280px; height: 140px; background-color: #1e293b; border-radius: 10px; vertical-align: top; position: relative; border: 1px solid #334155; }}
+.thumb-banner {{ background-color: #0f172a; color: #38bdf8; font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 8px 8px 0 0; }}
+.thumb-scene {{ color: #ffffff; font-size: 16px; font-weight: bold; padding-top: 30px; text-align: center; }}
 .dur-badge {{ background-color: #000000; color: #ffffff; border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: bold; float: right; margin: 6px; }}
-.result-info {{ display: inline-block; width: 470px; padding-left: 18px; vertical-align: top; }}
-.res-title {{ font-size: 15px; font-weight: bold; color: #ffffff; line-height: 1.3; margin-bottom: 6px; }}
-.res-meta {{ font-size: 12px; color: #aaaaaa; margin-bottom: 6px; }}
-.res-channel {{ font-size: 12px; color: #aaaaaa; margin-bottom: 8px; }}
-.ch-avatar {{ background-color: #333333; border-radius: 50%; padding: 2px 5px; margin-right: 4px; }}
-.verified {{ color: #aaaaaa; font-size: 11px; }}
-.res-desc {{ font-size: 11px; color: #717171; line-height: 1.4; }}
+.result-info {{ display: inline-block; width: 470px; padding-left: 16px; vertical-align: top; }}
+.res-title {{ font-size: 15px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 6px; }}
+.res-meta {{ font-size: 12px; color: #606060; margin-bottom: 6px; }}
+.res-channel {{ font-size: 12px; color: #606060; margin-bottom: 8px; }}
+.ch-avatar {{ background-color: #e5e5e5; border-radius: 50%; padding: 2px 5px; margin-right: 4px; font-weight: bold; font-size: 10px; }}
+.verified {{ color: #606060; font-size: 11px; }}
+.res-desc {{ font-size: 11px; color: #606060; line-height: 1.4; }}
 </style>
 </head>
 <body>
 <div class=\"topbar\">
     <div class=\"hamburger\">≡</div>
-    <div class=\"logo\">[>] YouTube <span class=\"logo-badge\">BD</span></div>
+    <div class=\"logo\"><span style=\"color:#ff0000;\">▶</span> YouTube <span class=\"logo-badge\">BD</span></div>
     <div class=\"search-container\">
         <div class=\"search-pill\">{}</div>
-        <div class=\"search-btn\">[Q]</div>
+        <div class=\"search-btn\">🔍</div>
+        <div class=\"mic-btn\">🎙</div>
     </div>
-    <div class=\"signin-btn\">[👤 Sign in]</div>
+    <div class=\"signin-btn\">👤 Sign in</div>
 </div>
 
 <div class=\"layout-row\">
@@ -826,7 +850,7 @@ body {{
         )
     }
 
-    /// Builds the authentic Cinema Player watch page matching Image 4.
+    /// Builds the authentic Cinema Player watch page matching Image 4 in White Mode (Light Theme).
     #[cfg(feature = "std")]
     pub fn build_youtube_watch_html(
         video: &YouTubeVideo,
@@ -835,11 +859,15 @@ body {{
         is_subscribed: bool,
         likes: u32,
     ) -> String {
-        let play_badge = if is_playing { "▶ PLAYING (Live Stream Active)" } else { "⏸ PAUSED" };
-        let play_btn = if is_playing { "[⏸ Pause]" } else { "[▶ Play]" };
-        let sub_btn = if is_subscribed { "[Subscribed ✓]" } else { "[Subscribe]" };
-        let sub_color = if is_subscribed { "#333333" } else { "#ffffff" };
-        let sub_text_color = if is_subscribed { "#aaaaaa" } else { "#0f0f0f" };
+        let play_badge = if is_playing {
+            "<span style=\"color:#22c55e; font-weight:bold;\">● LIVE STREAM ACTIVE</span>"
+        } else {
+            "<span style=\"color:#f59e0b; font-weight:bold;\">⏸ PAUSED</span>"
+        };
+        let play_btn = if is_playing { "⏸ Pause" } else { "▶ Play" };
+        let sub_btn = if is_subscribed { "Subscribed ✓" } else { "Subscribe" };
+        let sub_bg = if is_subscribed { "#f2f2f2" } else { "#cc0000" };
+        let sub_text_color = if is_subscribed { "#0f0f0f" } else { "#ffffff" };
 
         let mut rel_cards = String::new();
         for r in related {
@@ -847,7 +875,7 @@ body {{
                 "<div class=\"rel-item\">
                     <div class=\"rel-thumb\">
                         <div class=\"dur-badge\">{}</div>
-                        <div style=\"color:#ff0000; font-size:12px; font-weight:bold; padding-top:24px; text-align:center;\">[▶]</div>
+                        <div style=\"color:#ffffff; font-size:12px; font-weight:bold; padding-top:20px; text-align:center;\">▶ HD</div>
                     </div>
                     <div class=\"rel-info\">
                         <div class=\"rel-title\">{}</div>
@@ -866,150 +894,265 @@ body {{
 <title>{} - YouTube</title>
 <style>
 body {{
-    background-color: #0f0f0f;
-    color: #f1f1f1;
+    background-color: #ffffff;
+    color: #0f0f0f;
     font-family: sans-serif;
     margin: 0;
     padding: 0;
 }}
 .topbar {{
-    background-color: #0f0f0f;
-    border-bottom: 1px solid #272727;
-    height: 48px;
-    padding: 8px 18px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 10px 18px;
     display: block;
 }}
-.hamburger {{ display: inline-block; font-size: 20px; color: #f1f1f1; width: 32px; }}
-.logo {{ display: inline-block; font-size: 19px; font-weight: bold; color: #ffffff; width: 140px; }}
-.logo-badge {{ font-size: 10px; color: #aaaaaa; }}
-.search-container {{ display: inline-block; width: 520px; margin-left: 40px; }}
-.search-pill {{ background-color: #121212; border: 1px solid #303030; border-radius: 20px; padding: 7px 18px; width: 420px; color: #f1f1f1; font-size: 14px; display: inline-block; }}
-.signin-btn {{ display: inline-block; float: right; border: 1px solid #3ea6ff; color: #3ea6ff; border-radius: 18px; padding: 6px 14px; font-size: 13px; font-weight: bold; margin-top: 2px; }}
-.watch-container {{ padding: 18px 24px; display: block; }}
-.player-column {{ display: inline-block; width: 680px; vertical-align: top; }}
+.hamburger {{ display: inline-block; font-size: 18px; color: #0f0f0f; width: 28px; cursor: pointer; vertical-align: middle; }}
+.logo {{ display: inline-block; font-size: 18px; font-weight: bold; color: #0f0f0f; width: 130px; cursor: pointer; vertical-align: middle; }}
+.logo-badge {{ font-size: 10px; color: #606060; margin-left: 2px; }}
+.search-container {{ display: inline-block; width: 540px; margin-left: 20px; vertical-align: middle; }}
+.search-pill {{ background-color: #ffffff; border: 1px solid #cccccc; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
+.search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 56px; padding: 8px 0; text-align: center; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; cursor: pointer; }}
+.mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 36px; height: 36px; display: inline-block; margin-left: 10px; text-align: center; color: #0f0f0f; font-size: 14px; vertical-align: middle; cursor: pointer; }}
+.signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 7px 16px; font-size: 13px; font-weight: bold; margin-top: 2px; vertical-align: middle; }}
+.watch-container {{ padding: 14px 18px; display: block; }}
+.player-column {{ display: inline-block; width: 610px; vertical-align: top; }}
 .cinema-player {{
-    background-color: #000000;
+    background-color: #0b0f19;
     border-radius: 12px;
-    height: 360px;
-    position: relative;
-    border: 1px solid #1f1f1f;
+    border: 1px solid #1e293b;
+    display: block;
 }}
-.screen-art {{
-    color: #ff3333;
-    font-size: 22px;
+.player-hud-top {{
+    background-color: #0f172a;
+    color: #94a3b8;
+    font-size: 11px;
+    padding: 6px 14px;
+    border-radius: 12px 12px 0 0;
+}}
+.player-stage {{
+    padding: 8px 10px;
+    display: block;
+}}
+.stage-slide {{
+    display: inline-block;
+    width: 320px;
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 8px 10px;
+    vertical-align: top;
+}}
+.slide-tag {{
+    color: #38bdf8;
+    font-size: 10px;
     font-weight: bold;
-    padding-top: 130px;
-    text-align: center;
+    margin-bottom: 4px;
 }}
-.screen-subtitle {{
+.slide-main {{
     color: #ffffff;
-    font-size: 15px;
-    margin-top: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}}
+.slide-bullets {{
+    color: #cbd5e1;
+    font-size: 11px;
+    line-height: 1.5;
+}}
+.stage-speaker {{
+    display: inline-block;
+    width: 220px;
+    background-color: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 8px;
+    padding: 8px 10px;
+    vertical-align: top;
+    margin-left: 6px;
+}}
+.speaker-title {{
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 4px;
+}}
+.speaker-sub {{
+    color: #a1a1aa;
+    font-size: 10px;
+    margin-bottom: 6px;
+}}
+.audio-spectrum {{
+    color: #38bdf8;
+    font-size: 11px;
+    margin-bottom: 4px;
+}}
+.stage-state {{
+    font-size: 11px;
+    margin-top: 4px;
+}}
+.stage-cc {{
     text-align: center;
+    margin-top: 8px;
+    margin-bottom: 6px;
+}}
+.cc-pill {{
+    background-color: #1e293b;
+    color: #f8fafc;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 11px;
+    display: inline-block;
 }}
 .timeline-bar {{
-    background-color: #ff0000;
-    height: 4px;
-    margin-top: 130px;
-    width: 35%;
+    background-color: #333333;
+    height: 5px;
+    width: 100%;
+    position: relative;
     display: block;
 }}
+.timeline-fill {{
+    background-color: #ff0000;
+    height: 5px;
+    width: 35%;
+    display: inline-block;
+}}
+.timeline-dot {{
+    color: #ff0000;
+    font-size: 12px;
+    display: inline-block;
+    margin-left: -4px;
+    vertical-align: middle;
+}}
 .player-controls {{
-    background-color: #111111;
+    background-color: #0f0f0f;
     padding: 8px 14px;
-    font-size: 13px;
+    font-size: 12px;
     color: #f1f1f1;
     border-radius: 0 0 12px 12px;
 }}
-.ctrl-item {{ display: inline-block; margin-right: 14px; cursor: pointer; }}
-.shield-badge {{ display: inline-block; float: right; color: #ff5500; font-weight: bold; font-size: 12px; }}
-.vid-heading {{ font-size: 18px; font-weight: bold; color: #ffffff; margin-top: 14px; line-height: 1.3; }}
-.channel-row {{ margin-top: 12px; padding-bottom: 12px; border-bottom: 1px solid #222222; display: block; }}
+.ctrl-item {{ display: inline-block; margin-right: 12px; cursor: pointer; }}
+.float-r {{ float: right; margin-left: 10px; margin-right: 0; }}
+.shield-badge {{ display: inline-block; color: #ff5500; font-weight: bold; font-size: 11px; margin-left: 8px; }}
+.vid-heading {{ font-size: 17px; font-weight: bold; color: #0f0f0f; margin-top: 14px; line-height: 1.3; }}
+.channel-row {{ margin-top: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e5e5; display: block; }}
 .ch-avatar-big {{
-    background-color: #8b0000;
+    background-color: #cc0000;
     color: #ffffff;
     border-radius: 50%;
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     display: inline-block;
     text-align: center;
-    line-height: 38px;
+    line-height: 36px;
     font-weight: bold;
+    font-size: 11px;
     vertical-align: middle;
 }}
-.ch-details {{ display: inline-block; vertical-align: middle; margin-left: 10px; width: 180px; }}
-.ch-name {{ font-size: 14px; font-weight: bold; color: #ffffff; }}
-.ch-subs {{ font-size: 11px; color: #aaaaaa; }}
+.ch-details {{ display: inline-block; vertical-align: middle; margin-left: 10px; width: 170px; }}
+.ch-name {{ font-size: 13px; font-weight: bold; color: #0f0f0f; }}
+.ch-subs {{ font-size: 11px; color: #606060; }}
 .sub-pill {{
     display: inline-block;
     background-color: {};
     color: {};
     font-weight: bold;
-    padding: 8px 18px;
+    padding: 7px 16px;
     border-radius: 18px;
-    font-size: 13px;
+    font-size: 12px;
     vertical-align: middle;
-    margin-left: 12px;
+    margin-left: 8px;
+    border: 1px solid #cccccc;
+    cursor: pointer;
 }}
 .action-pills {{ display: inline-block; float: right; vertical-align: middle; margin-top: 4px; }}
 .action-pill {{
     display: inline-block;
-    background-color: #272727;
+    background-color: #f2f2f2;
+    border: 1px solid #e5e5e5;
     border-radius: 18px;
-    padding: 7px 14px;
-    font-size: 12px;
-    color: #f1f1f1;
-    margin-left: 6px;
+    padding: 6px 12px;
+    font-size: 11px;
+    color: #0f0f0f;
+    margin-left: 4px;
 }}
 .desc-box {{
-    background-color: #272727;
+    background-color: #f2f2f2;
     border-radius: 12px;
     padding: 12px 16px;
-    margin-top: 14px;
+    margin-top: 12px;
     font-size: 12px;
-    color: #f1f1f1;
+    color: #0f0f0f;
     line-height: 1.5;
 }}
 .related-column {{
     display: inline-block;
-    width: 300px;
+    width: 330px;
     vertical-align: top;
-    margin-left: 20px;
+    margin-left: 18px;
 }}
+.rel-header {{ font-size: 14px; font-weight: bold; color: #0f0f0f; margin-bottom: 12px; }}
 .rel-item {{ display: block; margin-bottom: 14px; cursor: pointer; }}
-.rel-thumb {{ display: inline-block; width: 130px; height: 75px; background-color: #1a1a1a; border-radius: 8px; vertical-align: top; position: relative; }}
+.rel-thumb {{ display: inline-block; width: 120px; height: 68px; background-color: #1e293b; border-radius: 8px; vertical-align: top; position: relative; border: 1px solid #cbd5e1; }}
 .dur-badge {{ background-color: #000000; color: #ffffff; border-radius: 4px; padding: 2px 4px; font-size: 10px; font-weight: bold; float: right; margin: 4px; }}
-.rel-info {{ display: inline-block; width: 155px; padding-left: 10px; vertical-align: top; }}
-.rel-title {{ font-size: 12px; font-weight: bold; color: #ffffff; line-height: 1.3; margin-bottom: 4px; }}
-.rel-channel {{ font-size: 11px; color: #aaaaaa; margin-bottom: 2px; }}
-.rel-meta {{ font-size: 10px; color: #717171; }}
+.rel-info {{ display: inline-block; width: 185px; padding-left: 10px; vertical-align: top; }}
+.rel-title {{ font-size: 12px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 4px; }}
+.rel-channel {{ font-size: 11px; color: #606060; margin-bottom: 2px; }}
+.rel-meta {{ font-size: 10px; color: #606060; }}
 </style>
 </head>
 <body>
 <div class=\"topbar\">
     <div class=\"hamburger\">≡</div>
-    <div class=\"logo\">[>] YouTube <span class=\"logo-badge\">BD</span></div>
+    <div class=\"logo\"><span style=\"color:#ff0000;\">▶</span> YouTube <span class=\"logo-badge\">BD</span></div>
     <div class=\"search-container\">
         <div class=\"search-pill\">naki in bangla</div>
+        <div class=\"search-btn\">🔍</div>
+        <div class=\"mic-btn\">🎙</div>
     </div>
-    <div class=\"signin-btn\">[👤 Sign in]</div>
+    <div class=\"signin-btn\">👤 Sign in</div>
 </div>
 
 <div class=\"watch-container\">
     <div class=\"player-column\">
         <div class=\"cinema-player\">
-            <div class=\"screen-art\">{}</div>
-            <div class=\"screen-subtitle\">{}</div>
-            <div class=\"timeline-bar\"></div>
-        </div>
-        <div class=\"player-controls\">
-            <div class=\"ctrl-item\">{}</div>
-            <div class=\"ctrl-item\">[🔊]</div>
-            <div class=\"ctrl-item\">0:02 / {}</div>
-            <div class=\"ctrl-item\">[CC]</div>
-            <div class=\"ctrl-item\">[⚙ 1080p]</div>
-            <div class=\"ctrl-item\">[⛶ Fullscreen]</div>
-            <div class=\"shield-badge\">[🛡️ Brave Shields: 0 Video Ads]</div>
+            <div class=\"player-hud-top\">
+                <span style=\"color:#22c55e; font-weight:bold;\">● LIVE 1080p60 HD</span> • Spektrum Media Official Stream • <span style=\"color:#38bdf8;\">NAK HD</span>
+            </div>
+            <div class=\"player-stage\">
+                <div class=\"stage-slide\">
+                    <div class=\"slide-tag\">📖 BAYYINAH LECTURE SERIES</div>
+                    <div class=\"slide-main\">Advice for Muslim Youth: Purpose &amp; Identity</div>
+                    <div class=\"slide-bullets\">
+                        • Building spiritual resilience in modern times<br>
+                        • Overcoming toxic digital distractions<br>
+                        • Achieving balance: Faith, Education &amp; Goals
+                    </div>
+                </div>
+                <div class=\"stage-speaker\">
+                    <div class=\"speaker-title\">[ 🎙 DR. NOUMAN ALI KHAN ]</div>
+                    <div class=\"speaker-sub\">Speaker &amp; Founder • Bayyinah</div>
+                    <div class=\"audio-spectrum\">SPECTRUM: ▂▃▅▆▇█▇▆▅▃▂ 100%</div>
+                    <div class=\"stage-state\">{}</div>
+                </div>
+                <div class=\"stage-cc\">
+                    <span class=\"cc-pill\">[ CC: &quot;Our purpose in life is building character, spiritual resilience and moral clarity&quot; - Nouman Ali Khan ]</span>
+                </div>
+            </div>
+            <div class=\"timeline-bar\">
+                <div class=\"timeline-fill\"></div>
+                <div class=\"timeline-dot\">●</div>
+            </div>
+            <div class=\"player-controls\">
+                <div class=\"ctrl-item\">{}</div>
+                <div class=\"ctrl-item\">⏮</div>
+                <div class=\"ctrl-item\">⏭</div>
+                <div class=\"ctrl-item\">🔊 100%</div>
+                <div class=\"ctrl-item\">02:14 / {}</div>
+                <div class=\"shield-badge\">🛡️ Brave Shields: 0 Video Ads</div>
+                <div class=\"ctrl-item float-r\">⛶ Fullscreen</div>
+                <div class=\"ctrl-item float-r\">⚙ 1080p HD</div>
+                <div class=\"ctrl-item float-r\">CC</div>
+            </div>
         </div>
 
         <div class=\"vid-heading\">{}</div>
@@ -1037,18 +1180,30 @@ body {{
     </div>
 
     <div class=\"related-column\">
-        <div style=\"font-size:14px; font-weight:bold; margin-bottom:12px;\">Up Next</div>
+        <div class=\"rel-header\">Up Next</div>
         {}
     </div>
 </div>
 </body>
 </html>",
-            video.title, sub_color, sub_text_color, play_badge, video.title, play_btn, video.duration,
-            video.title, video.channel, sub_btn, likes, video.views, video.published, video.description, rel_cards
+            video.title,
+            sub_bg,
+            sub_text_color,
+            play_badge,
+            play_btn,
+            video.duration,
+            video.title,
+            video.channel,
+            sub_btn,
+            likes,
+            video.views,
+            video.published,
+            video.description,
+            rel_cards
         )
     }
 
-    /// Builds the rich Home Feed matching Image 5.
+    /// Builds the rich Home Feed matching Image 5 in White Mode.
     #[cfg(feature = "std")]
     pub fn build_youtube_feed_html(category: &str, videos: &[YouTubeVideo]) -> String {
         let mut cards = String::new();
@@ -1059,14 +1214,16 @@ body {{
             } else {
                 v.title.clone()
             };
+            let initial = v.channel.chars().next().unwrap_or('Y');
             cards.push_str(&format!(
                 "<div class=\"grid-card\">
                     <div class=\"card-thumb\">
+                        <div class=\"thumb-tag\">VID STREAM</div>
+                        <div class=\"thumb-center\">▶ Play Video</div>
                         <div class=\"dur-badge\">{}</div>
-                        <div style=\"color:#ff0000; font-size:20px; font-weight:bold; padding-top:55px; text-align:center;\">[▶ Play]</div>
                     </div>
                     <div class=\"card-body\">
-                        <div class=\"card-avatar\">[o]</div>
+                        <div class=\"card-avatar\">{}</div>
                         <div class=\"card-text\">
                             <div class=\"card-title\">{}</div>
                             <div class=\"card-channel\">{} ✔</div>
@@ -1074,7 +1231,7 @@ body {{
                         </div>
                     </div>
                 </div>",
-                v.duration, title_display, v.channel, v.views, v.published
+                v.duration, initial, title_display, v.channel, v.views, v.published
             ));
         }
 
@@ -1085,62 +1242,65 @@ body {{
 <title>YouTube</title>
 <style>
 body {{
-    background-color: #0f0f0f;
-    color: #f1f1f1;
+    background-color: #ffffff;
+    color: #0f0f0f;
     font-family: sans-serif;
     margin: 0;
     padding: 0;
 }}
 .topbar {{
-    background-color: #0f0f0f;
-    border-bottom: 1px solid #272727;
-    height: 48px;
-    padding: 8px 18px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
+    padding: 10px 18px;
     display: block;
 }}
-.hamburger {{ display: inline-block; font-size: 20px; color: #f1f1f1; width: 32px; }}
-.logo {{ display: inline-block; font-size: 19px; font-weight: bold; color: #ffffff; width: 140px; }}
-.logo-badge {{ font-size: 10px; color: #aaaaaa; }}
-.search-container {{ display: inline-block; width: 520px; margin-left: 40px; }}
-.search-pill {{ background-color: #121212; border: 1px solid #303030; border-radius: 20px; padding: 7px 18px; width: 420px; color: #f1f1f1; font-size: 14px; display: inline-block; }}
-.search-btn {{ background-color: #222222; border: 1px solid #303030; border-radius: 0 20px 20px 0; padding: 7px 18px; color: #f1f1f1; font-size: 14px; display: inline-block; margin-left: -5px; }}
-.signin-btn {{ display: inline-block; float: right; border: 1px solid #3ea6ff; color: #3ea6ff; border-radius: 18px; padding: 6px 14px; font-size: 13px; font-weight: bold; margin-top: 2px; }}
+.hamburger {{ display: inline-block; font-size: 18px; color: #0f0f0f; width: 28px; cursor: pointer; vertical-align: middle; }}
+.logo {{ display: inline-block; font-size: 18px; font-weight: bold; color: #0f0f0f; width: 130px; cursor: pointer; vertical-align: middle; }}
+.logo-badge {{ font-size: 10px; color: #606060; margin-left: 2px; }}
+.search-container {{ display: inline-block; width: 540px; margin-left: 20px; vertical-align: middle; }}
+.search-pill {{ background-color: #ffffff; border: 1px solid #cccccc; border-right: none; border-radius: 20px 0 0 20px; padding: 8px 16px; width: 380px; color: #0f0f0f; font-size: 13px; display: inline-block; vertical-align: middle; }}
+.search-btn {{ background-color: #f8f8f8; border: 1px solid #cccccc; border-radius: 0 20px 20px 0; width: 56px; padding: 8px 0; text-align: center; color: #0f0f0f; font-size: 14px; display: inline-block; vertical-align: middle; cursor: pointer; }}
+.mic-btn {{ background-color: #f2f2f2; border: 1px solid #e5e5e5; border-radius: 50%; width: 36px; height: 36px; display: inline-block; margin-left: 10px; text-align: center; color: #0f0f0f; font-size: 14px; vertical-align: middle; cursor: pointer; }}
+.signin-btn {{ display: inline-block; float: right; border: 1px solid #065fd4; color: #065fd4; background-color: #ffffff; border-radius: 18px; padding: 7px 16px; font-size: 13px; font-weight: bold; margin-top: 2px; vertical-align: middle; }}
 .layout-row {{ display: block; }}
-.sidebar {{ display: inline-block; width: 190px; background-color: #0f0f0f; border-right: 1px solid #222222; padding-top: 12px; vertical-align: top; }}
-.side-item {{ padding: 10px 18px; font-size: 13px; color: #f1f1f1; border-radius: 10px; margin: 2px 10px; }}
-.side-active {{ background-color: #272727; font-weight: bold; }}
-.side-divider {{ border-top: 1px solid #222222; margin: 10px 14px; }}
-.content-area {{ display: inline-block; width: 800px; vertical-align: top; padding: 14px 20px; }}
+.sidebar {{ display: inline-block; width: 170px; background-color: #ffffff; border-right: 1px solid #e5e5e5; padding-top: 12px; vertical-align: top; }}
+.side-item {{ padding: 10px 18px; font-size: 13px; color: #0f0f0f; border-radius: 10px; margin: 2px 10px; }}
+.side-active {{ background-color: #f2f2f2; font-weight: bold; }}
+.side-divider {{ border-top: 1px solid #e5e5e5; margin: 10px 14px; }}
+.content-area {{ display: inline-block; width: 790px; vertical-align: top; padding: 14px 18px; }}
 .chips-bar {{ margin-bottom: 18px; display: block; }}
 .chip {{
     display: inline-block;
-    background-color: #272727;
-    border: 1px solid #383838;
-    color: #f1f1f1;
+    background-color: #f2f2f2;
+    border: 1px solid #e5e5e5;
+    color: #0f0f0f;
     padding: 6px 14px;
     border-radius: 16px;
     font-size: 12px;
     margin-right: 6px;
     margin-bottom: 6px;
 }}
-.chip-active {{ background-color: #ffffff; color: #0f0f0f; font-weight: bold; }}
+.chip-active {{ background-color: #0f0f0f; color: #ffffff; font-weight: bold; }}
 .grid-card {{
     display: inline-block;
-    width: 250px;
+    width: 240px;
     margin: 6px 8px 20px 8px;
     vertical-align: top;
+    cursor: pointer;
 }}
 .card-thumb {{
-    background-color: #1a1a1a;
+    background-color: #1e293b;
     border-radius: 10px;
     height: 140px;
     position: relative;
-    border: 1px solid #222222;
+    border: 1px solid #334155;
 }}
+.thumb-tag {{ background-color: #0f172a; color: #38bdf8; font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 8px 8px 0 0; }}
+.thumb-center {{ color: #ffffff; font-size: 16px; font-weight: bold; padding-top: 25px; text-align: center; }}
 .dur-badge {{ background-color: #000000; color: #ffffff; border-radius: 4px; padding: 2px 5px; font-size: 10px; font-weight: bold; float: right; margin: 6px; }}
 .card-body {{ margin-top: 10px; display: block; }}
 .card-avatar {{
-    background-color: #333333;
+    background-color: #e5e5e5;
     border-radius: 50%;
     width: 32px;
     height: 32px;
@@ -1148,23 +1308,26 @@ body {{
     text-align: center;
     line-height: 32px;
     font-size: 11px;
+    font-weight: bold;
     vertical-align: top;
+    color: #0f0f0f;
 }}
 .card-text {{ display: inline-block; width: 205px; padding-left: 8px; vertical-align: top; }}
-.card-title {{ font-size: 13px; font-weight: bold; color: #ffffff; line-height: 1.3; margin-bottom: 4px; }}
-.card-channel {{ font-size: 11px; color: #aaaaaa; margin-bottom: 2px; }}
-.card-meta {{ font-size: 10px; color: #717171; }}
+.card-title {{ font-size: 13px; font-weight: bold; color: #0f0f0f; line-height: 1.3; margin-bottom: 4px; }}
+.card-channel {{ font-size: 11px; color: #606060; margin-bottom: 2px; }}
+.card-meta {{ font-size: 10px; color: #606060; }}
 </style>
 </head>
 <body>
 <div class=\"topbar\">
     <div class=\"hamburger\">≡</div>
-    <div class=\"logo\">[>] YouTube <span class=\"logo-badge\">BD</span></div>
+    <div class=\"logo\"><span style=\"color:#ff0000;\">▶</span> YouTube <span class=\"logo-badge\">BD</span></div>
     <div class=\"search-container\">
         <div class=\"search-pill\">Search</div>
-        <div class=\"search-btn\">[Q]</div>
+        <div class=\"search-btn\">🔍</div>
+        <div class=\"mic-btn\">🎙</div>
     </div>
-    <div class=\"signin-btn\">[👤 Sign in]</div>
+    <div class=\"signin-btn\">👤 Sign in</div>
 </div>
 
 <div class=\"layout-row\">

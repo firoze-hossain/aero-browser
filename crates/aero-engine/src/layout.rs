@@ -154,26 +154,65 @@ impl<'a> LayoutBox<'a> {
         let style = self.get_styled_node();
         let zero = Value::Length(0.0, crate::css::Unit::Px);
 
-        let pad_h = style.and_then(|s| s.value("padding")).unwrap_or(&zero).to_px();
-        let pad_v = pad_h.min(8.0);
+        let pad_top = style.and_then(|s| s.value("padding-top"))
+            .or_else(|| style.and_then(|s| s.value("padding")))
+            .unwrap_or(&zero).to_px();
+        let pad_bottom = style.and_then(|s| s.value("padding-bottom"))
+            .or_else(|| style.and_then(|s| s.value("padding")))
+            .unwrap_or(&zero).to_px();
+        let pad_left = style.and_then(|s| s.value("padding-left"))
+            .or_else(|| style.and_then(|s| s.value("padding")))
+            .unwrap_or(&zero).to_px();
+        let pad_right = style.and_then(|s| s.value("padding-right"))
+            .or_else(|| style.and_then(|s| s.value("padding")))
+            .unwrap_or(&zero).to_px();
         self.dimensions.padding = EdgeSizes {
-            top: pad_v,
-            bottom: pad_v,
-            left: pad_h,
-            right: pad_h,
+            top: pad_top,
+            bottom: pad_bottom,
+            left: pad_left,
+            right: pad_right,
         };
 
-        let border_w = style.and_then(|s| s.value("border-width"))
-            .or_else(|| style.and_then(|s| s.value("border")))
-            .unwrap_or(&zero)
-            .to_px();
-        self.dimensions.border = EdgeSizes::all(border_w);
+        let border_top = style.and_then(|s| s.value("border-top-width"))
+            .or_else(|| style.and_then(|s| s.value("border-width")))
+            .unwrap_or(&zero).to_px();
+        let border_bottom = style.and_then(|s| s.value("border-bottom-width"))
+            .or_else(|| style.and_then(|s| s.value("border-width")))
+            .unwrap_or(&zero).to_px();
+        let border_left = style.and_then(|s| s.value("border-left-width"))
+            .or_else(|| style.and_then(|s| s.value("border-width")))
+            .unwrap_or(&zero).to_px();
+        let border_right = style.and_then(|s| s.value("border-right-width"))
+            .or_else(|| style.and_then(|s| s.value("border-width")))
+            .unwrap_or(&zero).to_px();
+        self.dimensions.border = EdgeSizes {
+            top: border_top,
+            bottom: border_bottom,
+            left: border_left,
+            right: border_right,
+        };
 
-        let mut margin_h = style.and_then(|s| s.value("margin")).unwrap_or(&zero).to_px();
-        self.dimensions.margin = EdgeSizes::all(margin_h);
+        let margin_top = style.and_then(|s| s.value("margin-top"))
+            .or_else(|| style.and_then(|s| s.value("margin")))
+            .unwrap_or(&zero).to_px();
+        let margin_bottom = style.and_then(|s| s.value("margin-bottom"))
+            .or_else(|| style.and_then(|s| s.value("margin")))
+            .unwrap_or(&zero).to_px();
+        let margin_left = style.and_then(|s| s.value("margin-left"))
+            .or_else(|| style.and_then(|s| s.value("margin")))
+            .unwrap_or(&zero).to_px();
+        let margin_right = style.and_then(|s| s.value("margin-right"))
+            .or_else(|| style.and_then(|s| s.value("margin")))
+            .unwrap_or(&zero).to_px();
+        self.dimensions.margin = EdgeSizes {
+            top: margin_top,
+            bottom: margin_bottom,
+            left: margin_left,
+            right: margin_right,
+        };
 
-        self.dimensions.content.x = containing_block.content.x + self.dimensions.margin.left + self.dimensions.padding.left;
-        self.dimensions.content.y = containing_block.content.y + self.dimensions.margin.top + self.dimensions.padding.top;
+        self.dimensions.content.x = containing_block.content.x + self.dimensions.margin.left + self.dimensions.border.left + self.dimensions.padding.left;
+        self.dimensions.content.y = containing_block.content.y + self.dimensions.margin.top + self.dimensions.border.top + self.dimensions.padding.top;
 
         if let Some(s) = style {
             if let crate::dom::NodeType::Text(ref text) = s.node.node_type {
@@ -194,6 +233,12 @@ impl<'a> LayoutBox<'a> {
         if let Some(s) = style {
             if let Some(w) = s.value("width") {
                 explicit_width = w.to_px();
+            }
+            if let Some(h) = s.value("height") {
+                let eh = h.to_px();
+                if eh > 0.0 {
+                    self.dimensions.content.height = eh;
+                }
             }
         }
         if explicit_width > 0.0 {
@@ -237,13 +282,13 @@ impl<'a> LayoutBox<'a> {
 
             if cur_x + mb.width > containing_block.content.x + containing_block.content.width && cur_x > self.dimensions.content.x {
                 cur_x = self.dimensions.content.x;
-                cur_y += max_row_h + 8.0;
+                cur_y += max_row_h;
                 max_row_h = mb.height;
                 child.dimensions.content.x = cur_x;
                 child.dimensions.content.y = cur_y;
             }
 
-            cur_x += mb.width + 8.0;
+            cur_x += mb.width;
             max_w = max_w.max(cur_x - self.dimensions.content.x);
         }
 
@@ -393,14 +438,14 @@ impl<'a> LayoutBox<'a> {
                 if cur_x + mb.width > self.dimensions.content.x + self.dimensions.content.width && cur_x > self.dimensions.content.x {
                     // Wrap to next row
                     cur_x = self.dimensions.content.x;
-                    cur_y += row_h + 8.0;
+                    cur_y += row_h;
                     row_h = mb.height;
                     let mut child_cb = self.dimensions;
                     child_cb.content.x = cur_x;
                     child_cb.content.y = cur_y;
                     child.layout(child_cb);
                 }
-                cur_x += mb.width + 12.0;
+                cur_x += mb.width;
             } else {
                 // Block child: end current inline row if any, stack vertically
                 if row_h > 0.0 {
