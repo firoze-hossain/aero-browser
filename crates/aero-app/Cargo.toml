@@ -18,3 +18,4 @@ std = ["aero-engine/std", "aero-ui/std"]
 [dependencies]
 aero-engine = { path = "../aero-engine", default-features = false }
 aero-ui = { path = "../aero-ui", default-features = false }
+x11rb = "0.14.0"
