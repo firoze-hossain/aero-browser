@@ -51,15 +51,21 @@ fn print_help() {
     println!("Usage: aero [OPTIONS] [URL]");
     println!();
     println!("Options:");
-    println!("  --help, -h       Print this help message");
-    println!("  --version, -v    Print browser version");
-    println!("  --shields, -s    Display privacy shields status and statistics");
-    println!("  --headless       Run headless rasterizer test without GUI window");
+    println!("  --help, -h               Print this help message");
+    println!("  --version, -v            Print browser version");
+    println!("  --shields, -s            Display privacy shields status and statistics");
+    println!("  --headless               Run headless rasterizer test without GUI window");
+    println!("  --open-devtools          Open Developer Tools immediately on startup");
+    println!("  --dock-side <side>       Set DevTools dock side: bottom, right, left, undocked");
+    println!("  --open-devtools-tab <tab> Open specific DevTools tab (e.g. elements, console, sources, network, performance, memory, application, shields, lighthouse)");
+    println!("  --open-devtools-options  Open DevTools options popover with dock side selectors");
+    println!("  --screenshot <path>      Render frame and save directly to PNG image");
     println!();
     println!("Examples:");
-    println!("  aero                           Launch Aero Browser homepage");
-    println!("  aero https://novaos.org        Open specific web document");
-    println!("  aero about:shields             Open privacy shields dashboard");
+    println!("  aero                                              Launch Aero Browser homepage");
+    println!("  aero https://youtube.com                          Open YouTube with Aero Shields ad-blocking");
+    println!("  aero --open-devtools --dock-side right            Launch with DevTools docked to right side");
+    println!("  aero --open-devtools --dock-side undocked         Launch with DevTools undocked in floating window");
     println!("============================================================");
 }
 
