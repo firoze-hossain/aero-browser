@@ -1,0 +1,20 @@
+[package]
+name = "aero-app"
+version = "0.1.0"
+edition = "2021"
+authors = ["Md. Firoze Hossain <firoze.hossain@outlook.com>"]
+description = "Aero Browser standalone desktop and NovaOS application."
+license = "MIT"
+repository = "https://github.com/firoze-hossain/aero-browser"
+
+[[bin]]
+name = "aero"
+path = "src/main.rs"
+
+[features]
+default = ["std"]
+std = ["aero-engine/std", "aero-ui/std"]
+
+[dependencies]
+aero-engine = { path = "../aero-engine", default-features = false }
+aero-ui = { path = "../aero-ui", default-features = false }
